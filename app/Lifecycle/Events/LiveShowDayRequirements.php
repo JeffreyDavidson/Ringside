@@ -17,7 +17,9 @@ final class LiveShowDayRequirements
         if ($run->status === LiveShowStatus::Running) {
             return;
         }
+
         $zone = PromotionTimeZoneService::zoneOf($run->event->promotion);
+
         if ($run->event->date?->copy()->setTimezone($zone)->toDateString() !== now()->setTimezone($zone)->toDateString()) {
             throw LiveShowException::showDay();
         }

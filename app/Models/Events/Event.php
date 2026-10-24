@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @property int $id
@@ -78,7 +79,7 @@ class Event extends Model implements SoftDeletable
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -130,7 +131,7 @@ class Event extends Model implements SoftDeletable
         return Attribute::make(
             get: fn (): ?Carbon => $this->date instanceof Carbon
                 ? PromotionTimeZoneService::toLocalTime($this->promotion, $this->date)
-                : null
+                : null,
         );
     }
 
@@ -142,7 +143,7 @@ class Event extends Model implements SoftDeletable
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: fn (): EventStatus => EventStatus::fromDate($this->date)
+            get: fn (): EventStatus => EventStatus::fromDate($this->date),
         );
     }
 }

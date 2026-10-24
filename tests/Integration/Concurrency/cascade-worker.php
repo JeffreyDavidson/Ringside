@@ -74,7 +74,7 @@ $result = ['ok' => true, 'exception' => null, 'deadlock' => false];
 
 try {
     match ($spec['action']) {
-        'create_tag_team' => resolve(CreateTagTeamAction::class)->handle($tagTeamData()),
+        'create_tag_team' => resolve(CreateTagTeamAction::class)->handle($tagTeamData(), null),
         'update_tag_team' => resolve(UpdateTagTeamAction::class)->handle(TagTeam::query()->findOrFail($spec['id']), $tagTeamData()),
         'retire_tag_team' => resolve(RetireTagTeamAction::class)->handle(TagTeam::query()->findOrFail($spec['id'])),
         'release_wrestler' => resolve(ReleaseWrestlerAction::class)->handle(Wrestler::query()->findOrFail($spec['id'])),
@@ -85,7 +85,8 @@ try {
                 MatchFinish::Pinfall,
                 MatchSide::query()->where('match_id', $spec['id'])->where('position', $spec['winning_position'] ?? 1)->firstOrFail(),
                 collect(),
-            ), $defaultActor,
+            ),
+            $defaultActor,
         ),
         default => throw new InvalidArgumentException("Unknown cascade action {$spec['action']}."),
     };

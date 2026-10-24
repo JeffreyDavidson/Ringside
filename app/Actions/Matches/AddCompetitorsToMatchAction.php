@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Lifecycle\Matches\MatchCompetitorRequirements;
-use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\ValueObjects\MatchSides;
-use Illuminate\Support\Facades\DB;
 
 class AddCompetitorsToMatchAction
 {
@@ -20,7 +18,6 @@ class AddCompetitorsToMatchAction
         protected AddWrestlersToMatchAction $addWrestlersToMatchAction,
         private readonly MatchCompetitorRequirements $requirements,
         private readonly MatchRosterLock $rosterLock,
-        private readonly MatchSchedulingLock $schedulingLock,
     ) {}
 
     /**
@@ -40,23 +37,14 @@ class AddCompetitorsToMatchAction
      * - Tag teams must be active and available for competition
      * - Competitors must not have conflicting bookings on the event date
      *
-     * @param  EventMatch  $eventMatch  The match to add competitors to
-     * @param  MatchSides  $competitors  Competitors organized by side number and type
-     */
-    public function handle(EventMatch $eventMatch, MatchSides $competitors): void
-    {
-        DB::transaction(function () use ($eventMatch, $competitors): void {
-            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
-            $this->handleWithinTransaction($lockedMatch, $competitors);
-        }, attempts: 3);
-    }
-
-    /**
-     * Add competitors while the caller owns the match transaction and lock.
+     * Runs inside the caller's transaction: the caller has locked the match and its event set with
+     * MatchSchedulingLock::lockMatchWithEventSet() and checked that every participant belongs to the event's
+     * promotion (MatchConfigurationRequirements::ensureWithinEventPromotion()).
      *
+     * @param  MatchSides  $competitors  Competitors organized by side number and type
      * @param  list<string>  $retainedKeys  Server-derived retained assignments.
      */
-    public function handleWithinTransaction(EventMatch $lockedMatch, MatchSides $competitors, array $retainedKeys = []): void
+    public function handle(EventMatch $lockedMatch, MatchSides $competitors, array $retainedKeys = []): void
     {
         $this->rosterLock->forSides($competitors);
         $this->requirements->ensureSatisfied($lockedMatch, $competitors);
@@ -80,7 +68,7 @@ class AddCompetitorsToMatchAction
         $wrestlers = $sideCompetitors['wrestlers'];
 
         if ($wrestlers !== []) {
-            $this->addWrestlersToMatchAction->handleWithinTransaction(
+            $this->addWrestlersToMatchAction->handle(
                 $eventMatch,
                 collect($wrestlers),
                 $sideNumber,
@@ -92,7 +80,7 @@ class AddCompetitorsToMatchAction
         $tagTeams = $sideCompetitors['tag_teams'];
 
         if ($tagTeams !== []) {
-            $this->addTagTeamsToMatchAction->handleWithinTransaction(
+            $this->addTagTeamsToMatchAction->handle(
                 $eventMatch,
                 collect($tagTeams),
                 $sideNumber,

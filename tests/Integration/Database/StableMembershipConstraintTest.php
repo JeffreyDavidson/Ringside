@@ -18,7 +18,7 @@ test('a wrestler may have multiple ended stable memberships', function () {
             'wrestler_id' => $wrestler->id,
             'joined_at' => now()->subMonth(),
             'left_at' => now()->subDay(),
-        ])
+        ]),
     );
 
     expect(StableWrestler::query()->where('wrestler_id', $wrestler->id)->count())->toBe(2);
@@ -51,7 +51,7 @@ test('a tag team may have multiple ended stable memberships', function () {
             'tag_team_id' => $tagTeam->id,
             'joined_at' => now()->subMonth(),
             'left_at' => now()->subDay(),
-        ])
+        ]),
     );
 
     expect(StableTagTeam::query()->where('tag_team_id', $tagTeam->id)->count())->toBe(2);

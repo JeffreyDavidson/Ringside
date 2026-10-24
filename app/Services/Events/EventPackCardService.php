@@ -55,14 +55,17 @@ class EventPackCardService
         $calendarUnavailable = $this->calendarUnavailable($event, $matches)->map(EventRosterService::key(...))->all();
         $rows = [];
         $roster = [];
+
         foreach ($matches as $match) {
             $warning = false;
             $sides = $match->competitors->competitorModelsBySidePosition();
+
             foreach ($match->competitors as $assignment) {
                 $competitor = $assignment->competitor;
                 $calendarRelevant = $match->match_finish === null || $event->date >= now();
                 $dateBlocked = $calendarRelevant && in_array(EventRosterService::key($competitor), $calendarUnavailable, true);
                 $warning = $warning || $dateBlocked || ! in_array($competitor->id, $available[$competitor->getMorphClass()], true);
+
                 if ($competitor instanceof TagTeam) {
                     foreach ($competitor->currentWrestlers as $wrestler) {
                         $blocked = $calendarRelevant && in_array(EventRosterService::key($wrestler), $calendarUnavailable, true);
@@ -72,13 +75,16 @@ class EventPackCardService
 
                     continue;
                 }
+
                 $this->addPerson($roster, $competitor, __('event-pack.wrestler'), $match->match_number, $available['wrestler'], $dateBlocked);
             }
+
             foreach ($match->referees as $referee) {
                 $dateBlocked = ($match->match_finish === null || $event->date >= now()) && in_array(EventRosterService::key($referee), $calendarUnavailable, true);
                 $warning = $warning || $dateBlocked || ! in_array($referee->id, $available['referee'], true);
                 $this->addPerson($roster, $referee, __('event-pack.referee'), $match->match_number, $available['referee'], $dateBlocked);
             }
+
             $rows[] = [
                 'id' => $match->id, 'number' => $match->match_number,
                 'label' => $sides->map(fn (Collection $side): string => $side->map(fn (Wrestler|TagTeam $person): string => $person->name)->join(' & '))->join(' vs '),
@@ -86,6 +92,7 @@ class EventPackCardService
                 'referees' => implode(', ', $match->referees->map(fn (Referee $referee): string => $referee->full_name)->all()), 'warning' => $warning,
             ];
         }
+
         $zone = PromotionTimeZoneService::zoneOf($event->promotion);
         $roster = array_values($roster);
 

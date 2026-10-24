@@ -11,7 +11,6 @@ use App\Exceptions\Roster\Wrestlers\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Scopes\PromotionContextScope;
-use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +20,6 @@ class CreateAction
         protected EmployAction $employAction,
         protected AssignManagersAction $assignManagersAction,
         protected RecordNameLock $nameLock,
-        protected PromotionContextService $promotionContext,
     ) {}
 
     /**
@@ -31,13 +29,14 @@ class CreateAction
      * they do for the form rule). Nothing in the database keeps them unique, so it first takes the name locks,
      * before anything else is written, and the check that follows sees the other transaction's committed wrestler.
      *
+     * @param  int|null  $promotionId  The promotion the wrestler belongs to: the enforced promotion for a member, null for an administrator without one
+     *
      * @throws NameTakenException When another wrestler of the promotion has the name or the signature move
      */
-    public function handle(WrestlerData $wrestlerData): Wrestler
+    public function handle(WrestlerData $wrestlerData, ?int $promotionId): Wrestler
     {
-        return DB::transaction(function () use ($wrestlerData): Wrestler {
+        return DB::transaction(function () use ($wrestlerData, $promotionId): Wrestler {
             $name = mb_trim($wrestlerData->name);
-            $promotionId = $this->promotionContext->isEnforced() ? $this->promotionContext->current()?->id : null;
 
             $this->nameLock->lock(GuardedName::WrestlerName, $promotionId, $name);
 
@@ -47,13 +46,16 @@ class CreateAction
 
             $this->ensureNameIsAvailable($name, $wrestlerData->signature_move, $promotionId);
 
-            $wrestler = Wrestler::query()->create([
-                'name' => $name,
-                'height' => $wrestlerData->height,
-                'weight' => $wrestlerData->weight,
-                'hometown' => $wrestlerData->hometown,
-                'signature_move' => $wrestlerData->signature_move,
-            ]);
+            $wrestler = Wrestler::query()
+                ->make([
+                    'name' => $name,
+                    'height' => $wrestlerData->height,
+                    'weight' => $wrestlerData->weight,
+                    'hometown' => $wrestlerData->hometown,
+                    'signature_move' => $wrestlerData->signature_move,
+                ])
+                ->forceFill(['promotion_id' => $promotionId]);
+            $wrestler->save();
 
             if ($wrestlerData->managers instanceof Collection && $wrestlerData->managers->isNotEmpty()) {
                 $this->assignManagersAction->handle(

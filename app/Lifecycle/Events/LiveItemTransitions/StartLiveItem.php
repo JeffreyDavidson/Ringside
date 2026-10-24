@@ -20,14 +20,17 @@ final readonly class StartLiveItem implements LiveItemTransition
     {
         $items = collect($run->content['items']);
         $item = $run->content['items'][$index];
+
         if (LiveItemStatus::from($item['state']) !== LiveItemStatus::Pending
             || $items->contains('state', LiveItemStatus::Running->value)
             || ($items->firstWhere('state', LiveItemStatus::Pending->value)['key'] ?? null) !== $item['key']) {
             throw LiveShowException::transitionInvalid();
         }
+
         if ($this->source->hasChanged($run->event, $run)) {
             throw LiveShowException::reviewRequired();
         }
+
         $this->showDay->ensureShowDay($run);
 
         return [...$item, 'state' => LiveItemStatus::Running->value, 'start' => now()->utc()->toIso8601String()];

@@ -91,6 +91,7 @@ describe('MatchFactory', function () {
 
             // All competitors should be wrestlers or tag teams
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
+
             foreach ($eventMatch->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -105,6 +106,7 @@ describe('MatchFactory', function () {
 
             // All competitors should be wrestlers or tag teams
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
+
             foreach ($eventMatch->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -119,6 +121,7 @@ describe('MatchFactory', function () {
 
             // All competitors should be wrestlers or tag teams
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
+
             foreach ($eventMatch->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -133,6 +136,7 @@ describe('MatchFactory', function () {
 
             // All competitors should be wrestlers or tag teams
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
+
             foreach ($eventMatch->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }

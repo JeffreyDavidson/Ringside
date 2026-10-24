@@ -91,7 +91,7 @@ final readonly class MatchSides
     public function populated(): self
     {
         return new self($this->sides->filter(
-            fn (array $side): bool => $side['wrestlers'] !== [] || $side['tag_teams'] !== []
+            fn (array $side): bool => $side['wrestlers'] !== [] || $side['tag_teams'] !== [],
         ));
     }
 

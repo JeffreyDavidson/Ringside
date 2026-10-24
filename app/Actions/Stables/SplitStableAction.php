@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
@@ -26,7 +26,7 @@ class SplitStableAction
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected StableRestructuringEligibility $eligibility,
         protected StableNameLock $nameLock,
-        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
+        protected LifecycleTransitionRecorder $transitionRecorder,
     ) {}
 
     /**
@@ -52,7 +52,7 @@ class SplitStableAction
         Stable $originalStable,
         string $newStableName,
         StableMembershipData $membersForNewStable,
-        Carbon $date
+        Carbon $date,
     ): Stable {
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
             if ($originalStable->promotion_id === null) {
@@ -68,7 +68,7 @@ class SplitStableAction
             $stableData = new StableData(
                 name: mb_trim($newStableName),
                 start_date: $date,
-                members: $membersForNewStable
+                members: $membersForNewStable,
             );
 
             $this->eligibility->ensureSplitNameAvailable($lockedStable, mb_trim($stableData->name));
@@ -77,14 +77,14 @@ class SplitStableAction
 
             $newStable = $this->createAction->handle($stableData, $lockedStable->promotion_id);
 
-            $this->recordLifecycleTransitionAction->handle(
+            $this->transitionRecorder->record(
                 $lockedStable,
                 LifecycleDimension::Activity,
                 LifecycleTransitionType::Split,
                 $date,
                 ['new_stable_id' => $newStable->getKey(), 'new_stable_name' => $newStable->name],
             );
-            $this->recordLifecycleTransitionAction->handle(
+            $this->transitionRecorder->record(
                 $newStable,
                 LifecycleDimension::Activity,
                 LifecycleTransitionType::Split,

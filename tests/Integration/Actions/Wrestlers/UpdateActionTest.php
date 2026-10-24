@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\UpdateAction;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Naming\GuardedName;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Exceptions\Roster\Managers\CannotBeAssignedException;
 use App\Exceptions\Roster\Wrestlers\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
@@ -32,7 +33,7 @@ test('it updates wrestler basic information', function () {
         hometown: 'Updated Town',
         signature_move: 'Updated Move',
         employment_date: null,
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -167,7 +168,7 @@ test('it updates wrestler and employs them when employment date provided', funct
         hometown: 'West Newbury, MA',
         signature_move: 'Attitude Adjustment',
         employment_date: $employmentDate,
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -196,7 +197,7 @@ test('it updates wrestler without employing when no employment date', function (
         hometown: 'Miami, FL',
         signature_move: 'Rock Bottom',
         employment_date: null,
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -223,8 +224,8 @@ test('it does not re-employ already employed wrestler', function () {
         weight: 220,
         hometown: 'Updated Town',
         signature_move: 'Updated Move',
-        employment_date: now(),
-        managers: null
+        employment_date: $originalEmployment->started_at,
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -259,7 +260,7 @@ test('it employs managers when wrestler gets employed', function () {
         hometown: 'Updated Town',
         signature_move: 'Updated Move',
         employment_date: $employmentDate,
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -296,7 +297,7 @@ test('it uses the provided employment date', function () {
         hometown: 'Test Town',
         signature_move: 'Test Move',
         employment_date: now()->subDays(10), // Past date
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -322,7 +323,7 @@ test('it maintains transaction boundaries', function () {
         hometown: 'Transaction Town',
         signature_move: 'Transaction Move',
         employment_date: now(),
-        managers: null
+        managers: null,
     );
 
     // Simulate transaction - all changes should be atomic
@@ -352,7 +353,7 @@ test('it returns updated wrestler instance', function () {
         hometown: 'Return Town',
         signature_move: 'Return Move',
         employment_date: null,
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -374,7 +375,7 @@ test('it handles height conversion correctly', function () {
         hometown: 'Height Town',
         signature_move: 'Height Move',
         employment_date: null,
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -396,7 +397,7 @@ test('it preserves wrestler id and timestamps', function () {
         hometown: 'Preserve Town',
         signature_move: 'Preserve Move',
         employment_date: null,
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -416,7 +417,7 @@ test('it handles null signature move', function () {
         hometown: 'Null Town',
         signature_move: null,
         employment_date: null,
-        managers: null
+        managers: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
@@ -501,6 +502,37 @@ test('it keeps the start date of a wrestler who has already started when the dat
 
     // Assert
     expect($wrestler->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt);
+});
+
+test('it refuses another start date for a wrestler who is employed and saves nothing', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->employed()->create(['name' => 'Original Name']);
+    $startedAt = $wrestler->employments()->sole()->started_at;
+    $data = renamingWrestlerData('Renamed Wrestler', $wrestler->signature_move);
+    $data = new WrestlerData($data->name, $data->height, $data->weight, $data->hometown, $data->signature_move, $startedAt->copy()->addDays(3));
+
+    // Act
+    $act = fn () => resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($act)->toThrow(EmploymentDateException::class, "Wrestler 'Original Name' is currently employed, so the date employment started cannot be changed.")
+        ->and($wrestler->refresh()->name)->toBe('Original Name')
+        ->and($wrestler->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
+});
+
+test('it saves a wrestler who is employed when the form date is the day employment started', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->employed()->create();
+    $startedAt = $wrestler->employments()->sole()->started_at;
+    $data = renamingWrestlerData('Renamed Wrestler', $wrestler->signature_move);
+    $data = new WrestlerData($data->name, $data->height, $data->weight, $data->hometown, $data->signature_move, $startedAt->copy()->startOfDay());
+
+    // Act
+    resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($wrestler->refresh()->name)->toBe('Renamed Wrestler')
+        ->and($wrestler->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });
 
 describe('wrestler name guard', function (): void {

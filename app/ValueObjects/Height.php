@@ -7,6 +7,7 @@ namespace App\ValueObjects;
 use App\Casts\HeightCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use InvalidArgumentException;
+use Stringable;
 
 /**
  * Value object representing a wrestler's height in feet and inches.
@@ -16,7 +17,7 @@ use InvalidArgumentException;
  * Height is stored as feet and inches since this is the standard format
  * used in professional wrestling.
  */
-readonly class Height implements \Stringable, Castable
+readonly class Height implements Castable, Stringable
 {
     /**
      * Create a new Height instance.
@@ -26,7 +27,7 @@ readonly class Height implements \Stringable, Castable
      */
     public function __construct(
         public int $feet,
-        public int $inches
+        public int $inches,
     ) {
         if ($feet < 0) {
             throw new InvalidArgumentException('Height feet cannot be negative.');

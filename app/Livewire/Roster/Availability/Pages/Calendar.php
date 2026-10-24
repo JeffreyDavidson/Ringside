@@ -45,6 +45,7 @@ class Calendar extends Component
     public function mount(): void
     {
         Gate::authorize('viewAny', Wrestler::class);
+
         if ($this->date === '') {
             $this->date = now()->setTimezone(PromotionTimeZoneService::zoneOf($this->promotionContext->current()))->toDateString();
         }
@@ -58,9 +59,11 @@ class Calendar extends Component
     public function moveDay(int $direction): void
     {
         Gate::authorize('viewAny', Wrestler::class);
+
         if (! in_array($direction, [-1, 1], true) || ! $this->validDate()) {
             return;
         }
+
         $this->date = Carbon::parse($this->date, 'UTC')->addDays($direction)->toDateString();
         $this->resetPage();
     }
@@ -72,6 +75,7 @@ class Calendar extends Component
 
             return false;
         }
+
         $this->resetErrorBag('date');
 
         return true;
@@ -83,6 +87,7 @@ class Calendar extends Component
         $promotion = $this->promotionContext->current();
         $entries = null;
         $eventIssues = [];
+
         if ($promotion instanceof Promotion && $this->validDate()) {
             $like = LikeTerm::from($this->search);
             $types = match ($this->kind) {
@@ -99,8 +104,10 @@ class Calendar extends Component
             $start = Carbon::parse($this->date, $promotion->timezone)->startOfDay();
             $events = Event::query()->where('promotion_id', $promotion->id)->where('date', '>=', $start->copy()->utc())
                 ->where('date', '<', $start->copy()->addDay()->utc())->orderBy('date')->orderBy('id')->get();
+
             foreach ($events as $event) {
                 $people = $availability->get($event);
+
                 if ($people->isNotEmpty()) {
                     $eventIssues[] = ['event' => $event, 'names' => $people->map(fn (Wrestler|Referee $person): string => $person instanceof Referee ? $person->full_name : $person->name)->join(', ')];
                 }

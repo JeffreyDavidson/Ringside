@@ -69,9 +69,11 @@ class RecordResultAction
             );
 
             $this->requirements->ensureSatisfied($lockedMatch, $lockedResult, $lockedCompetitors);
+
             if (! $changed && TournamentMatchLink::query()->forMatchId($lockedMatch->id)->exists()) {
                 return new RecordedMatchResultData($lockedMatch, new Collection);
             }
+
             $titlesLeftUnchanged = $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
 
             $lockedMatch->update([

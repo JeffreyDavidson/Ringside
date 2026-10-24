@@ -39,9 +39,11 @@ test('an approved poster stays readable on phones and the public page works at z
     $world = publicEventFixture();
     $event = $world['event'];
     $file = storage_path('framework/testing/public-event-demo-poster.png');
+
     if (! is_dir(dirname($file))) {
         mkdir(dirname($file), 0755, true);
     }
+
     $pixels = imagecreatetruecolor(300, 500);
     imagefill($pixels, 0, 0, imagecolorallocate($pixels, 16, 17, 18) ?: throw new RuntimeException('Test color unavailable'));
     imagestring($pixels, 5, 60, 150, 'DEMO POSTER', imagecolorallocate($pixels, 247, 247, 245) ?: throw new RuntimeException('Test color unavailable'));

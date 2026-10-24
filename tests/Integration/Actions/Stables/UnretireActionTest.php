@@ -2,9 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Actions\Stables\DisbandAction;
+use App\Actions\Stables\RetireAction;
+use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
+use App\Actions\Stables\UpdateAction;
+use App\Data\Stables\StableData;
+use App\Data\Stables\StableMembershipData;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -65,7 +73,7 @@ test('it reports the weighted headcount when a tag team alone is too few', funct
     // Arrange
     $stable = Stable::factory()->retired()->create();
     $stable->previousWrestlers()->get()->each(
-        fn (Wrestler $wrestler) => $wrestler->suspensions()->create(['started_at' => now()->subHour()])
+        fn (Wrestler $wrestler) => $wrestler->suspensions()->create(['started_at' => now()->subHour()]),
     );
 
     // Act
@@ -144,3 +152,161 @@ test('it skips an unavailable member and returns the available ones', function (
         ->and($currentMembers->contains(fn ($member): bool => $member->is($unavailableMember)))->toBeFalse()
         ->and($currentMembers)->not->toBeEmpty();
 })->with('unavailable stable former members');
+
+test('it unretires a stable that was active when it retired back to active with its members', function (Closure $retire, int $monthsLater): void {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $stable = Stable::factory()
+        ->active()
+        ->create();
+    $retire($stable);
+    $this->travelTo(now()->addMonths($monthsLater));
+
+    // Act
+    resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($stable->refresh()->status)->toBe(StableStatus::Active)
+        ->and($stable->currentRetirement()->exists())->toBeFalse()
+        ->and($stable->currentWrestlers()->count())->toBe(2)
+        ->and($stable->currentTagTeams()->count())->toBe(1)
+        ->and($stable->activityPeriods()->count())->toBe(2);
+})->with([
+    'retired now' => [
+        fn (Stable $stable) => resolve(RetireAction::class)->handle($stable, now()),
+        0,
+    ],
+    'retired in the future' => [
+        fn (Stable $stable) => resolve(RetireAction::class)->handle($stable, now()->addMonth()),
+        2,
+    ],
+]);
+
+test('it refuses a stable that was active when it retired with too few members', function (Closure $retire, int $monthsLater): void {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $stable = Stable::factory()
+        ->active()
+        ->create();
+    $stable->tagTeams()->detach();
+    $retire($stable);
+    $this->travelTo(now()->addMonths($monthsLater));
+
+    // Act
+    $unretire = fn () => resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($unretire)->toThrow(CannotBeUnretiredException::class, 'only 2 former members available, but 3 required')
+        ->and($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->activityPeriods()->count())->toBe(1);
+})->with([
+    'retired now' => [
+        fn (Stable $stable) => resolve(RetireAction::class)->handle($stable, now()),
+        0,
+    ],
+    'retired in the future' => [
+        fn (Stable $stable) => resolve(RetireAction::class)->handle($stable, now()->addMonth()),
+        2,
+    ],
+]);
+
+test('it unretires a stable that was disbanded when it retired back to disbanded without members', function (Closure $retire, int $monthsLater): void {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $stable = Stable::factory()
+        ->active()
+        ->create();
+    resolve(DisbandAction::class)->handle($stable, now()->subHours(2));
+    $retire($stable);
+    $this->travelTo(now()->addMonths($monthsLater));
+    $effectiveDate = now();
+
+    // Act
+    resolve(UnretireAction::class)->handle($stable, $effectiveDate);
+
+    // Assert
+    $stable->refresh();
+
+    expect($stable->status)->toBe(StableStatus::Inactive)
+        ->and($stable->currentRetirement()->exists())->toBeFalse()
+        ->and(requiredDate($stable->retirements()->sole()->ended_at)->toDateTimeString())->toBe($effectiveDate->toDateTimeString())
+        ->and($stable->activityPeriods()->count())->toBe(1)
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse()
+        ->and($stable->currentWrestlers()->exists())->toBeFalse()
+        ->and($stable->currentTagTeams()->exists())->toBeFalse()
+        ->and($stable->lifecycleTransitions()->where('transition', LifecycleTransitionType::Unretired)->count())->toBe(1);
+})->with([
+    'retired later' => [
+        fn (Stable $stable) => resolve(RetireAction::class)->handle($stable, now()->subHour()),
+        0,
+    ],
+    'retired the same moment it was disbanded' => [
+        fn (Stable $stable) => resolve(RetireAction::class)->handle($stable, now()->subHours(2)),
+        0,
+    ],
+    'retired in the future' => [
+        fn (Stable $stable) => resolve(RetireAction::class)->handle($stable, now()->addMonth()),
+        2,
+    ],
+]);
+
+test('it still unretires an active-then-retired stable to active after its closed period end date is edited later', function (): void {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $stable = Stable::factory()
+        ->active()
+        ->create();
+    resolve(RetireAction::class)->handle($stable, now()->subHour());
+    resolve(UpdateAction::class)->handle($stable, new StableData(
+        name: $stable->name,
+        start_date: requiredDate($stable->activityPeriods()->sole()->started_at),
+        members: new StableMembershipData,
+        end_date: now(),
+    ));
+
+    // Act
+    resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($stable->refresh()->status)->toBe(StableStatus::Active)
+        ->and($stable->currentWrestlers()->count())->toBe(2)
+        ->and($stable->currentTagTeams()->count())->toBe(1);
+});
+
+test('it lets a stable unretired back to disbanded reunite', function (): void {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $stable = Stable::factory()
+        ->active()
+        ->create();
+    $formerMembers = new StableMembershipData(
+        $stable->currentWrestlers()->get(),
+        $stable->currentTagTeams()->get(),
+    );
+    resolve(DisbandAction::class)->handle($stable, now()->subHours(2));
+    resolve(RetireAction::class)->handle($stable, now()->subHour());
+    resolve(UnretireAction::class)->handle($stable);
+
+    // Act
+    resolve(ReuniteAction::class)->handle($stable, $formerMembers);
+
+    // Assert
+    expect($stable->refresh()->status)->toBe(StableStatus::Active)
+        ->and($stable->currentWrestlers()->count())->toBe(2)
+        ->and($stable->currentTagTeams()->count())->toBe(1);
+});
+
+test('it unretires a stable retired without ever being active to unformed', function (): void {
+    // Arrange
+    $stable = Stable::factory()
+        ->has(Retirement::factory()->started(now()->subDay()), 'retirements')
+        ->create();
+
+    // Act
+    resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($stable->refresh()->status)->toBe(StableStatus::Unformed)
+        ->and($stable->currentRetirement()->exists())->toBeFalse()
+        ->and($stable->activityPeriods()->exists())->toBeFalse();
+});

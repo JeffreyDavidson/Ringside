@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\UpdateAction;
 use App\Data\Referees\RefereeData;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Models\Roster\Referees\Referee;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -18,7 +19,7 @@ test('it updates referee basic information', function () {
     $updateData = new RefereeData(
         first_name: 'Updated',
         last_name: 'Name',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -43,7 +44,7 @@ test('it updates referee and employs them when employment date provided', functi
     $updateData = new RefereeData(
         first_name: 'Earl',
         last_name: 'Hebner',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -73,7 +74,7 @@ test('it updates using the current persisted referee state', function () {
     $updateData = new RefereeData(
         first_name: 'Updated',
         last_name: 'Referee',
-        employment_date: null
+        employment_date: null,
     );
 
     $updatedReferee = resolve(UpdateAction::class)->handle($staleReferee, $updateData);
@@ -93,7 +94,7 @@ test('it updates referee without employing when no employment date', function ()
     $updateData = new RefereeData(
         first_name: 'Mike',
         last_name: 'Chioda',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -118,7 +119,7 @@ test('it does not re-employ already employed referee', function () {
     $updateData = new RefereeData(
         first_name: 'Updated',
         last_name: 'Name',
-        employment_date: now()
+        employment_date: $originalEmployment->started_at,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -139,7 +140,7 @@ test('it uses the provided employment date', function () {
     $updateData = new RefereeData(
         first_name: 'Charles',
         last_name: 'Robinson',
-        employment_date: now()->subDays(10) // Past date
+        employment_date: now()->subDays(10), // Past date
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -161,7 +162,7 @@ test('it maintains transaction boundaries', function () {
     $updateData = new RefereeData(
         first_name: 'Transaction',
         last_name: 'Test',
-        employment_date: now()
+        employment_date: now(),
     );
 
     // Simulate transaction - all changes should be atomic
@@ -188,7 +189,7 @@ test('it returns updated referee instance', function () {
     $updateData = new RefereeData(
         first_name: 'Return',
         last_name: 'Test',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -207,7 +208,7 @@ test('it preserves referee id and timestamps', function () {
     $updateData = new RefereeData(
         first_name: 'Preserve',
         last_name: 'Test',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -224,7 +225,7 @@ test('it validates referee can be updated', function () {
     $updateData = new RefereeData(
         first_name: 'Valid',
         last_name: 'Update',
-        employment_date: null
+        employment_date: null,
     );
 
     // Should succeed without throwing validation exception
@@ -242,7 +243,7 @@ test('it uses EmployAction for consistent employment handling', function () {
     $updateData = new RefereeData(
         first_name: 'EmployAction',
         last_name: 'Test',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -292,4 +293,33 @@ test('it keeps the start date of a referee who has already started when the date
 
     // Assert
     expect($referee->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt);
+});
+
+test('it refuses another start date for a referee who is employed and saves nothing', function () {
+    // Arrange
+    $referee = Referee::factory()->employed()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+    $startedAt = $referee->employments()->sole()->started_at;
+    $data = new RefereeData(first_name: 'Renamed', last_name: 'Person', employment_date: $startedAt->copy()->addDays(3));
+
+    // Act
+    $act = fn () => resolve(UpdateAction::class)->handle($referee, $data);
+
+    // Assert
+    expect($act)->toThrow(EmploymentDateException::class, "Referee 'Original Name' is currently employed, so the date employment started cannot be changed.")
+        ->and($referee->refresh()->first_name)->toBe('Original')
+        ->and($referee->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
+});
+
+test('it saves a referee who is employed when the form date is the day employment started', function () {
+    // Arrange
+    $referee = Referee::factory()->employed()->create();
+    $startedAt = $referee->employments()->sole()->started_at;
+    $data = new RefereeData(first_name: 'Renamed', last_name: 'Person', employment_date: $startedAt->copy()->startOfDay());
+
+    // Act
+    resolve(UpdateAction::class)->handle($referee, $data);
+
+    // Assert
+    expect($referee->refresh()->first_name)->toBe('Renamed')
+        ->and($referee->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });

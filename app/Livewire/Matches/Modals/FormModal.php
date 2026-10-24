@@ -35,6 +35,7 @@ use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
+use Override;
 
 /**
  * @phpstan-import-type LinkedSnapshot from BookingHistoryLinks
@@ -55,7 +56,7 @@ class FormModal extends BaseFormModal
     use PresentsTitlesList;
     use ResolvesActor;
 
-    #[\Override]
+    #[Override]
     protected bool $resetFormAfterSubmission = true;
 
     #[Locked]
@@ -73,7 +74,7 @@ class FormModal extends BaseFormModal
 
     private SameDayBookingsQuery $sameDayBookingsQuery;
 
-    #[\Override]
+    #[Override]
     public function mount(int|string|null $modelId = null, ?int $eventId = null): void
     {
         if ($eventId !== null) {
@@ -102,7 +103,7 @@ class FormModal extends BaseFormModal
         return EventMatch::class;
     }
 
-    #[\Override]
+    #[Override]
     protected function storeForm(): bool
     {
         $event = $this->bookedEvent();
@@ -121,7 +122,7 @@ class FormModal extends BaseFormModal
         });
     }
 
-    #[\Override]
+    #[Override]
     protected function businessErrorField(BaseBusinessException $exception): string
     {
         return $exception instanceof InvalidMatchConfigurationException
@@ -284,7 +285,12 @@ class FormModal extends BaseFormModal
 
         return array_values(collect($selection)
             ->flatMap(fn (Collection $ids, string $kind): Collection => $this->sameDayBookingsQuery->get(
-                BookableRosterKind::from($kind), $ids, $from, $from->copy()->addDay()->startOfDay(), $event->id, $event->promotion_id,
+                BookableRosterKind::from($kind),
+                $ids,
+                $from,
+                $from->copy()->addDay()->startOfDay(),
+                $event->id,
+                $event->promotion_id,
             ))
             ->unique()
             ->all());
@@ -304,7 +310,7 @@ class FormModal extends BaseFormModal
         $this->dummyData->fill($this->form);
     }
 
-    #[\Override]
+    #[Override]
     public function getModalTitle(): string
     {
         if ($this->form->isEditing()) {

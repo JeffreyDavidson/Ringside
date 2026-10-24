@@ -11,7 +11,6 @@ use App\Exceptions\Roster\TagTeams\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Scopes\PromotionContextScope;
-use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +23,6 @@ class CreateAction
         protected EstablishMembershipAction $establishMembershipAction,
         protected EmployAction $employAction,
         protected RecordNameLock $nameLock,
-        protected PromotionContextService $promotionContext,
     ) {}
 
     /**
@@ -34,13 +32,14 @@ class CreateAction
      * they do for the form rule). Nothing in the database keeps them unique, so it first takes the name locks,
      * before anything else is written, and the check that follows sees the other transaction's committed tag team.
      *
+     * @param  int|null  $promotionId  The promotion the tag team belongs to: the enforced promotion for a member, null for an administrator without one
+     *
      * @throws NameTakenException When another tag team of the promotion has the name or the signature move
      */
-    public function handle(TagTeamData $tagTeamData): TagTeam
+    public function handle(TagTeamData $tagTeamData, ?int $promotionId): TagTeam
     {
-        return DB::transaction(function () use ($tagTeamData): TagTeam {
+        return DB::transaction(function () use ($tagTeamData, $promotionId): TagTeam {
             $name = mb_trim($tagTeamData->name);
-            $promotionId = $this->promotionContext->isEnforced() ? $this->promotionContext->current()?->id : null;
 
             $this->nameLock->lock(GuardedName::TagTeamName, $promotionId, $name);
 
@@ -51,10 +50,13 @@ class CreateAction
             $this->ensureNameIsAvailable($name, $tagTeamData->signature_move, $promotionId);
 
             // Create the base tag team record
-            $tagTeam = TagTeam::query()->create([
-                'name' => $name,
-                'signature_move' => $tagTeamData->signature_move,
-            ]);
+            $tagTeam = TagTeam::query()
+                ->make([
+                    'name' => $name,
+                    'signature_move' => $tagTeamData->signature_move,
+                ])
+                ->forceFill(['promotion_id' => $promotionId]);
+            $tagTeam->save();
 
             $membershipData = TagTeamMembershipData::fromWrestlers(
                 $tagTeamData->wrestlerA,

@@ -15,14 +15,19 @@ class LiveShowTimingService
         if ($value === null || $value === '') {
             return null;
         }
+
         $wall = Carbon::createFromFormat('!Y-m-d\TH:i', $value, 'UTC');
+
         if (! $wall instanceof Carbon || $wall->format('Y-m-d\TH:i') !== $value) {
             return null;
         }
+
         $candidates = [];
         $transitions = new DateTimeZone($zone)->getTransitions($wall->getTimestamp() - 86400, $wall->getTimestamp() + 86400);
+
         foreach ($transitions ?: [['offset' => Carbon::parse($value, $zone)->offset]] as $transition) {
             $instant = $wall->copy()->subSeconds($transition['offset'])->setTimezone($zone);
+
             if ($instant->format('Y-m-d\TH:i') === $value && ($offset === null || $instant->format('P') === $offset)) {
                 $candidates[$instant->getTimestamp()] = $instant->utc();
             }

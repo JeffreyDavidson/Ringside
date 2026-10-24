@@ -19,6 +19,7 @@ test('source rows lock before the story mutation in the established event order'
     $statements = recordStatements(fn () => plannedStorylineStep($f['story'], new SourceData($f['event']->id, $f['match']->id)));
     $locked = collect($statements)->where('locked', true)->pluck('sql')->values()->all();
     expect($locked)->toHaveCount(5);
+
     foreach (['events', 'events_matches', 'event_packs', 'event_live_runs', 'storylines'] as $index => $table) {
         expect($locked[$index])->toContain('from "'.$table.'"');
     }
@@ -54,9 +55,11 @@ $allowCurrentSave = [
     }],
     'skipped live item' => [function (array $f): SourceData {
         $content = $f['run']->content;
+
         foreach ($content['items'] as &$item) {
             $item['state'] = 'skipped';
         }
+
         unset($item);
         $f['run']->content = $content;
         $f['run']->save();

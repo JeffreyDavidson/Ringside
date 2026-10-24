@@ -39,6 +39,7 @@ class SponsorInstructionService
         if ($key === null) {
             return null;
         }
+
         try {
             $packKey = PackKey::fromString($key);
         } catch (InvalidArgumentException) {
@@ -75,10 +76,13 @@ class SponsorInstructionService
         if ($commitment->pack_key === null) {
             return false;
         }
+
         if ($commitment->status === SponsorCommitmentStatus::Cancelled) {
             return true;
         }
+
         $target = $this->target($content, $commitment->pack_key);
+
         if ($target === null || $this->hash($target) !== $commitment->pack_instruction_hash || $target['label'] !== $commitment->instruction_label) {
             return true;
         }

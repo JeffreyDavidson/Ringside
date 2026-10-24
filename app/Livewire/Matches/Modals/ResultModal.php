@@ -18,6 +18,7 @@ use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use LivewireUI\Modal\ModalComponent;
+use Override;
 
 /**
  * @property-read EventMatch $match
@@ -77,7 +78,7 @@ class ResultModal extends ModalComponent
         $this->dispatch('closeModal');
     }
 
-    #[\Override]
+    #[Override]
     public static function destroyOnClose(): bool
     {
         return true;

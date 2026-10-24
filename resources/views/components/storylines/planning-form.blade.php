@@ -3,6 +3,7 @@
 @php
     $states = $mode === StorylineFormMode::StepStatus ? [\App\Enums\Storylines\StepStatus::Planned, \App\Enums\Storylines\StepStatus::Postponed, \App\Enums\Storylines\StepStatus::Cancelled] : \App\Enums\Storylines\StorylineStatus::cases();
     $statusOptions = collect($states)->mapWithKeys(fn ($state) => [$state->value => $state->label()])->all();
+
     if ($mode === StorylineFormMode::StoryStatus && $story->status === \App\Enums\Storylines\StorylineStatus::Archived) {
         $statusOptions = [$story->previous_status->value => __('storylines.restore').' · '.$story->previous_status->label()];
     }

@@ -48,6 +48,7 @@ test('promotion members can view but only managers and owners operate the live s
 
         return;
     }
+
     $component->assertHasNoErrors()->assertSee('Roster checklist');
     expect(EventLiveRun::query()->where('event_id', $event->id)->count())->toBe(1);
 })->with([
@@ -322,6 +323,7 @@ test('the correction form opens only for operations that need a reason', functio
 
     // Assert
     $component->assertSet('draftOperation', $opens ? $operation : '');
+
     if (! $opens) {
         $component->assertHasErrors('operation');
     }

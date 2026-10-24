@@ -13,7 +13,7 @@ test('it creates a referee with basic information', function () {
     $data = new RefereeData(
         first_name: 'Earl',
         last_name: 'Hebner',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(CreateAction::class)->handle($data);
@@ -39,7 +39,7 @@ test('it creates a referee with employment when employment date is provided', fu
     $data = new RefereeData(
         first_name: 'Mike',
         last_name: 'Chioda',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(CreateAction::class)->handle($data);
@@ -67,7 +67,7 @@ test('it creates referee with proper database transactions', function () {
     $data = new RefereeData(
         first_name: 'Charles',
         last_name: 'Robinson',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(CreateAction::class)->handle($data);
@@ -96,7 +96,7 @@ test('it handles employment creation through EmployAction dependency injection',
     $data = new RefereeData(
         first_name: 'Dave',
         last_name: 'Hebner',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(CreateAction::class)->handle($data);

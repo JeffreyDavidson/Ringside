@@ -110,11 +110,13 @@ class Production extends Component
     {
         $event = $this->event();
         Gate::authorize('updateProduction', $event);
+
         if (count($this->assignments) >= 100) {
             $this->addError('production', __('production.assignment_limit'));
 
             return;
         }
+
         $data = $this->packs->data($event);
         $this->assignments[] = ['id' => (string) Str::uuid(), 'contact_id' => 0, 'name' => '', 'role' => 'sound',
             'station' => null, 'call_at' => null, 'timezone' => $data['content']['timezone'], 'offset' => null,
@@ -140,11 +142,13 @@ class Production extends Component
     {
         Gate::authorize('updateProduction', $this->event());
         Validator::make(['item' => $key], ['item' => ['required', Rule::in(array_column($this->items, 'key'))]])->validate();
+
         if (count(array_filter($this->cues, fn (array $cue): bool => $cue['item_key'] === $key)) >= 20) {
             $this->addError('production', __('production.cue_limit'));
 
             return;
         }
+
         $this->cues[] = ['id' => (string) Str::uuid(), 'item_key' => $key, 'subject' => '', 'trigger' => '', 'instruction' => '',
             'role' => null, 'owner_id' => null, 'owner_name' => null, 'owner_station' => null, 'owner_role' => null, 'owner_contact_id' => null, 'pronunciation' => null, 'track' => null, 'url' => null];
         $this->saved = false;
@@ -168,12 +172,14 @@ class Production extends Component
             'cue' => ['required', Rule::in(array_column($retained, 'id'))],
             'item' => ['required', Rule::in(array_column($this->items, 'key'))],
         ])->validate();
+
         foreach ($retained as $cue) {
             if ($cue['id'] === $id) {
                 $cue['item_key'] = $key;
                 $this->cues = [...array_values(array_filter($this->cues, fn (array $entry): bool => $entry['id'] !== $id)), $cue];
             }
         }
+
         $this->saved = false;
     }
 
@@ -182,15 +188,19 @@ class Production extends Component
         Gate::authorize('updateProduction', $this->event());
         Validator::make(['direction' => $direction], ['direction' => [Rule::in([-1, 1])]])->validate();
         $index = array_search($id, array_column($this->cues, 'id'), true);
+
         if (! is_int($index)) {
             return;
         }
+
         $indices = array_keys(array_filter($this->cues, fn (array $cue): bool => $cue['item_key'] === $this->cues[$index]['item_key']));
         $position = array_search($index, $indices, true);
         $other = $indices[$position + $direction] ?? null;
+
         if ($other === null) {
             return;
         }
+
         [$this->cues[$index], $this->cues[$other]] = [$this->cues[$other], $this->cues[$index]];
         $this->saved = false;
     }
@@ -201,6 +211,7 @@ class Production extends Component
         Gate::authorize('updateProduction', $event);
         $this->resetErrorBag();
         $previousVersion = $this->version;
+
         try {
             $input = $this->validatedInput($requirements);
             $action->handle($event, $this->version, $this->fingerprint, EventProductionData::fromValidated($input), $this->reviewed, $this->actor());

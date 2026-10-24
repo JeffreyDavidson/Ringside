@@ -12,6 +12,7 @@ use App\Queries\Events\EventVenueQuery;
 use App\Services\Events\LiveRunSourceService;
 use App\Services\Events\LiveShowSourceService;
 use App\Services\Events\LiveShowTimingService;
+use App\Services\Events\ProductionRedactionService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
@@ -27,7 +28,7 @@ use Illuminate\Support\Facades\Lang;
  */
 class LiveShowViewModel
 {
-    public function __construct(private readonly LiveShowSourceService $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison, private readonly EventVenueQuery $venues) {}
+    public function __construct(private readonly LiveShowSourceService $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison, private readonly EventVenueQuery $venues, private readonly ProductionRedactionService $redaction) {}
 
     /**
      * @param  string  $refreshedAt  when the page last refreshed, as an ISO 8601 instant
@@ -41,19 +42,23 @@ class LiveShowViewModel
         $source = null;
         $sourceError = null;
         $complete = $run?->status === LiveShowStatus::Completed;
+
         if (! $complete) {
             $source = $this->source->get($event);
             $sourceError = $source === null ? Lang::string('live-show.prepare_required') : null;
         }
+
         if (Gate::denies('viewProduction', $event)) {
             if ($run !== null) {
                 $run = clone $run;
-                $run->content = $this->withoutProduction($run->content);
+                $run->content = $this->redaction->liveShowWithoutProduction($run->content);
             }
+
             if ($source !== null) {
-                $source['content'] = $this->withoutProduction($source['content']);
+                $source['content'] = $this->redaction->liveShowWithoutProduction($source['content']);
             }
         }
+
         $needsReview = $run !== null && ! $complete && ($source === null || $this->comparison->hasMovedOn($run, $source['pack'], $source['fingerprint']));
         $items = collect($run?->content['items'] ?? []);
         $sourceKeys = array_column($source['content']['items'] ?? [], 'key');
@@ -72,22 +77,6 @@ class LiveShowViewModel
             'savedLabel' => $run === null ? null : $this->actual($run->updated_at->toIso8601String(), $zone),
             'removed' => array_values($items->filter(fn (array $item): bool => $item['state'] === LiveItemStatus::Pending->value && ! in_array($item['key'], $sourceKeys, true))->all()),
             'current' => $items->firstWhere('state', LiveItemStatus::Running->value), 'next' => $items->firstWhere('state', LiveItemStatus::Pending->value)];
-    }
-
-    /** @param Content $content
-     * @return Content
-     */
-    private function withoutProduction(array $content): array
-    {
-        unset($content['production']);
-        $content['items'] = array_map(function (array $item): array {
-            unset($item['cues']);
-
-            return $item;
-        }, $content['items']);
-        $content['roster'] = array_values(array_filter($content['roster'], fn (array $person): bool => ! str_starts_with($person['key'], 'crew:')));
-
-        return $content;
     }
 
     private function actual(?string $instant, string $timezone): string
@@ -110,12 +99,15 @@ class LiveShowViewModel
     private function comparison(array $item): string
     {
         $planned = $this->timing->wallTime($item['timing']['revised_at'] ?? $item['timing']['planned_at'] ?? null, $item['timezone']);
+
         if (! $planned instanceof Carbon) {
             return __('live-show.no_plan');
         }
+
         if ($item['start'] === null) {
             return __('live-show.planned', ['time' => $planned->setTimezone($item['timezone'])->format('M j H:i P')]);
         }
+
         $minutes = (int) round($planned->diffInMinutes(Carbon::parse($item['start']), absolute: false));
 
         return match (true) {

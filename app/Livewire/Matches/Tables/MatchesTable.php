@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends DataTableComponent<EventMatch> */
 class MatchesTable extends DataTableComponent
@@ -43,7 +44,7 @@ class MatchesTable extends DataTableComponent
 
     protected string $databaseTableName = 'events_matches';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'matches';
 
     /**
@@ -121,7 +122,7 @@ class MatchesTable extends DataTableComponent
      *
      * @param  Collection<int, EventMatch>  $rows
      */
-    #[\Override]
+    #[Override]
     protected function projectRowState(Collection $rows): void
     {
         $event = Event::query()->with('promotion')->findOrFail($this->eventId);

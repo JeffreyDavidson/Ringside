@@ -24,18 +24,31 @@ class PlanTournamentBoutAction
         DB::transaction(function () use ($node, $event, $version, $actor): void {
             $tournament = $this->locks->lock($node->tournament_id, $event instanceof Event ? [$event->id] : []);
             $event = $event instanceof Event ? Event::query()->withTrashed()->findOrFail($event->id) : null;
+
             if ($tournament->version !== $version || ($event !== null && ($event->trashed() || $event->promotion_id !== $tournament->promotion_id))) {
                 throw RecordChangedException::changed();
             }
+
             $this->states->ensureOpen($tournament);
             $node = $tournament->nodes()->findOrFail($node->id);
             $bout = $this->bracket->bout($node);
+
             if ($bout->link instanceof TournamentMatchLink && $bout->link->match->event_id !== $event?->id) {
                 throw TournamentException::alreadyBooked();
             }
+
             $node->forceFill(['planned_event_id' => $event?->id])->save();
-            $tournament->forceFill(['version' => $tournament->version + 1])->save();
-            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'event_id' => $event?->id])->log('tournament.planned');
+            $tournament->increment('version');
+
+            activity('tournaments')
+                ->causedBy($actor)
+                ->withProperties([
+                    'promotion_id' => $tournament->promotion_id,
+                    'tournament_id' => $tournament->id,
+                    'node_id' => $node->id,
+                    'event_id' => $event?->id,
+                ])
+                ->log('tournament.planned');
         }, attempts: 3);
     }
 }

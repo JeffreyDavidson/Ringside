@@ -32,8 +32,15 @@ test('the checklist keeps unavailable agreements and flags event context changes
     EventMatch::factory()->for($event)->withCompetitors($people->all())->withReferees()->create();
     $person = $people->firstOrFail();
     $context = resolve(TalentBookingFingerprintService::class);
-    $booking = resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0,
-        $context->fingerprint($event, "wrestler:{$person->id}"), new TalentBookingData(TalentBookingStatus::Confirmed, 0, null, 'UTC', null, true), signedInUser());
+    $booking = resolve(SaveTalentBookingAction::class)->handle(
+        $event,
+        'wrestler',
+        $person->id,
+        0,
+        $context->fingerprint($event, "wrestler:{$person->id}"),
+        new TalentBookingData(TalentBookingStatus::Confirmed, 0, null, 'UTC', null, true),
+        signedInUser(),
+    );
     $person->delete();
     $event->update(['date' => now()->addDays(2)]);
 
@@ -96,8 +103,15 @@ test('tag team members have individual rows and agreements never transfer to rep
     $opponent = TagTeam::factory()->bookable()->withCurrentWrestlers(Wrestler::factory()->count(2)->bookable()->create())->create();
     EventMatch::factory()->for($event)->withCompetitors([$team, $opponent])->withReferees()->create(['match_type' => MatchType::TagTeam]);
     $person = $members->firstOrFail();
-    resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0,
-        resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"), new TalentBookingData(TalentBookingStatus::Confirmed, 5000, null, 'UTC', null, true), signedInUser());
+    resolve(SaveTalentBookingAction::class)->handle(
+        $event,
+        'wrestler',
+        $person->id,
+        0,
+        resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
+        new TalentBookingData(TalentBookingStatus::Confirmed, 5000, null, 'UTC', null, true),
+        signedInUser(),
+    );
     $team->wrestlers()->updateExistingPivot($person->id, ['left_at' => now()]);
     $replacement = Wrestler::factory()->bookable()->create();
     $team->wrestlers()->attach($replacement, ['joined_at' => now()]);
@@ -267,8 +281,15 @@ test('a row lists its warnings in the order the page shows them', function (): v
     $people = Wrestler::factory()->count(2)->bookable()->create();
     $match = EventMatch::factory()->for($event)->withCompetitors($people->all())->withReferees()->create();
     $person = $people->firstOrFail();
-    resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0,
-        resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"), new TalentBookingData(TalentBookingStatus::Confirmed, 0, null, 'UTC', null, true), signedInUser());
+    resolve(SaveTalentBookingAction::class)->handle(
+        $event,
+        'wrestler',
+        $person->id,
+        0,
+        resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
+        new TalentBookingData(TalentBookingStatus::Confirmed, 0, null, 'UTC', null, true),
+        signedInUser(),
+    );
     $person->delete();
     $match->delete();
     $event->update(['venue_id' => null]);

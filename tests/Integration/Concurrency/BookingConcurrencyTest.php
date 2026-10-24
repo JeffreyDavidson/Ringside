@@ -712,15 +712,18 @@ test('concurrent live show commands commit once without replacing times or dupli
         resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
         $version = 0;
         $key = '';
+
         if ($operation !== 'prepare') {
             $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
             $version = 1;
             $key = $operation === 'attendance' ? $run->content['roster'][0]['key'] : $run->content['items'][0]['key'];
+
             if ($operation === 'finish') {
                 resolve(TransitionLiveItemAction::class)->handle($event, 1, $key, LiveItemOperation::Start, signedInUser());
                 $version = 2;
             }
         }
+
         $auditCount = Activity::query()->where('log_name', 'live-show')->count();
         $spec = ['live_event_id' => $event->id, 'user_id' => $user->id, 'live_operation' => $operation, 'version' => $version,
             'pack_version' => 1, 'fingerprint' => $data['card']['fingerprint'], 'key' => $key, 'clock' => now()->toIso8601String()];
@@ -753,6 +756,7 @@ test('calendar writes serialize with direct team and rescheduled bookings withou
             $spec = ['event_id' => $event->id, 'first_wrestler_id' => $person->id,
                 'second_wrestler_id' => Wrestler::factory()->bookable()->for($promotion)->create()->id,
                 'referee_id' => Referee::factory()->bookable()->for($promotion)->create()->id];
+
             if ($mode === 'team') {
                 $team = TagTeam::factory()->bookable()->for($promotion)->create();
                 $person = $team->currentWrestlers()->firstOrFail();
@@ -760,10 +764,12 @@ test('calendar writes serialize with direct team and rescheduled bookings withou
                 $spec['team_id'] = $team->id;
                 $spec['opponent_team_id'] = TagTeam::factory()->bookable()->for($promotion)->create()->id;
             }
+
             if ($mode === 'reschedule') {
                 EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
                 $spec = ['event_id' => $event->id, 'reschedule_date' => $target->toDateTimeString()];
             }
+
             $availability = ['unavailability_person_id' => $person->id, 'unavailability_day' => $target->toDateString(), 'user_id' => $actor->id];
 
             // Act
@@ -774,6 +780,7 @@ test('calendar writes serialize with direct team and rescheduled bookings withou
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and($results[0]['exception'])->toBeIn([null, EntityNotAvailableException::class])
                 ->and(Unavailability::query()->where('person_id', $person->id)->count())->toBe(1);
+
             if ($mode === 'reschedule') {
                 expect($event->refresh()->date?->toDateTimeString())->toBe(($results[0]['ok'] ? $target : $target->copy()->subDay())->toDateTimeString());
             } else {
@@ -794,11 +801,20 @@ test('concurrent talent changes never duplicate or overwrite agreements', functi
         $person = Wrestler::factory()->bookable()->create();
         $context = resolve(TalentBookingFingerprintService::class);
         $version = 0;
+
         if ($operation !== 'first create') {
-            resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0, $context->fingerprint($event, "wrestler:{$person->id}"),
-                new TalentBookingData(TalentBookingStatus::Proposed, null, null, 'UTC', null), signedInUser());
+            resolve(SaveTalentBookingAction::class)->handle(
+                $event,
+                'wrestler',
+                $person->id,
+                0,
+                $context->fingerprint($event, "wrestler:{$person->id}"),
+                new TalentBookingData(TalentBookingStatus::Proposed, null, null, 'UTC', null),
+                signedInUser(),
+            );
             $version = 1;
         }
+
         $spec = ['talent_event_id' => $event->id, 'user_id' => $user->id, 'person_id' => $person->id, 'version' => $version,
             'fingerprint' => $context->fingerprint($event, "wrestler:{$person->id}"), 'talent_status' => 'confirmed', 'clock' => now()->toIso8601String()];
         $other = $operation === 'reschedule' ? ['event_id' => $event->id, 'reschedule_date' => now()->addDays(2)->toIso8601String()]
@@ -809,10 +825,12 @@ test('concurrent talent changes never duplicate or overwrite agreements', functi
 
         // Assert
         expect(collect($results)->contains('deadlock', true))->toBeFalse(workerOutcomes($results));
+
         if ($operation === 'reschedule') {
             expect($results[1]['ok'])->toBeTrue(workerOutcomes($results));
             $booking = EventTalentBooking::query()->where('event_id', $event->id)->sole();
             expect($booking->version)->toBeIn([1, 2]);
+
             if ($booking->status === TalentBookingStatus::Confirmed) {
                 $row = resolve(TalentBookingsViewModel::class)->data($event->refresh())['rows'][0];
                 expect($row['warnings'])->toContain('reconfirmation');
@@ -820,6 +838,7 @@ test('concurrent talent changes never duplicate or overwrite agreements', functi
 
             return;
         }
+
         expect(collect($results)->where('ok', true))->toHaveCount(1, workerOutcomes($results))
             ->and(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class], workerOutcomes($results))
             ->and(EventTalentBooking::query()->where('event_id', $event->id)->sole()->version)->toBe($version + 1)

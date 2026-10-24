@@ -20,6 +20,7 @@ test('two real booker requests commit exactly one planned or actual development'
         $deadlocksBefore = resolvedDeadlocks();
         $processes = [];
         $inputs = [];
+
         foreach (range(1, 2) as $index) {
             $input = new InputStream;
             $process = new Process([PHP_BINARY, __DIR__.'/storyline-worker.php', json_encode($spec, JSON_THROW_ON_ERROR)]);
@@ -29,28 +30,35 @@ test('two real booker requests commit exactly one planned or actual development'
             $processes[] = $process;
             $inputs[] = $input;
         }
+
         foreach ($processes as $process) {
             while (! str_contains($process->getOutput(), 'READY') && $process->isRunning()) {
                 usleep(10000);
             }
         }
+
         // Act
         $start = microtime(true) + .2;
+
         foreach ($inputs as $input) {
             $input->write($start."\n");
             $input->close();
         }
+
         while (microtime(true) < $start) {
             foreach ($processes as $process) {
                 $process->isRunning();
             } usleep(1000);
         }
+
         $results = [];
+
         foreach ($processes as $process) {
             $process->wait();
             preg_match('/RESULT:(.*)/', $process->getOutput(), $matches);
             $results[] = json_decode($matches[1] ?? '{}', true, flags: JSON_THROW_ON_ERROR);
         }
+
         // Assert
         expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
             ->and(collect($results)->where('ok', true))->toHaveCount(1)

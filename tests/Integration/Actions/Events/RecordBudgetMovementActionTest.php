@@ -59,26 +59,33 @@ test('refunds enforce same-line ownership original kind date and remaining cap',
     $f = budgetFixture();
     $source = EventBudgetMovement::factory()->for($f['line'], 'line')->create(['amount_cents' => 20000]);
     $input = budgetPayment(['kind' => 'refund', 'amount' => '100.00', 'source_id' => $source->id]);
+
     if ($case === 'foreign') {
         $input['source_id'] = EventBudgetMovement::factory()->create()->id;
     }
+
     if ($case === 'voided') {
         $source->voided_at = now();
         $source->save();
     }
+
     if ($case === 'refund') {
         $source->kind = BudgetMovementKind::Refund;
         $source->save();
     }
+
     if ($case === 'early') {
         $input['effective_date'] = today()->subDay()->toDateString();
     }
+
     if ($case === 'missing') {
         $input['source_id'] = null;
     }
+
     if ($case === 'cap') {
         EventBudgetMovement::factory()->for($f['line'], 'line')->create(['kind' => 'refund', 'source_id' => $source->id, 'amount_cents' => 15000]);
     }
+
     // Act / Assert
     $count = EventBudgetMovement::query()->count();
     expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input), signedInUser()))->toThrow(BudgetException::class)
@@ -127,10 +134,12 @@ test('an archived line refuses payments and a guessed foreign line changes nothi
     // Arrange
     $f = budgetFixture();
     $line = $archived ? $f['line'] : EventBudgetLine::factory()->create();
+
     if ($archived) {
         $line->archived_at = now();
         $line->save();
     }
+
     // Act / Assert
     expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $line->id, budgetMovementData(), signedInUser()))->toThrow($archived ? BudgetException::class : ModelNotFoundException::class);
     expect(EventBudgetMovement::query()->count())->toBe(0);

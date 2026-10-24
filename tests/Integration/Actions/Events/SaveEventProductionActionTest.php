@@ -68,37 +68,48 @@ test('invalid production input leaves the saved pack unchanged', function (strin
     $data = resolve(EventPackViewModel::class)->data($event);
     $input = $fixture['production'];
     $before = $event->pack()->firstOrFail()->content;
+
     if ($case === 'foreign contact') {
         $input['assignments'][0]['contact_id'] = CrewContact::factory()->create()->id;
     }
+
     if ($case === 'unknown owner') {
         $input['cues'][0]['owner_id'] = '4e833c54-5f60-48b8-91c5-dbf85ca51111';
     }
+
     if ($case === 'foreign item') {
         $input['cues'][0]['item_key'] = 'match:'.EventMatch::factory()->create()->id;
     }
+
     if ($case === 'duplicate assignment') {
         $input['assignments'][] = $input['assignments'][0];
     }
+
     if ($case === 'duplicate cue') {
         $input['cues'][] = $input['cues'][0];
     }
+
     if ($case === 'unsafe url') {
         $input['cues'][0]['url'] = 'javascript:alert(1)';
     }
+
     if ($case === 'missing role') {
         unset($input['assignments'][0]['role']);
     }
+
     if ($case === 'credential url') {
         $input['cues'][0]['url'] = 'https://secret:password@example.com/track';
     }
+
     if ($case === 'other description') {
         $input['assignments'][0]['role'] = 'other';
     }
+
     if ($case === 'gap' || $case === 'repeated') {
         $input['assignments'][0]['timezone'] = 'America/New_York';
         $input['assignments'][0]['call_at'] = $case === 'gap' ? '2026-03-08T02:30' : '2026-11-01T01:30';
     }
+
     if ($case === 'cue count') {
         $input['cues'] = array_map(fn (int $i): array => [...$input['cues'][0], 'id' => sprintf('eed36a82-90cb-4a79-b2cc-%012d', $i)], range(1, 21));
     }
@@ -132,6 +143,27 @@ test('saving production locks the referenced crew contacts after the event, its 
         ->and($matchLock)->toBeLessThan($packLock)
         ->and($packLock)->toBeLessThan($contactLock)
         ->and($contactLock)->toBeLessThan($packWrite);
+});
+
+test('saving production takes every lock once in order, then updates the pack row and logs the save', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    $before = $event->pack()->firstOrFail();
+
+    // Act
+    $statements = recordStatements(fn () => resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated([...$fixture['production'], 'notes' => 'Changed note']), false, administrator()));
+
+    // Assert
+    $writes = array_values(array_filter(statementTargets($statements), fn (string $target): bool => str_starts_with($target, 'lock ') || in_array($target, ['update event_packs', 'insert activity_log'], true)));
+    $pack = $event->pack()->firstOrFail();
+    expect($writes)->toBe(['lock events', 'lock events_matches', 'lock event_packs', 'lock event_live_runs', 'lock crew_contacts', 'update event_packs', 'insert activity_log'])
+        ->and($pack->version)->toBe(2)
+        ->and($pack->card_fingerprint)->toBe($data['card']['fingerprint'])
+        ->and(array_keys($pack->content))->toBe(array_keys($before->content))
+        ->and(data_get($pack->content, 'production'))->toEqual([...$fixture['production'], 'notes' => 'Changed note']);
 });
 
 test('explicit name refresh and offset call time change only the latest saved plan', function (): void {
@@ -189,11 +221,13 @@ test('stale production previews cannot overwrite a changed source', function (st
     $data = resolve(EventPackViewModel::class)->data($event);
     $version = $case === 'version' ? 0 : 1;
     $fingerprint = $case === 'fingerprint' ? str_repeat('0', 64) : $data['card']['fingerprint'];
+
     if ($case === 'review') {
         $fixture['match']->match_number = 25;
         $fixture['match']->save();
         $fingerprint = resolve(EventPackViewModel::class)->data($event)['card']['fingerprint'];
     }
+
     $before = $event->pack()->firstOrFail()->content;
 
     // Act

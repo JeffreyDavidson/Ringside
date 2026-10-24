@@ -17,6 +17,7 @@ use App\Models\Titles\TitleChampionship;
 use App\Services\Titles\TitleReignService;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends DataTableComponent<TitleChampionship> */
 class TitleHistory extends DataTableComponent
@@ -29,7 +30,7 @@ class TitleHistory extends DataTableComponent
 
     protected string $databaseTableName = 'titles_championships';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'title reigns';
 
     /**

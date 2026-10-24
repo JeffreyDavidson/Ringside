@@ -129,10 +129,12 @@ it('accepts independently recorded sibling winners without losing either qualifi
 it('completes every seeded round of an eight entrant tournament', function (EntrantKind $kind): void {
     $world = tournamentFixture(capacity: 8, kind: $kind);
     $t = $world['tournament'];
+
     foreach ($t->nodes()->orderBy('round')->orderBy('position')->get() as $node) {
         $match = bookTournamentNode($world, $node);
         recordTournamentWinner($match, $t);
     }
+
     expect($world['event']->matches()->count())->toBe(7)->and($t->refresh()->status)->toBe(TournamentStatus::Completed)
         ->and(resolve(TournamentBracketService::class)->bouts($t)->last()?->winner?->seed)->toBe(1);
 })->with(EntrantKind::cases());

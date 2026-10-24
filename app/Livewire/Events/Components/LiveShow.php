@@ -131,11 +131,13 @@ class LiveShow extends Component
         Validator::make(['operation' => $operation], ['operation' => [$this->correctionOperationRule()]])->validate();
         $run = EventLiveRun::query()->forEventId($event->id)->firstOrFail();
         $item = collect($run->content['items'])->firstWhere('key', $key);
+
         if ($item === null) {
             $this->addError('run', __('live-show.unknown_item'));
 
             return;
         }
+
         $this->reviewing = false;
         $this->draftKey = $key;
         $this->draftLabel = $item['label'];
@@ -158,21 +160,33 @@ class LiveShow extends Component
         $event = $this->event();
         Gate::authorize('update', $event);
         $rules = ['reason' => ['required', 'string', 'max:2000'], 'draftOperation' => [$this->correctionOperationRule()]];
+
         if ($this->draftOperation === 'correct') {
             $rules += ['actualStart' => ['required', 'date_format:Y-m-d\TH:i'], 'actualFinish' => ['nullable', 'date_format:Y-m-d\TH:i'],
                 'startOffset' => ['required', 'regex:/^[+-]\d{2}:\d{2}$/'], 'finishOffset' => ['required', 'regex:/^[+-]\d{2}:\d{2}$/']];
         }
+
         Validator::make(['draftOperation' => $this->draftOperation, 'reason' => $this->reason, 'actualStart' => $this->actualStart, 'actualFinish' => $this->actualFinish,
             'startOffset' => $this->startOffset, 'finishOffset' => $this->finishOffset], $rules)->validate();
         $this->perform(function (Event $event) use ($timing): void {
             $run = EventLiveRun::query()->forEventId($event->id)->firstOrFail();
             $start = $this->draftOperation === 'correct' ? $timing->wallTime($this->actualStart, $run->content['timezone'], $this->startOffset) : null;
             $finish = $this->actualFinish === '' ? null : $timing->wallTime($this->actualFinish, $run->content['timezone'], $this->finishOffset);
+
             if ($this->draftOperation === 'correct' && (! $start instanceof Carbon || ($this->actualFinish !== '' && ! $finish instanceof Carbon))) {
                 throw LiveShowException::invalidTimes();
             }
-            $this->transitionItem->handle($event, $this->draftVersion, $this->draftKey,
-                LiveItemOperation::from($this->draftOperation), $this->actor(), $this->reason, $start, $finish);
+
+            $this->transitionItem->handle(
+                $event,
+                $this->draftVersion,
+                $this->draftKey,
+                LiveItemOperation::from($this->draftOperation),
+                $this->actor(),
+                $this->reason,
+                $start,
+                $finish,
+            );
         });
     }
 
@@ -192,8 +206,14 @@ class LiveShow extends Component
     public function acceptReview(ReviewLiveShowAction $action): void
     {
         Validator::make(['removedReasons' => $this->removedReasons], ['removedReasons' => ['array'], 'removedReasons.*' => ['required', 'string', 'max:2000']])->validate();
-        $this->perform(fn (Event $event) => $action->handle($event, $this->draftVersion,
-            $this->reviewPackVersion, $this->reviewFingerprint, LiveShowReviewData::fromValidated($this->removedReasons), $this->actor()));
+        $this->perform(fn (Event $event) => $action->handle(
+            $event,
+            $this->draftVersion,
+            $this->reviewPackVersion,
+            $this->reviewFingerprint,
+            LiveShowReviewData::fromValidated($this->removedReasons),
+            $this->actor(),
+        ));
     }
 
     public function cancelDraft(): void
@@ -215,6 +235,7 @@ class LiveShow extends Component
         $event = $this->event();
         Gate::authorize('update', $event);
         $this->resetErrorBag();
+
         try {
             $operation($event);
             $this->draftKey = '';
@@ -222,6 +243,7 @@ class LiveShow extends Component
         } catch (BaseBusinessException $exception) {
             $this->addError('run', $exception->getMessage());
         }
+
         $this->refreshState();
     }
 

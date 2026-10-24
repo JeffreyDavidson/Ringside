@@ -100,8 +100,12 @@ test('a pending replacement cannot revoke the approved released poster', functio
     $oldKey = $key;
     $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
         ->image('replacement.png', 50, 50));
-    $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
-        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
+    $publication = app(SaveEventPublicationAction::class)->handle(
+        $event,
+        $publication->version,
+        $source['fingerprint'],
+        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]),
+    );
 
     // Act
     $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
@@ -132,8 +136,12 @@ test('a pending replacement cannot expose its new asset publicly', function (): 
     $oldKey = $key;
     $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
         ->image('replacement.png', 50, 50));
-    $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
-        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
+    $publication = app(SaveEventPublicationAction::class)->handle(
+        $event,
+        $publication->version,
+        $source['fingerprint'],
+        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]),
+    );
     $key = $newKey;
 
     // Act
@@ -165,8 +173,12 @@ test('a reviewed replacement revokes the previously approved poster key', functi
     $oldKey = $key;
     $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
         ->image('replacement.png', 50, 50));
-    $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
-        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
+    $publication = app(SaveEventPublicationAction::class)->handle(
+        $event,
+        $publication->version,
+        $source['fingerprint'],
+        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]),
+    );
     $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
@@ -201,8 +213,12 @@ test('a reviewed replacement serves its new poster key', function (): void {
     $oldKey = $key;
     $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
         ->image('replacement.png', 50, 50));
-    $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
-        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
+    $publication = app(SaveEventPublicationAction::class)->handle(
+        $event,
+        $publication->version,
+        $source['fingerprint'],
+        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]),
+    );
     $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
@@ -237,8 +253,12 @@ test('public pages adopt reviewed replacement metadata without the old asset key
     $oldKey = $key;
     $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
         ->image('replacement.png', 50, 50));
-    $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
-        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
+    $publication = app(SaveEventPublicationAction::class)->handle(
+        $event,
+        $publication->version,
+        $source['fingerprint'],
+        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]),
+    );
     $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
@@ -275,8 +295,12 @@ test('unpublishing a replaced card also revokes its current poster', function ()
     $oldKey = $key;
     $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
         ->image('replacement.png', 50, 50));
-    $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
-        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
+    $publication = app(SaveEventPublicationAction::class)->handle(
+        $event,
+        $publication->version,
+        $source['fingerprint'],
+        EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]),
+    );
     $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();

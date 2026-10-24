@@ -20,7 +20,7 @@ return new class extends Migration
         match ($connection->getDriverName()) {
             'sqlite', 'pgsql', 'sqlsrv' => $connection->statement(
                 'CREATE UNIQUE INDEX suspensions_one_open_period_unique '
-                .'ON suspensions (suspendable_type, suspendable_id) WHERE ended_at IS NULL'
+                .'ON suspensions (suspendable_type, suspendable_id) WHERE ended_at IS NULL',
             ),
             'mysql', 'mariadb' => $connection->statement(
                 'ALTER TABLE suspensions '
@@ -29,7 +29,7 @@ return new class extends Migration
                 .'ADD COLUMN current_suspendable_type VARCHAR(255) '
                 .'GENERATED ALWAYS AS (CASE WHEN ended_at IS NULL THEN suspendable_type ELSE NULL END) STORED, '
                 .'ADD UNIQUE INDEX suspensions_one_open_period_unique '
-                .'(current_suspendable_type, current_suspendable_id)'
+                .'(current_suspendable_type, current_suspendable_id)',
             ),
             default => throw new LogicException('The database driver does not support open suspension period constraints.'),
         };

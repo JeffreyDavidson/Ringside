@@ -19,7 +19,7 @@ return new class extends Migration
         match ($connection->getDriverName()) {
             'sqlite', 'pgsql', 'sqlsrv' => $connection->statement(
                 'CREATE UNIQUE INDEX injuries_one_open_period_unique '
-                .'ON injuries (injurable_type, injurable_id) WHERE ended_at IS NULL'
+                .'ON injuries (injurable_type, injurable_id) WHERE ended_at IS NULL',
             ),
             'mysql', 'mariadb' => $connection->statement(
                 'ALTER TABLE injuries '
@@ -28,7 +28,7 @@ return new class extends Migration
                 .'ADD COLUMN current_injurable_type VARCHAR(255) '
                 .'GENERATED ALWAYS AS (CASE WHEN ended_at IS NULL THEN injurable_type ELSE NULL END) STORED, '
                 .'ADD UNIQUE INDEX injuries_one_open_period_unique '
-                .'(current_injurable_type, current_injurable_id)'
+                .'(current_injurable_type, current_injurable_id)',
             ),
             default => throw new LogicException('The database driver does not support open injury period constraints.'),
         };

@@ -16,6 +16,7 @@ use App\Models\Titles\Title;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Title>
@@ -25,7 +26,7 @@ use Livewire\Attributes\Computed;
  */
 class FormModal extends BaseFormModal
 {
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.type';
 
     public CreateEditForm $form;
@@ -68,7 +69,7 @@ class FormModal extends BaseFormModal
     }
 
     /** A name taken since validation shows on the name field; any other failure on the type. */
-    #[\Override]
+    #[Override]
     protected function businessErrorField(BaseBusinessException $exception): string
     {
         return $exception->reason() === BusinessRuleReason::NameTaken
@@ -83,7 +84,7 @@ class FormModal extends BaseFormModal
 
     protected function createForm(): void
     {
-        $this->createAction->handle($this->form->toData());
+        $this->createAction->handle($this->form->toData(), $this->form->formPromotionId());
     }
 
     public function render(): View

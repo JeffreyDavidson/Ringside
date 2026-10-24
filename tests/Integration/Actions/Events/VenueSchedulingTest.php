@@ -22,7 +22,7 @@ test('it rejects creating events at the same venue and time', function () {
     Event::factory()->for($venue)->create(['date' => $date]);
     $data = new EventData('Conflicting Event', $date, $venue, null);
 
-    expect(fn () => resolve(CreateAction::class)->handle($data))
+    expect(fn () => resolve(CreateAction::class)->handle($data, null))
         ->toThrow(
             SchedulingConflictException::class,
             "Venue [{$venue->name}] is already booked on {$date->format('M j, Y')} (venue time).",
@@ -35,7 +35,7 @@ test('it permits using the same venue at a different time', function () {
     Event::factory()->for($venue)->create(['date' => now()->addWeek()]);
     $data = new EventData('Later Event', now()->addWeeks(2), $venue, null);
 
-    $event = resolve(CreateAction::class)->handle($data);
+    $event = resolve(CreateAction::class)->handle($data, null);
 
     expect($event)
         ->name->toBe('Later Event')
@@ -154,12 +154,13 @@ describe('venue booking across promotions', function () {
         actAsPromotion($promotionB);
         $data = new EventData('Morning Show', $day->copy()->setTime(9, 0), $venue, null);
 
-        $attempt = fn () => resolve(CreateAction::class)->handle($data);
+        $attempt = fn () => resolve(CreateAction::class)->handle($data, $promotionB->id);
 
         expect($attempt)->toThrow(
             SchedulingConflictException::class,
             sprintf('Venue [%s] is already booked on %s (venue time).', $venue->name, $day->copy()->setTime(9, 0)->format('M j, Y')),
         );
+
         try {
             $attempt();
         } catch (SchedulingConflictException $exception) {
@@ -176,7 +177,7 @@ describe('venue booking across promotions', function () {
         actAsPromotion($promotionB);
         $data = new EventData('Next Day Show', $day->copy()->addDay()->setTime(9, 0), $venue, null);
 
-        $event = resolve(CreateAction::class)->handle($data);
+        $event = resolve(CreateAction::class)->handle($data, $promotionB->id);
 
         expect($event->venue_id)->toBe($venue->id);
     });
@@ -205,7 +206,7 @@ describe('venue booking across promotions', function () {
         actAsPromotion($promotionB);
         $data = new EventData('Replacement Show', $day->copy()->setTime(9, 0), $venue, null);
 
-        $event = resolve(CreateAction::class)->handle($data);
+        $event = resolve(CreateAction::class)->handle($data, $promotionB->id);
 
         expect($event->exists)->toBeTrue();
     });
@@ -303,7 +304,7 @@ test('it rejects creating an event at a deleted venue', function () {
     $venue = Venue::factory()->trashed()->create();
     $data = new EventData('Deleted Venue Event', now()->addWeek(), $venue, null);
 
-    expect(fn () => resolve(CreateAction::class)->handle($data))
+    expect(fn () => resolve(CreateAction::class)->handle($data, null))
         ->toThrow(VenueDeletedException::class)
         ->and(Event::query()->where('name', 'Deleted Venue Event')->exists())->toBeFalse();
 });

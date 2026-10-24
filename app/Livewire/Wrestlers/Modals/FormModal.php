@@ -19,6 +19,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Wrestler>
@@ -29,7 +30,7 @@ class FormModal extends BaseFormModal
 {
     use SearchesRosterMembers;
 
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.name';
 
     public CreateEditForm $form;
@@ -64,7 +65,7 @@ class FormModal extends BaseFormModal
      * A signature move taken since validation shows on its own field, and so does a manager who stopped being
      * available; any other failure on the name.
      */
-    #[\Override]
+    #[Override]
     protected function businessErrorField(BaseBusinessException $exception): string
     {
         if ($exception instanceof CannotBeAssignedException) {
@@ -103,7 +104,7 @@ class FormModal extends BaseFormModal
 
     protected function createForm(): void
     {
-        $this->createAction->handle($this->form->toData());
+        $this->createAction->handle($this->form->toData(), $this->form->formPromotionId());
     }
 
     public function render(): View

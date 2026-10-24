@@ -19,15 +19,22 @@ class CreateAction
         return DB::transaction(function () use ($person, $data, $actor): Unavailability {
             $startsOn = $data->startsOn;
             $endsOn = $data->endsOn;
-            $person = $person->newQuery()->whereKey($person->id)->lockForUpdate()->firstOrFail();
+            $person = $person->newQuery()
+                ->whereKey($person->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             if ($person->promotion_id === null) {
                 throw UnavailabilityException::unowned();
             }
+
             $reason = $data->reason === null || mb_trim($data->reason) === '' ? null : mb_trim($data->reason);
+
             if (Unavailability::query()->whereMorphedTo('person', $person)->where('promotion_id', $person->promotion_id)
                 ->active()->where('starts_on', $startsOn)->where('ends_on', $endsOn)->where('reason', $reason)->exists()) {
                 throw UnavailabilityException::duplicate();
             }
+
             $entry = new Unavailability;
             $entry->fill(['starts_on' => $startsOn, 'ends_on' => $endsOn, 'reason' => $reason]);
             $entry->promotion_id = $person->promotion_id;
@@ -35,8 +42,16 @@ class CreateAction
             $entry->person_id = $person->id;
             $entry->created_by = $actor->id;
             $entry->save();
-            activity('availability')->performedOn($person)->causedBy($actor)
-                ->withProperties(['entry_id' => $entry->id, 'starts_on' => $startsOn, 'ends_on' => $endsOn])->log('create');
+
+            activity('availability')
+                ->performedOn($person)
+                ->causedBy($actor)
+                ->withProperties([
+                    'entry_id' => $entry->id,
+                    'starts_on' => $startsOn,
+                    'ends_on' => $endsOn,
+                ])
+                ->log('create');
 
             return $entry;
         }, attempts: 3);

@@ -97,7 +97,8 @@ it('records an ordinary finish and winning side', function () {
 
     $resultedMatch = resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     )->match;
 
     expect($resultedMatch->match_finish)->toBe(MatchFinish::Pinfall)
@@ -109,7 +110,8 @@ it('records a draw without a winning side', function () {
 
     $resultedMatch = resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::TimeLimitDraw, null), administrator(),
+        matchResult(MatchFinish::TimeLimitDraw, null),
+        administrator(),
     )->match;
 
     expect($resultedMatch->match_finish)->toBe(MatchFinish::TimeLimitDraw)
@@ -127,7 +129,8 @@ it('records a complete battle royal elimination history', function () {
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($firstEliminated, 1, $winner),
             new MatchEliminationData($secondEliminated, 2, $winner),
-        ]), administrator(),
+        ]),
+        administrator(),
     );
 
     expect($firstEliminated->refresh()->elimination_order)->toBe(1)
@@ -146,7 +149,8 @@ it('records a royal rumble outcome with entry and elimination order', function (
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($competitors[0], 1, $winner),
             new MatchEliminationData($competitors[1], 2, $winner),
-        ]), administrator(),
+        ]),
+        administrator(),
     );
 
     expect($match->competitors()->orderBy('entry_order')->pluck('entry_order')->all())->toBe([1, 2, 3])
@@ -161,7 +165,8 @@ it('records a partial elimination history for a no-outcome elimination match', f
         $match,
         matchResult(MatchFinish::NoDecision, null, [
             new MatchEliminationData($competitors[0], 1, $competitors[2]),
-        ]), administrator(),
+        ]),
+        administrator(),
     )->match;
 
     expect($resultedMatch->match_finish)->toBe(MatchFinish::NoDecision)
@@ -180,7 +185,8 @@ it('replaces a previously recorded outcome atomically', function () {
         matchResult(MatchFinish::Stipulation, $firstWinner->side, [
             new MatchEliminationData($competitors[0], 1, $firstWinner),
             new MatchEliminationData($correctedWinner, 2, $firstWinner),
-        ]), administrator(),
+        ]),
+        administrator(),
     );
 
     $correctedMatch = resolve(RecordResultAction::class)->handle(
@@ -188,7 +194,8 @@ it('replaces a previously recorded outcome atomically', function () {
         matchResult(MatchFinish::Forfeit, $correctedWinner->side, [
             new MatchEliminationData($firstWinner, 1),
             new MatchEliminationData($competitors[0], 2, $correctedWinner),
-        ]), administrator(),
+        ]),
+        administrator(),
     )->match;
 
     expect($correctedMatch->match_finish)->toBe(MatchFinish::Forfeit)
@@ -207,14 +214,16 @@ it('rolls back an invalid correction without changing the recorded outcome', fun
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($competitors[0], 1, $winner),
             new MatchEliminationData($competitors[1], 2, $winner),
-        ]), administrator(),
+        ]),
+        administrator(),
     );
 
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
         matchResult(MatchFinish::NoDecision, null, [
             new MatchEliminationData($competitors[0], 2),
-        ]), administrator(),
+        ]),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class)
         ->and($match->refresh()->match_finish)->toBe(MatchFinish::Stipulation)
         ->and($match->winning_side_id)->toBe($winner->match_side_id)
@@ -227,7 +236,8 @@ it('requires a winning side for a decisive finish', function () {
 
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Submission, null), administrator(),
+        matchResult(MatchFinish::Submission, null),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -237,7 +247,8 @@ it('rejects a winning side for a no-outcome finish', function () {
 
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::NoDecision, $side), administrator(),
+        matchResult(MatchFinish::NoDecision, $side),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -248,7 +259,8 @@ it('rejects a side belonging to another match', function () {
 
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $otherSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $otherSide),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -258,7 +270,8 @@ it('rejects an empty winning side', function () {
 
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $emptySide), administrator(),
+        matchResult(MatchFinish::Pinfall, $emptySide),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -271,7 +284,8 @@ it('rejects elimination metadata for an ordinary match', function () {
         $match,
         matchResult(MatchFinish::Pinfall, $winningSide, [
             new MatchEliminationData($competitor, 1),
-        ]), administrator(),
+        ]),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -283,7 +297,8 @@ it('requires every losing competitor in a decisive elimination match', function 
         $match,
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($competitors[0], 1, $winner),
-        ]), administrator(),
+        ]),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -296,7 +311,8 @@ it('rejects eliminating the winning competitor', function () {
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($competitors[0], 1, $winner),
             new MatchEliminationData($winner, 2, $competitors[1]),
-        ]), administrator(),
+        ]),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -311,7 +327,8 @@ it('rejects an eliminated competitor from another match', function () {
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($otherCompetitor, 1, $winner),
             new MatchEliminationData($competitors[1], 2, $winner),
-        ]), administrator(),
+        ]),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -324,7 +341,8 @@ it('rejects a self elimination', function () {
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($competitors[0], 1, $competitors[0]),
             new MatchEliminationData($competitors[1], 2, $winner),
-        ]), administrator(),
+        ]),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -338,7 +356,8 @@ it('rejects a royal rumble with invalid entry order', function () {
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($competitors[0], 1, $winner),
             new MatchEliminationData($competitors[1], 2, $winner),
-        ]), administrator(),
+        ]),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -351,7 +370,8 @@ it('rejects an elimination credited after the eliminator exited', function () {
         matchResult(MatchFinish::Stipulation, $winner->side, [
             new MatchEliminationData($competitors[0], 1, $competitors[1]),
             new MatchEliminationData($competitors[1], 2, $competitors[0]),
-        ]), administrator(),
+        ]),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
 
@@ -373,7 +393,8 @@ it('transfers a singles title to the winning challenger', function () {
 
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     $newReign = $title->championships()->current()->sole();
@@ -397,7 +418,8 @@ it('retains a title when its champion wins', function () {
 
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Submission, $winningSide), administrator(),
+        matchResult(MatchFinish::Submission, $winningSide),
+        administrator(),
     );
 
     expect($reign->refresh()->lost_at)->toBeNull()
@@ -417,7 +439,8 @@ it('does not transfer a title on a disqualification', function () {
 
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Disqualification, $winningSide), administrator(),
+        matchResult(MatchFinish::Disqualification, $winningSide),
+        administrator(),
     );
 
     expect($reign->refresh()->lost_at)->toBeNull()
@@ -435,7 +458,8 @@ it('crowns the winner of a vacant title match', function () {
 
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Knockout, $winningSide), administrator(),
+        matchResult(MatchFinish::Knockout, $winningSide),
+        administrator(),
     );
 
     $reign = $title->championships()->current()->sole();
@@ -465,7 +489,8 @@ it('transfers every title in a winner-take-all match', function () {
 
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Stipulation, $winningSide), administrator(),
+        matchResult(MatchFinish::Stipulation, $winningSide),
+        administrator(),
     );
 
     expect($firstTitle->championships()->current()->sole()->champion->is($winner))->toBeTrue()
@@ -485,7 +510,8 @@ it('transfers a tag team title to a winning tag team', function () {
 
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     expect($title->championships()->current()->sole()->champion->is($challenger))->toBeTrue();
@@ -500,7 +526,8 @@ it('rejects a winner incompatible with the title type', function () {
 
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class)
         ->and($match->refresh()->match_finish)->toBeNull()
         ->and($title->championships()->count())->toBe(0);
@@ -515,7 +542,8 @@ it('rejects a title change at an undated event', function () {
 
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class)
         ->and($match->refresh()->match_finish)->toBeNull()
         ->and($title->championships()->count())->toBe(0);
@@ -534,11 +562,13 @@ it('restores title lineage when a result is corrected to a draw', function () {
 
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::TimeLimitDraw, null), administrator(),
+        matchResult(MatchFinish::TimeLimitDraw, null),
+        administrator(),
     );
 
     expect($originalReign->refresh()->lost_at)->toBeNull()
@@ -561,7 +591,8 @@ it('rejects correcting a title result after later lineage exists', function () {
 
     resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     $laterMatch = EventMatch::factory()->for(Event::factory()->past())->create();
@@ -578,7 +609,8 @@ it('rejects correcting a title result after later lineage exists', function () {
 
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::TimeLimitDraw, null), administrator(),
+        matchResult(MatchFinish::TimeLimitDraw, null),
+        administrator(),
     ))->toThrow(InvalidMatchOutcomeException::class)
         ->and($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
         ->and($title->championships()->current()->sole()->champion->is($laterChampion))->toBeTrue();
@@ -611,7 +643,8 @@ it('rejects a title result recorded before a later recorded result', function (T
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $earlierMatch,
-        matchResult(MatchFinish::Pinfall, $earlierSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $earlierSide),
+        administrator(),
     );
 
     // Assert
@@ -711,7 +744,8 @@ it('rejects a result at an unscheduled event even when a later reign exists', fu
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $undatedMatch,
-        matchResult(MatchFinish::Pinfall, $undatedSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $undatedSide),
+        administrator(),
     );
 
     // Assert
@@ -729,7 +763,8 @@ it('rejects the whole result when only one of several titles is out of date orde
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $earlierMatch,
-        matchResult(MatchFinish::Pinfall, $earlierSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $earlierSide),
+        administrator(),
     );
 
     // Assert
@@ -750,7 +785,8 @@ it('rejects a result for an event that has not taken place yet', function (?int 
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     // Assert
@@ -786,7 +822,8 @@ it('rejects a title change on a title that is no longer active', function (Closu
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     // Assert
@@ -810,7 +847,8 @@ it('rejects a title change on a deleted title', function (): void {
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     // Assert
@@ -830,7 +868,8 @@ it('rejects a correction that would change the champion of a title deleted since
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $otherSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $otherSide),
+        administrator(),
     );
 
     // Assert
@@ -883,7 +922,8 @@ it('rejects a title change for a winner who is no longer eligible', function (Cl
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     // Assert
@@ -1127,7 +1167,8 @@ it('rejects a title change dated inside a reign that was vacated later', functio
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     // Assert
@@ -1148,7 +1189,8 @@ it('rejects a title change dated at the instant a later vacated reign began', fu
     // Act
     $record = fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        matchResult(MatchFinish::Pinfall, $winningSide), administrator(),
+        matchResult(MatchFinish::Pinfall, $winningSide),
+        administrator(),
     );
 
     // Assert
@@ -1233,9 +1275,11 @@ it('records a back-filled defence after the title has moved on', function (Title
     $title = Title::factory()->active()->create(['type' => $type]);
     $champion = $newChampion();
     reignOn($title, $champion, '2026-09-01 12:00:00', '2026-09-20 12:00:00');
+
     if ($scenario === 'later reign by another champion') {
         reignOn($title, $newChampion(), '2026-09-20 12:00:00');
     }
+
     $before = reignSnapshot($title);
     [$match, $winningSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, $champion);
 
@@ -1272,9 +1316,11 @@ it('still rejects a title change back-dated before a later reign or inside a vac
     travelTo(Carbon::parse('2026-10-04 12:00:00'));
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-01 12:00:00', '2026-09-20 12:00:00');
+
     if ($laterReignExists) {
         reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-20 12:00:00');
     }
+
     $before = reignSnapshot($title);
     [$match, $winningSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, Wrestler::factory()->bookable()->create());
 
@@ -1296,9 +1342,11 @@ it('corrects a recorded defence into a title change only while no later reign ex
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $champion = Wrestler::factory()->bookable()->create();
     $firstReign = reignOn($title, $champion, '2026-09-01 12:00:00', $laterReignExists ? '2026-09-20 12:00:00' : null);
+
     if ($laterReignExists) {
         reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-20 12:00:00');
     }
+
     [$match, $championSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, $champion);
     $challengerSide = $match->sides()->whereKeyNot($championSide->id)->sole();
     resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $championSide), administrator());

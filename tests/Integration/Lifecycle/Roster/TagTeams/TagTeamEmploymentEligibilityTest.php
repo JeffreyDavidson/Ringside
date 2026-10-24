@@ -46,3 +46,18 @@ test('release predicate stays aligned with its guard', function (string $factory
     'unemployed' => ['unemployed', false],
     'released' => ['released', false],
 ]);
+
+test('it names the missing partners when a tag team has no current wrestlers', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()
+        ->create();
+
+    // Act
+    $employ = fn () => resolve(TagTeamEmploymentEligibility::class)->ensureCanEmploy($tagTeam);
+
+    // Assert
+    expect($employ)->toThrow(
+        CannotBeEmployedException::class,
+        "Tag team '{$tagTeam->name}' cannot be employed because these partners are unavailable: No current partners available.",
+    );
+});

@@ -88,6 +88,7 @@ class TagTeamBuilder extends Builder
         } else {
             $this->bookable();
         }
+
         if ($date === null) {
             return $this;
         }

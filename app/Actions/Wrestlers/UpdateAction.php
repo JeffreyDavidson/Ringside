@@ -8,10 +8,13 @@ use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
 use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Naming\GuardedName;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Exceptions\Roster\Wrestlers\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
+use App\Lifecycle\Roster\EmploymentDateRequirements;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Scopes\PromotionContextScope;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -40,6 +43,7 @@ class UpdateAction
         protected ChangeScheduledEmploymentAction $changeScheduledEmployment,
         protected RecordNameLock $nameLock,
         protected SynchronizeManagerAssignmentsAction $synchronizeManagerAssignmentsAction,
+        protected EmploymentDateRequirements $employmentDates,
     ) {}
 
     /**
@@ -52,6 +56,7 @@ class UpdateAction
      * - Maintains transaction boundaries for data consistency
      *
      * @throws NameTakenException When another wrestler of the promotion has the name or the signature move
+     * @throws EmploymentDateException When the date is another day than the one employment started, or a scheduled hire moves to a day before today
      */
     public function handle(Wrestler $wrestler, WrestlerData $wrestlerData): Wrestler
     {
@@ -67,6 +72,11 @@ class UpdateAction
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->ensureNameIsAvailable($lockedWrestler, $name, $wrestlerData->signature_move);
+
+            // A wrestler who is employed keeps the date employment started; another one is refused, not dropped.
+            if ($wrestlerData->employment_date instanceof Carbon) {
+                $this->employmentDates->ensureCurrentStartIsUnchanged($lockedWrestler, $wrestlerData->employment_date);
+            }
 
             $lockedWrestler->update([
                 'name' => $name,

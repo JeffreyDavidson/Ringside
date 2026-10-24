@@ -62,14 +62,17 @@ test('date-aware tag-team candidates agree with the authority for current and fo
     $member->forceFill(['promotion_id' => $promotion->id])->save();
     $actor = administrator();
     $entry = resolve(CreateAction::class)->handle($member, new UnavailabilityData('2026-10-17', '2026-10-17', null), $actor);
+
     if ($cancelled) {
         resolve(CancelAction::class)->handle($member, $entry->id, $actor);
     }
+
     if (! $current) {
         $team->wrestlers()->updateExistingPivot($member, ['left_at' => now()]);
         $replacement = Wrestler::factory()->bookable()->for($promotion)->create();
         $team->wrestlers()->attach($replacement, ['joined_at' => now()]);
     }
+
     $team->refresh();
 
     // Act
@@ -138,9 +141,11 @@ test('the bookable scope agrees with roster booking eligibility for tag teams', 
 test('the date-aware bookable scope agrees with roster booking eligibility for individuals employed on the event date', function (string $modelClass, int $startedDaysAgo, ?int $endedDaysAgo, int $eventDaysAhead, bool $expected): void {
     // Arrange
     $employment = Employment::factory()->started(now()->subDays($startedDaysAgo));
+
     if ($endedDaysAgo !== null) {
         $employment = $employment->ended(now()->subDays($endedDaysAgo));
     }
+
     $rosterMember = $modelClass::factory()->has($employment, 'employments')->create();
     $eventDate = now()->addDays($eventDaysAhead);
 

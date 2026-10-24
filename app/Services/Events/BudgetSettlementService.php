@@ -30,12 +30,15 @@ class BudgetSettlementService
         $net = $this->net($line);
         $balance = $line->confirmed_cents === null ? null : $line->confirmed_cents - $net;
         $attention = 'balanced';
+
         if ($balance === null) {
             $attention = 'needs_amount';
         }
+
         if ($balance !== null && $balance > 0) {
             $attention = $line->direction === BudgetDirection::Expense ? 'to_pay' : 'to_collect';
         }
+
         if ($balance !== null && $balance < 0) {
             $attention = $line->direction === BudgetDirection::Expense ? 'refund_to_collect' : 'refund_to_send';
         }

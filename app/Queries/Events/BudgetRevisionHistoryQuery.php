@@ -17,6 +17,7 @@ class BudgetRevisionHistoryQuery
     public function get(EventBudget $budget, ?int $lineId): HasMany
     {
         $query = $budget->revisions()->orderByDesc('version');
+
         if ($lineId === null) {
             return $query;
         }

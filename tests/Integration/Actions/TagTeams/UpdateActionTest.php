@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\TagTeams\UpdateAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Enums\Naming\GuardedName;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Exceptions\Roster\TagTeams\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Promotions\Promotion;
@@ -272,7 +273,7 @@ test('it employs newly assigned members when the tag team is employed', function
     resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
         name: $tagTeam->name,
         signature_move: $tagTeam->signature_move,
-        employment_date: now(),
+        employment_date: $tagTeam->employments()->sole()->started_at,
         wrestlerA: $wrestlerA,
         wrestlerB: $newWrestler,
         managers: new Collection([$newManager]),
@@ -465,4 +466,43 @@ describe('tag team name guard', function (): void {
         expect($tagTeam->refresh()->name)->toBe('Other Team')
             ->and($tagTeam->signature_move)->toBe('Other Move');
     });
+});
+
+test('it refuses another start date for a tag team that is employed and saves nothing', function () {
+    // Arrange
+    ['tagTeam' => $tagTeam, 'wrestlerA' => $wrestlerA, 'wrestlerB' => $wrestlerB] = tagTeamsUpdateActionFixtures();
+    $startedAt = $tagTeam->employments()->sole()->started_at;
+
+    // Act
+    $act = fn () => resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
+        name: 'Renamed Team',
+        signature_move: $tagTeam->signature_move,
+        employment_date: $startedAt->copy()->addDays(3),
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    ));
+
+    // Assert
+    expect($act)->toThrow(EmploymentDateException::class, "Tag team 'Original Team' is currently employed, so the date employment started cannot be changed.")
+        ->and($tagTeam->refresh()->name)->toBe('Original Team')
+        ->and($tagTeam->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
+});
+
+test('it saves a tag team that is employed when the form date is the day employment started', function () {
+    // Arrange
+    ['tagTeam' => $tagTeam, 'wrestlerA' => $wrestlerA, 'wrestlerB' => $wrestlerB] = tagTeamsUpdateActionFixtures();
+    $startedAt = $tagTeam->employments()->sole()->started_at;
+
+    // Act
+    resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
+        name: 'Renamed Team',
+        signature_move: $tagTeam->signature_move,
+        employment_date: $startedAt->copy()->startOfDay(),
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    ));
+
+    // Assert
+    expect($tagTeam->refresh()->name)->toBe('Renamed Team')
+        ->and($tagTeam->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });

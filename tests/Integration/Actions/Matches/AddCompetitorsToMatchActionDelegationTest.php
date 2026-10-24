@@ -33,10 +33,10 @@ test('it adds wrestler competitors to a match', function () {
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
-    $addWrestlersToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 0, []);
-    $addWrestlersToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 1, []);
+    $addWrestlersToMatchAction->expects('handle')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 0, []);
+    $addWrestlersToMatchAction->expects('handle')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 1, []);
 
-    resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
+    assignWithinLockedMatch($eventMatch, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors));
 
     $addWrestlersToMatchAction->verify();
     $addTagTeamsToMatchAction->unused();
@@ -61,10 +61,10 @@ test('it adds tag team competitors to a match', function () {
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
-    $addTagTeamsToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 0, []);
-    $addTagTeamsToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 1, []);
+    $addTagTeamsToMatchAction->expects('handle')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 0, []);
+    $addTagTeamsToMatchAction->expects('handle')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 1, []);
 
-    resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
+    assignWithinLockedMatch($eventMatch, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors));
 
     $addTagTeamsToMatchAction->verify();
     $addWrestlersToMatchAction->unused();

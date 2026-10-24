@@ -19,8 +19,10 @@ class CreateAction
     public function handle(Promotion $promotion, StorylineData $data, User $actor): Storyline
     {
         return DB::transaction(function () use ($promotion, $data, $actor): Storyline {
-            Promotion::query()->whereKey($promotion->id)->lockForUpdate()->firstOrFail();
+            $promotion->refreshForUpdate();
+
             $existing = Storyline::query()->where('submission_id', $data->submissionId)->first();
+
             if ($existing !== null) {
                 if ($existing->promotion_id !== $promotion->id) {
                     throw RecordChangedException::changed();
@@ -28,6 +30,7 @@ class CreateAction
 
                 return $existing;
             }
+
             $story = new Storyline;
             $story->promotion_id = $promotion->id;
             $story->title = mb_trim($data->title);

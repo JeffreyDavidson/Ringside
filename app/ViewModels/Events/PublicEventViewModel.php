@@ -38,18 +38,29 @@ class PublicEventViewModel
         $notice = PublicAnnouncement::from($card['announcement'])->isNotice();
         $params = ['publicId' => $publication->public_id, 'slug' => $publication->slug];
 
-        return $this->project($card, route('shows.show', $params),
+        return $this->project(
+            $card,
+            route('shows.show', $params),
             ! $scheduleChanged && ! $notice && ! $resultsChanged && $publication->results_published_at !== null ? route('shows.results', $params) : null,
             $scheduleChanged || $card['poster'] === null ? null : route('shows.poster', [...$params, 'asset' => $card['poster']['key']]),
-            $results, $scheduleChanged, $resultsChanged, $results ? $publication->results : null);
+            $results,
+            $scheduleChanged,
+            $resultsChanged,
+            $results ? $publication->results : null,
+        );
     }
 
     public function preview(Event $event, EventPublication $publication): PublicEventData
     {
         $card = $this->cards->card($this->source->get($event), $publication->draft);
 
-        return $this->project($card, route('shows.show', ['publicId' => $publication->public_id, 'slug' => $publication->slug]), null,
-            $card['poster'] === null ? null : route('events.public-pages.poster', $event), preview: true);
+        return $this->project(
+            $card,
+            route('shows.show', ['publicId' => $publication->public_id, 'slug' => $publication->slug]),
+            null,
+            $card['poster'] === null ? null : route('events.public-pages.poster', $event),
+            preview: true,
+        );
     }
 
     /**
@@ -61,10 +72,21 @@ class PublicEventViewModel
         $hidden = $scheduleChanged;
         $details = $hidden ? self::WITHHELD : array_intersect_key($card, self::WITHHELD);
 
-        return new PublicEventData(...$details, title: $card['title'], timezone: $card['timezone'],
-            posterUrl: $posterUrl, posterAlt: $card['poster']['alt'] ?? null, posterCaption: $hidden ? null : ($card['poster']['caption'] ?? null),
+        return new PublicEventData(
+            ...$details,
+            title: $card['title'],
+            timezone: $card['timezone'],
+            posterUrl: $posterUrl,
+            posterAlt: $card['poster']['alt'] ?? null,
+            posterCaption: $hidden ? null : ($card['poster']['caption'] ?? null),
             rows: $hidden || ($results && $resultsChanged) ? [] : ($results ? ($releasedResults['rows'] ?? []) : $card['rows']),
-            cardUrl: $cardUrl, resultsUrl: $resultsUrl, isResults: $results, isPreview: $preview, scheduleChanged: $scheduleChanged, resultsChanged: $results && $resultsChanged,
-            correctedAt: $hidden || $resultsChanged ? null : ($releasedResults['corrected_at'] ?? null));
+            cardUrl: $cardUrl,
+            resultsUrl: $resultsUrl,
+            isResults: $results,
+            isPreview: $preview,
+            scheduleChanged: $scheduleChanged,
+            resultsChanged: $results && $resultsChanged,
+            correctedAt: $hidden || $resultsChanged ? null : ($releasedResults['corrected_at'] ?? null),
+        );
     }
 }

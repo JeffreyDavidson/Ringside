@@ -35,7 +35,7 @@ test('a standalone assignment rejects a date-unavailable wrestler and writes not
     resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-17', null), administrator());
 
     // Act
-    $assign = fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$person]), 1);
+    $assign = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$person]), 1));
 
     // Assert
     expect($assign)->toThrow(EntityNotAvailableException::class, $person->name)
@@ -113,6 +113,7 @@ test('restoring a future event checks its retained roster while historical resto
 
         resolve(CancelAction::class)->handle($person, $entry->id, $actor);
     }
+
     $restore();
     expect($event->refresh()->trashed())->toBeFalse();
 })->with([true, false]);

@@ -54,12 +54,15 @@ class Index extends Component
     {
         Gate::authorize('create', Tournament::class);
         $promotion = $context->current();
+
         if (! $promotion instanceof Promotion) {
             $this->addError('operation', __('tournaments.choose_promotion'));
 
             return;
         }
+
         $data = $this->form->data();
+
         try {
             $tournament = $save->handle($promotion, $data, $this->actor());
         } catch (BaseBusinessException $exception) {
@@ -67,6 +70,7 @@ class Index extends Component
 
             return;
         }
+
         $this->redirectRoute('tournaments.show', ['tournament' => $tournament]);
     }
 
@@ -76,9 +80,11 @@ class Index extends Component
     {
         Gate::authorize('create', Tournament::class);
         $rosterKind = BookableRosterKind::tryFrom($kind);
+
         if (! in_array($rosterKind, [BookableRosterKind::Wrestlers, BookableRosterKind::TagTeams], true)) {
             return [];
         }
+
         $promotion = $context->current();
 
         return $promotion instanceof Promotion ? $search->search($rosterKind, $term, $promotion->id) : [];

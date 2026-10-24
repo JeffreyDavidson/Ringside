@@ -74,9 +74,11 @@ test('every current tag team wrestler must be eligible', function () {
 test('an individual is bookable on the date they were employed', function (int $startedDaysAgo, ?int $endedDaysAgo, int $eventDaysAhead, bool $eligible): void {
     // Arrange
     $employment = Employment::factory()->started(now()->subDays($startedDaysAgo));
+
     if ($endedDaysAgo !== null) {
         $employment = $employment->ended(now()->subDays($endedDaysAgo));
     }
+
     $wrestler = Wrestler::factory()->has($employment, 'employments')->create();
     $referee = Referee::factory()->has($employment, 'employments')->create();
     $eventDate = now()->addDays($eventDaysAhead);

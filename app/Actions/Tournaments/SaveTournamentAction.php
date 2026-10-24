@@ -29,10 +29,16 @@ class SaveTournamentAction
     {
         return DB::transaction(function () use ($promotion, $data, $actor, $tournament, $version): Tournament {
             if (! $tournament instanceof Tournament && $data->requestId !== null) {
-                Promotion::query()->whereKey($promotion->id)->lockForUpdate()->firstOrFail();
-                $existing = Tournament::query()->where('promotion_id', $promotion->id)->where('request_id', $data->requestId)->first();
+                $promotion->refreshForUpdate();
+
+                $existing = Tournament::query()
+                    ->where('promotion_id', $promotion->id)
+                    ->where('request_id', $data->requestId)
+                    ->first();
+
                 if ($existing !== null) {
                     $acceptedIds = array_values($existing->entries()->get()->map(fn (TournamentEntry $entry): int => $entry->competitor_id)->all());
+
                     if ($existing->name !== mb_trim($data->name) || $existing->description !== $data->description || $existing->entrant_kind !== $data->kind || $existing->capacity !== $data->capacity || $existing->repeat_appearances !== $data->repeatAppearances || $acceptedIds !== $data->competitorIds) {
                         throw RecordChangedException::changed();
                     }
@@ -40,17 +46,31 @@ class SaveTournamentAction
                     return $existing;
                 }
             }
-            $locked = $tournament instanceof Tournament ? Tournament::query()->lockForUpdate()->findOrFail($tournament->id) : new Tournament;
+
+            $locked = $tournament instanceof Tournament
+                ? Tournament::query()->lockForUpdate()->findOrFail($tournament->id)
+                : new Tournament;
+
             if ($locked->exists && ($locked->promotion_id !== $promotion->id || $locked->version !== $version)) {
                 throw RecordChangedException::changed();
             }
+
             if ($locked->exists) {
                 $this->states->ensureStructureEditable($locked);
             }
-            $competitors = $data->kind->modelClass()::query()->where('promotion_id', $promotion->id)->whereKey($data->competitorIds)->orderBy('id')->when($data->kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))->lockForUpdate()->get();
+
+            $competitors = $data->kind->modelClass()::query()
+                ->where('promotion_id', $promotion->id)
+                ->whereKey($data->competitorIds)
+                ->orderBy('id')
+                ->when($data->kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))
+                ->lockForUpdate()
+                ->get();
+
             if ($competitors->count() !== count($data->competitorIds) || $competitors->contains(fn (\App\Models\Roster\Wrestlers\Wrestler|\App\Models\Roster\Referees\Referee|TagTeam $competitor): bool => ! $this->eligibility->allows($competitor))) {
                 throw TournamentException::entrantUnavailable();
             }
+
             $locked->fill([
                 'name' => mb_trim($data->name),
                 'description' => $data->description,
@@ -65,14 +85,24 @@ class SaveTournamentAction
             $locked->save();
             $locked->nodes()->delete();
             $locked->entries()->delete();
+
             foreach ($data->competitorIds as $offset => $id) {
                 $competitor = $competitors->sole('id', $id);
                 (new TournamentEntry)->forceFill(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'seed' => $offset + 1, 'competitor_type' => $competitor->getMorphClass(), 'competitor_id' => $id])->save();
             }
+
             foreach (new BracketShape($data->capacity)->slots() as [$round, $position, $firstSeed, $secondSeed]) {
                 (new TournamentNode)->forceFill(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'round' => $round, 'position' => $position, 'first_seed' => $firstSeed, 'second_seed' => $secondSeed])->save();
             }
-            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'version' => $locked->version])->log('tournament.saved');
+
+            activity('tournaments')
+                ->causedBy($actor)
+                ->withProperties([
+                    'promotion_id' => $promotion->id,
+                    'tournament_id' => $locked->id,
+                    'version' => $locked->version,
+                ])
+                ->log('tournament.saved');
 
             return $locked;
         }, attempts: 3);

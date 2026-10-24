@@ -21,10 +21,13 @@ class LockSourceAction
         if ($source->eventId !== null) {
             $this->card->lockIncludingDeleted($source->eventId, $promotionId);
         }
+
         $result = $this->sources->get($source, $promotionId) ?? throw new ModelNotFoundException;
+
         if ($source->fingerprint !== null && ! hash_equals($source->fingerprint, $result['fingerprint'])) {
             throw StorylineConflictException::source();
         }
+
         if (! $historical && collect($result['warnings'])->contains(fn (StorylineSourceWarning $warning): bool => ! $warning->allowsCurrentSave())) {
             throw StorylineConflictException::source();
         }

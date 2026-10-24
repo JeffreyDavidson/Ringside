@@ -16,6 +16,7 @@ final class UsdAmount
         if (! preg_match('/\A[0-9]{1,7}(?:\.[0-9]{1,2})?\z/', $amount)) {
             throw new InvalidArgumentException('Enter USD with at most two decimal places.');
         }
+
         $parts = explode('.', $amount);
 
         return ((int) $parts[0] * 100) + (int) str_pad($parts[1] ?? '', 2, '0');

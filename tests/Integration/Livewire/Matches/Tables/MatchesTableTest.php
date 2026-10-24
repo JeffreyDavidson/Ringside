@@ -564,6 +564,7 @@ describe('search and event scoping', function (): void {
 it('paginates rendered matches using the selected page size', function (): void {
     // Arrange
     $event = Event::factory()->create();
+
     foreach (
         [
             MatchType::Singles,
@@ -580,6 +581,7 @@ it('paginates rendered matches using the selected page size', function (): void 
             ->withMatchNumber($index + 1)
             ->create();
     }
+
     $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
 
     // Act

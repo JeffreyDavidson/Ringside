@@ -29,6 +29,7 @@ class EventPublicPageController
         $publication = EventPublication::query()->forEventId($event->id)->with(['publisher', 'resultsPublisher'])->first();
         $draft = $publication->draft ?? ['announcement' => 'scheduled', 'summary' => null, 'notice' => null, 'address' => false, 'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => null, 'matches' => [], 'results' => []];
         $needsReview = false;
+
         if ($publication !== null) {
             $changed = $changes->compare($publication, $source);
             $needsReview = ($publication->card !== null && ($changed['scheduleChanged'] || $changed['cardChanged']))
@@ -50,14 +51,17 @@ class EventPublicPageController
     {
         $newPosterKey = null;
         $saved = false;
+
         try {
             try {
                 $draft = $request->draft();
                 $upload = $request->file('poster');
+
                 if ($upload instanceof UploadedFile) {
                     $newPosterKey = $posters->handle($upload);
                     $draft['poster'] = ['key' => $newPosterKey, 'alt' => $request->string('poster_alt')->toString(), 'caption' => $request->filled('poster_caption') ? $request->string('poster_caption')->toString() : null];
                 }
+
                 $save->handle($event, $request->integer('version'), $request->string('fingerprint')->toString(), EventPublicationDraftData::fromValidated($draft));
                 $saved = true;
             } finally {

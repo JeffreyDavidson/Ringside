@@ -71,10 +71,10 @@ describe('Event Activation Action Integration', function () {
                 name: 'Test Event',
                 date: null,
                 venue: null,
-                preview: 'A test event'
+                preview: 'A test event',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->name)->toBe('Test Event')
@@ -93,10 +93,10 @@ describe('Event Activation Action Integration', function () {
                 name: 'Scheduled Event',
                 date: $scheduledDate,
                 venue: $venue,
-                preview: 'A scheduled event'
+                preview: 'A scheduled event',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->name)->toBe('Scheduled Event')
@@ -116,10 +116,10 @@ describe('Event Activation Action Integration', function () {
                 name: 'Past Event',
                 date: $pastDate,
                 venue: $venue,
-                preview: 'An event that happened'
+                preview: 'An event that happened',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->status)->not->toBe(EventStatus::Unscheduled)
@@ -133,10 +133,10 @@ describe('Event Activation Action Integration', function () {
                 name: 'No Venue Event',
                 date: Carbon::now()->addWeeks(2),
                 venue: null,
-                preview: 'Event without venue'
+                preview: 'Event without venue',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->status)->not->toBe(EventStatus::Unscheduled)
@@ -156,7 +156,7 @@ describe('Event Activation Action Integration', function () {
                 name: 'Scheduled Event',
                 date: $scheduledDate,
                 venue: $venue,
-                preview: 'Now scheduled'
+                preview: 'Now scheduled',
             );
 
             resolve(UpdateAction::class)->handle($event, $eventData);
@@ -182,7 +182,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $newDate,
                 venue: $venue,
-                preview: $event->preview
+                preview: $event->preview,
             );
 
             resolve(UpdateAction::class)->handle($event, $eventData);
@@ -203,7 +203,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $event->date,
                 venue: $newVenue,
-                preview: $event->preview
+                preview: $event->preview,
             );
 
             resolve(UpdateAction::class)->handle($event, $eventData);
@@ -223,7 +223,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $event->date,
                 venue: null,
-                preview: $event->preview
+                preview: $event->preview,
             );
 
             resolve(UpdateAction::class)->handle($event, $eventData);
@@ -243,7 +243,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: null,
                 venue: null,
-                preview: 'Unscheduled again'
+                preview: 'Unscheduled again',
             );
 
             resolve(UpdateAction::class)->handle($event, $eventData);
@@ -309,9 +309,9 @@ describe('Event Activation Action Integration', function () {
                 name: 'Lifecycle Event',
                 date: null,
                 venue: null,
-                preview: 'Draft event'
+                preview: 'Draft event',
             );
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             expect($event->status)->toBe(EventStatus::Unscheduled);
 
             // Schedule the event
@@ -320,7 +320,7 @@ describe('Event Activation Action Integration', function () {
                 name: 'Scheduled Lifecycle Event',
                 date: $scheduledDate,
                 venue: $venue,
-                preview: 'Scheduled event'
+                preview: 'Scheduled event',
             );
             resolve(UpdateAction::class)->handle($event, $updateData);
 
@@ -333,7 +333,7 @@ describe('Event Activation Action Integration', function () {
                 name: 'Final Event Name',
                 date: $scheduledDate,
                 venue: $venue,
-                preview: 'Updated preview'
+                preview: 'Updated preview',
             );
             resolve(UpdateAction::class)->handle($event, $finalUpdateData);
 
@@ -362,18 +362,18 @@ describe('Event Activation Action Integration', function () {
                 name: 'Event One',
                 date: $date1,
                 venue: $venue,
-                preview: 'First event'
+                preview: 'First event',
             );
 
             $event2Data = new EventData(
                 name: 'Event Two',
                 date: $date2,
                 venue: $venue,
-                preview: 'Second event'
+                preview: 'Second event',
             );
 
-            $event1 = resolve(CreateAction::class)->handle($event1Data);
-            $event2 = resolve(CreateAction::class)->handle($event2Data);
+            $event1 = resolve(CreateAction::class)->handle($event1Data, null);
+            $event2 = resolve(CreateAction::class)->handle($event2Data, null);
 
             expect($event1->venue_id)->toBe($venue->id)
                 ->and($event2->venue_id)->toBe($venue->id)
@@ -394,9 +394,9 @@ describe('Event Activation Action Integration', function () {
                 name: 'Venue Change Event',
                 date: Carbon::now()->addMonths(2),
                 venue: $venue1,
-                preview: 'Initial venue'
+                preview: 'Initial venue',
             );
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             expect($event->venue_id)->toBe($venue1->id);
 
             // Change to second venue
@@ -404,7 +404,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $event->date,
                 venue: $venue2,
-                preview: 'Changed venue'
+                preview: 'Changed venue',
             );
             resolve(UpdateAction::class)->handle($event, $updateData);
 
@@ -418,7 +418,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $event->date,
                 venue: null,
-                preview: 'No venue'
+                preview: 'No venue',
             );
             resolve(UpdateAction::class)->handle($event, $finalUpdateData);
 
@@ -439,9 +439,9 @@ describe('Event Activation Action Integration', function () {
                 name: 'Timing Event',
                 date: $futureDate,
                 venue: $venue,
-                preview: 'Future event'
+                preview: 'Future event',
             );
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             expect($event->status)->toBe(EventStatus::Scheduled)->not->toBe(EventStatus::Past);
 
             // Change to past date
@@ -449,7 +449,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $pastDate,
                 venue: $venue,
-                preview: 'Past event'
+                preview: 'Past event',
             );
             resolve(UpdateAction::class)->handle($event, $updateData);
 
@@ -468,7 +468,7 @@ describe('Event Activation Action Integration', function () {
                 name: 'Updated Event Name',
                 date: $event->date,
                 venue: $venue,
-                preview: 'Updated preview'
+                preview: 'Updated preview',
             );
 
             resolve(UpdateAction::class)->handle($event, $updateData);
@@ -495,7 +495,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $event->date,
                 venue: $venue2,
-                preview: $event->preview
+                preview: $event->preview,
             );
             resolve(UpdateAction::class)->handle($event, $updateData1);
             expect(freshModel($event)->venue_id)->toBe($venue2->id);
@@ -505,7 +505,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $event->date,
                 venue: $venue3,
-                preview: $event->preview
+                preview: $event->preview,
             );
             resolve(UpdateAction::class)->handle($event, $updateData2);
             expect(freshModel($event)->venue_id)->toBe($venue3->id);
@@ -525,10 +525,10 @@ describe('Event Activation Action Integration', function () {
                 name: 'Minimal Event',
                 date: null,
                 venue: null,
-                preview: null
+                preview: null,
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->name)->toBe('Minimal Event')
@@ -544,10 +544,10 @@ describe('Event Activation Action Integration', function () {
                 name: 'Date Only Event',
                 date: Carbon::now()->addMonths(1),
                 venue: null,
-                preview: 'Date but no venue'
+                preview: 'Date but no venue',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->status)->not->toBe(EventStatus::Unscheduled)
                 ->and($event->venue_id)->toBeNull()
@@ -561,10 +561,10 @@ describe('Event Activation Action Integration', function () {
                 name: 'Consistency Event',
                 date: Carbon::now()->addWeeks(4),
                 venue: $venue,
-                preview: 'Consistency test'
+                preview: 'Consistency test',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             $originalState = [
                 'name' => $event->name,
                 'date' => requiredDate($event->date),
@@ -610,9 +610,9 @@ describe('Event Activation Action Integration', function () {
                 name: 'Timezone Event',
                 date: $futureDate,
                 venue: $venue,
-                preview: 'Future event'
+                preview: 'Future event',
             );
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             expect($event->status)->toBe(EventStatus::Scheduled);
 
             // Update to past
@@ -620,7 +620,7 @@ describe('Event Activation Action Integration', function () {
                 name: $event->name,
                 date: $pastDate,
                 venue: $venue,
-                preview: 'Past event'
+                preview: 'Past event',
             );
             resolve(UpdateAction::class)->handle($event, $updateData);
 

@@ -33,6 +33,7 @@ use App\Exceptions\BaseBusinessException;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -90,9 +91,9 @@ it('rechecks standalone assignments and refuses a non-final title stake', functi
     $world = tournamentFixture();
     $match = bookTournamentNode($world, $world['tournament']->nodes()->firstOrFail());
     $third = Wrestler::factory()->employed()->for($world['promotion'])->create();
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$third]), 1))->toThrow(TournamentException::class);
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$third]), 1)))->toThrow(TournamentException::class);
     $title = Title::factory()->active()->for($world['promotion'])->create();
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title])))->toThrow(TournamentException::class)
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title]))))->toThrow(TournamentException::class)
         ->and($match->competitors()->count())->toBe(2)
         ->and($match->titles()->count())->toBe(0);
 });
@@ -236,10 +237,12 @@ it('keeps final title stakes when an ordinary match edit is valid', function ():
 it('rechecks chronology when editing the name of a same-card event', function (): void {
     $world = tournamentFixture();
     $t = $world['tournament'];
+
     foreach ($t->nodes()->get() as $node) {
         $match = bookTournamentNode($world, $node);
         recordTournamentWinner($match, $t);
     }
+
     resolve(UpdateAction::class)->handle($world['event'], new EventData('Tournament night', $world['event']->date, null, null));
     expect($world['event']->refresh()->name)->toBe('Tournament night')->and($t->refresh()->status)->toBe(TournamentStatus::Completed);
 });
@@ -253,28 +256,35 @@ it('rejects forged low-level tournament booking contexts atomically', function (
     $first = Wrestler::query()->findOrFail($entries->sole('seed', 1)->competitor_id);
     $second = Wrestler::query()->findOrFail($entries->sole('seed', 4)->competitor_id);
     $titles = new Collection;
+
     if ($case === 'unresolved') {
         $node = $t->nodes()->where('round', 2)->firstOrFail();
     }
+
     if ($case === 'withdrawn') {
         $entries->sole('seed', 1)->forceFill(['withdrawn' => true])->save();
     }
+
     if ($case === 'other entrants') {
         $second = Wrestler::factory()->employed()->for($world['promotion'])->create();
     }
+
     if ($case === 'nonfinal title') {
         $titles->push(Title::factory()->active()->for($world['promotion'])->create());
     }
+
     if ($case === 'foreign tournament') {
         $event = Event::factory()->for(Promotion::factory()->create())->create(['date' => now()->subHour()]);
         $first = Wrestler::factory()->employed()->for($event->promotion()->firstOrFail())->create();
         $second = Wrestler::factory()->employed()->for($event->promotion()->firstOrFail())->create();
         $world['referees'] = Referee::factory()->employed()->for($event->promotion()->firstOrFail())->count(1)->create();
     }
+
     if ($case === 'conflicting retry') {
         bookTournamentNode($world, $node);
         $event = Event::factory()->for($world['promotion'])->create(['date' => now()->addWeek()]);
     }
+
     $version = $t->refresh()->version;
     $data = new EventMatchData(MatchType::Singles, $world['referees'], $titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), null);
     expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, administrator(), $node, $version))->toThrow($case === 'foreign tournament' ? RecordChangedException::class : TournamentException::class)
@@ -301,6 +311,7 @@ it('keeps chronology intact while a multi-event eight-slot bracket is renamed', 
     $second = Event::factory()->for($world['promotion'])->create(['date' => now()->subMinutes(55)]);
     $semis = Event::factory()->for($world['promotion'])->create(['date' => now()->subMinutes(30)]);
     $final = Event::factory()->for($world['promotion'])->create(['date' => now()->subMinutes(15)]);
+
     foreach ($t->nodes()->get() as $node) {
         $event = match ($node->round) {
             1 => $node->position <= 2 ? $world['event'] : $second,2 => $semis,3 => $final,default => throw new RuntimeException('Unexpected round')
@@ -308,6 +319,7 @@ it('keeps chronology intact while a multi-event eight-slot bracket is renamed', 
         $match = resolve(BookTournamentMatchAction::class)->handle($node, $t->refresh()->version, new TournamentBookingData($event, $world['referees']), administrator());
         recordTournamentWinner($match, $t);
     }
+
     resolve(UpdateAction::class)->handle($world['event'], new EventData('Qualification night', $world['event']->date, null, null));
     expect($world['event']->refresh()->name)->toBe('Qualification night')->and($t->refresh()->status)->toBe(TournamentStatus::Completed);
 });

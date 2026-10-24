@@ -150,6 +150,7 @@ describe('store', function (): void {
             'email' => $user->email,
             'password' => 'secret',
         ];
+
         foreach (range(1, 5) as $attempt) {
             from(route('login'))->post(route('login'), [
                 ...$credentials,
@@ -178,6 +179,7 @@ describe('store', function (): void {
         Event::fake([Lockout::class]);
         $user = User::factory()
             ->create(['status' => UserStatus::Active]);
+
         foreach (range(1, 4) as $attempt) {
             from(route('login'))->post(route('login'), [
                 'email' => $user->email,
@@ -206,12 +208,14 @@ describe('store', function (): void {
         freezeTime();
         $user = User::factory()
             ->create(['status' => UserStatus::Active]);
+
         foreach (range(1, 5) as $attempt) {
             from(route('login'))->post(route('login'), [
                 'email' => $user->email,
                 'password' => 'wrong-password',
             ]);
         }
+
         travel(61)->seconds();
 
         $requestData = [

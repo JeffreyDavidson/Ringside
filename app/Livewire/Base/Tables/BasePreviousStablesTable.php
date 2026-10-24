@@ -9,6 +9,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * @template TModel of Model
@@ -19,7 +20,7 @@ abstract class BasePreviousStablesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'stables';
 
     protected string $databaseTableName;

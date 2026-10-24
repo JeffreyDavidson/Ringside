@@ -46,19 +46,23 @@ class PublicEventSourceService
         $people = $this->names($event, Wrestler::class, $assignments->where('competitor_type', 'wrestler'))
             ->merge($this->names($event, TagTeam::class, $assignments->where('competitor_type', 'tag_team')));
         $rows = [];
+
         foreach ($matches as $match) {
             $sides = $match->sides->mapWithKeys(fn (MatchSide $side): array => [$side->id => $side->competitors->sortBy('id')
                 ->map(fn (MatchCompetitor $assignment): string => $people->get($assignment->competitor_type.':'.$assignment->competitor_id, ''))->join(' & ')]);
             $complete = $match->sides->count() >= 2 && ! $match->sides->contains(fn (MatchSide $side): bool => $side->competitors->isEmpty()
                 || $side->competitors->contains(fn (MatchCompetitor $assignment): bool => ! $people->has($assignment->competitor_type.':'.$assignment->competitor_id)));
             $winner = null;
+
             if ($match->match_finish?->requiresWinningSide()) {
                 $winner = $match->winning_side_id === null ? '' : $sides->get($match->winning_side_id, '');
             }
+
             $rows[] = ['id' => $match->id, 'label' => $complete ? $sides->join(' vs ') : '', 'type' => $match->match_type->label(),
                 'stipulation' => $match->matchStipulation?->name, 'titles' => $match->titles->map(fn (Title $title): string => $title->name)->join(', '),
                 'finish' => $match->match_finish?->label(), 'winner' => $winner];
         }
+
         // A deleted venue still publishes its name, address and time zone, so a page released before the deletion keeps its card.
         $venue = $event->venue;
         $zone = $venue->timezone ?? $event->promotion->timezone ?? config()->string('app.timezone');

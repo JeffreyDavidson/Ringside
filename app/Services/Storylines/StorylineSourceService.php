@@ -39,25 +39,34 @@ class StorylineSourceService
         if ($source->eventId === null) {
             return ['context' => [], 'fingerprint' => hash('sha256', (string) $source->targetOn), 'warnings' => []];
         }
+
         $event = $loadedEvent ?? $this->events->get($promotionId, $source->eventId);
+
         if (! $event instanceof Event) {
             return null;
         }
+
         $context = ['event_id' => $event->id, 'event_name' => $event->name, 'event_date' => $event->date?->toIso8601String(),
             'event_deleted' => $event->trashed(), 'event_timezone' => $event->promotion?->timezone];
         $warnings = [];
+
         if ($event->trashed()) {
             $warnings[] = StorylineSourceWarning::DeletedSource;
         }
+
         if ($event->date === null) {
             $warnings[] = StorylineSourceWarning::UndatedSource;
         }
+
         $key = null;
+
         if ($source->matchId !== null) {
             $match = $loadedMatch ?? $this->matches->get($event->id, $source->matchId);
+
             if (! $match instanceof EventMatch) {
                 return null;
             }
+
             $context['match_id'] = $match->id;
             $context['match_label'] = __('storylines.match_number', ['number' => $match->match_number]);
             $context['match_result'] = $match->match_finish?->value;
@@ -67,27 +76,34 @@ class StorylineSourceService
             $context['title_ids'] = $match->titles->sortBy('id')->modelKeys();
             $context['match_deleted'] = $match->trashed();
             $context['competitors'] = $match->competitors->sortBy('id')->map(fn (MatchCompetitor $competitor): array => [$competitor->competitor_type, $competitor->competitor_id, $competitor->match_side_id])->values()->all();
+
             if ($match->trashed()) {
                 $warnings[] = StorylineSourceWarning::DeletedSource;
             }
+
             $key = "match:{$match->id}";
         }
+
         if ($source->segmentId !== null) {
             $segment = collect($event->pack?->content['segments'] ?? [])->firstWhere('id', $source->segmentId);
             $key = "segment:{$source->segmentId}";
             $context['segment_id'] = $source->segmentId;
             $context['segment_label'] = $segment['label'] ?? null;
             $context['segment_anchor'] = $segment['after_match_id'] ?? null;
+
             if ($segment === null) {
                 $warnings[] = StorylineSourceWarning::RemovedSegment;
             }
+
             if ($segment !== null && $segment['after_match_id'] !== null && ! ($event->relationLoaded('matches') ? $event->matches->contains('id', $segment['after_match_id']) : $this->placements->get($event, $segment['after_match_id']))) {
                 $warnings[] = StorylineSourceWarning::UnplacedSegment;
             }
         }
+
         $item = $key === null ? null : collect($event->liveRun?->content['items'] ?? [])->firstWhere('key', $key);
         $context['live_state'] = $item['state'] ?? null;
         $context['live_label'] = $item['label'] ?? null;
+
         if (($item['state'] ?? null) === LiveItemStatus::Skipped->value) {
             $warnings[] = StorylineSourceWarning::SkippedSource;
         }

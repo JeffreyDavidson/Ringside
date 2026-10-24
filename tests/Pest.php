@@ -56,6 +56,7 @@ pest()
         'Integration/Collections',
         'Integration/Concurrency',
         'Integration/Config',
+        'Integration/Console',
         'Integration/Database',
         'Integration/Enums',
         'Integration/Exceptions',
@@ -248,6 +249,7 @@ function freshModel(?Model $model): Model
     }
 
     $freshModel = $model->fresh();
+
     if ($freshModel === null) {
         throw new RuntimeException('Expected the model to exist when reloading it.');
     }

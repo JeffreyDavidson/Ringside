@@ -1,14 +1,26 @@
 /**
- * Searchable, server-backed select for roster records (wrestlers, tag teams, referees).
+ * Searchable, server-backed select for roster records (wrestlers, tag teams, referees) and other long option lists.
  *
  * Alpine UI's combobox provides the keyboard handling and ARIA wiring. This component keeps the
  * chosen ids in sync with a Livewire property (deferred, like wire:model) and loads at most
  * `limit` matching options from the server instead of embedding the whole roster in the page.
  *
+ * `searchMethod` names the Livewire method that answers `(kind, term)` with `{ id, name }` options; it is
+ * `searchRoster` unless a field searches something else (events, venues); such a method takes only the term, so
+ * those fields pass no `kind`.
+ *
  * `messages` holds the translated strings the component shows or announces: `searching`, `empty`,
  * `capped`, `one`, `many` (with a `:count` placeholder), `remove` (with `:name`) and `unknown`.
  */
-export default function rosterCombobox({ path, kind, multiple, labels, limit, messages }) {
+export default function rosterCombobox({
+    path,
+    kind,
+    searchMethod = 'searchRoster',
+    multiple,
+    labels,
+    limit,
+    messages,
+}) {
     let root = null;
     let stopWatchingFocus = () => {};
 
@@ -90,7 +102,8 @@ export default function rosterCombobox({ path, kind, multiple, labels, limit, me
                 return Array.isArray(value) ? [...value] : [];
             }
 
-            return value ?? null;
+            // A form may start an unchosen single field at 0; no record has that id.
+            return value || null;
         },
 
         writeLivewireValue(value) {
@@ -209,13 +222,26 @@ export default function rosterCombobox({ path, kind, multiple, labels, limit, me
             this.loading = true;
         },
 
+        /** Inside a short modal the open list would hang below the scrolling body; bring it fully into view. */
+        keepListInView() {
+            this.$nextTick(() =>
+                window.requestAnimationFrame(() => {
+                    const list = root.querySelector('[role="listbox"]');
+
+                    if (list?.checkVisibility()) {
+                        list.scrollIntoView({ block: 'nearest' });
+                    }
+                }),
+            );
+        },
+
         async search(term) {
             const ticket = ++this.ticket;
             this.term = term;
             this.loading = true;
 
             try {
-                const results = await this.$wire.searchRoster(kind, term);
+                const results = await this.$wire.$call(searchMethod, ...(kind === null ? [term] : [kind, term]));
 
                 // The component may have been removed or replaced, or a newer search started.
                 if (ticket !== this.ticket || !Array.isArray(results)) {
@@ -227,6 +253,7 @@ export default function rosterCombobox({ path, kind, multiple, labels, limit, me
                 });
                 this.options = results;
                 this.loaded = true;
+                this.keepListInView();
             } finally {
                 if (ticket === this.ticket) {
                     this.loading = false;

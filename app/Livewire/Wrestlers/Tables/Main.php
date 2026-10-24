@@ -18,32 +18,33 @@ use App\Livewire\Table\Filter;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Override;
 
 /** @extends BaseTable<Wrestler> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = Wrestler::class;
 
-    #[\Override]
+    #[Override]
     protected ?string $indexView = 'livewire.wrestlers.tables.main';
 
-    #[\Override]
+    #[Override]
     protected string $actionsView = 'components.tables.columns.wrestler-actions';
 
-    #[\Override]
+    #[Override]
     protected string $actionsRowVariable = 'wrestler';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'wrestlers';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'wrestlers';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'wrestlers';
 
     /** @return WrestlerBuilder<Wrestler> */
@@ -55,7 +56,7 @@ class Main extends BaseTable
             ->oldest('id');
     }
 
-    #[\Override]
+    #[Override]
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists(IndividualBuilder::ROSTER_STATE);
@@ -82,7 +83,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      **/
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

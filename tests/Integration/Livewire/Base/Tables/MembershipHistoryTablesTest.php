@@ -58,6 +58,7 @@ describe('membership history tables', function (): void {
     ): void {
         // Arrange
         $parent = $createParent();
+
         foreach (['Historic Record', 'Former Record'] as $offset => $name) {
             $link(
                 $parent,

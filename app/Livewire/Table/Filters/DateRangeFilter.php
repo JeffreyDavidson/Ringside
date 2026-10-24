@@ -6,6 +6,7 @@ namespace App\Livewire\Table\Filters;
 
 use App\Livewire\Table\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 /** @phpstan-consistent-constructor */
 class DateRangeFilter extends Filter
@@ -59,7 +60,7 @@ class DateRangeFilter extends Filter
      *
      * @param  Builder<*>  $builder
      */
-    #[\Override]
+    #[Override]
     public function apply(Builder $builder, mixed $value): void
     {
         if (! is_array($value)) {

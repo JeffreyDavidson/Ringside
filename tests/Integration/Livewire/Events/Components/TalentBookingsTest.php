@@ -191,9 +191,11 @@ test('the private timeline can reach older agreements beyond the first page', fu
     // Arrange
     $fixture = talentBookingFixture();
     saveTalentFixture($fixture, new TalentBookingData(TalentBookingStatus::Contacted, null, null, 'UTC', 'Correction', false, 'Correction'));
+
     foreach (range(1, 12) as $version) {
         saveTalentFixture($fixture, new TalentBookingData(TalentBookingStatus::Contacted, null, null, 'UTC', "Change {$version}"));
     }
+
     $component = livewire(TalentBookings::class, ['eventId' => $fixture['event']->id]);
 
     // Act

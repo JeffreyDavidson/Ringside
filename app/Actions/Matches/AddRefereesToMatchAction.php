@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Enums\Matches\MatchParticipantKind;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Matches\MatchAssignmentEligibility;
-use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class AddRefereesToMatchAction
 {
@@ -22,11 +21,14 @@ class AddRefereesToMatchAction
         private readonly MatchAssignmentEligibility $assignmentEligibility,
         private readonly RosterBookingEligibility $bookingEligibility,
         private readonly RosterDateAvailability $dateAvailability,
-        private readonly MatchConfigurationRequirements $configurationRequirements,
     ) {}
 
     /**
      * Add referees to an event match.
+     *
+     * Runs inside the caller's transaction: the caller has locked the match and its event set with
+     * MatchSchedulingLock::lockMatchWithEventSet() and checked that every participant belongs to the event's
+     * promotion (MatchConfigurationRequirements::ensureWithinEventPromotion()).
      *
      * This handles the complete referee assignment workflow for matches:
      * - Validates referees are active, employed, and available for officiating
@@ -50,40 +52,15 @@ class AddRefereesToMatchAction
      * - Maintains match integrity and credibility for fans and stakeholders
      * - Enables proper disciplinary actions and match result validation
      *
-     * @param  EventMatch  $eventMatch  The match to add referees to
-     * @param  Collection<int, Referee>  $referees  The referees to assign for officiating
-     */
-    public function handle(EventMatch $eventMatch, Collection $referees): void
-    {
-        $requestedReferees = $referees->unique('id')->values();
-
-        if ($requestedReferees->isEmpty()) {
-            throw EntityNotAvailableException::forMatchAssignment('referees');
-        }
-
-        DB::transaction(function () use ($eventMatch, $requestedReferees): void {
-            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
-            $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
-                $lockedMatch->event()->firstOrFail(),
-                'referees',
-                $requestedReferees->all(),
-            );
-            $this->handleWithinTransaction($lockedMatch, $requestedReferees);
-        }, attempts: 3);
-    }
-
-    /**
-     * Assign referees while the caller owns the match transaction and lock.
-     *
      * @param  Collection<int, Referee>  $referees
      * @param  list<string>  $retainedKeys  Server-derived assignments retained by the locked match update.
      */
-    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $referees, array $retainedKeys = []): void
+    public function handle(EventMatch $lockedMatch, Collection $referees, array $retainedKeys = []): void
     {
         $requestedReferees = $referees->unique('id')->values();
 
         if ($requestedReferees->isEmpty()) {
-            throw EntityNotAvailableException::forMatchAssignment('referees');
+            throw EntityNotAvailableException::forMatchAssignment(MatchParticipantKind::Referee);
         }
 
         $conflictingEventIds = $this->schedulingLock->lockConflictingEventIds($lockedMatch);
@@ -95,9 +72,9 @@ class AddRefereesToMatchAction
             ->get();
 
         if ($lockedReferees->count() !== $requestedReferees->count() || $lockedReferees->contains(
-            fn (Referee $referee): bool => ! $this->bookingEligibility->allows($referee, $event->date)
+            fn (Referee $referee): bool => ! $this->bookingEligibility->allows($referee, $event->date),
         )) {
-            throw EntityNotAvailableException::forMatchAssignment('referees');
+            throw EntityNotAvailableException::forMatchAssignment(MatchParticipantKind::Referee);
         }
 
         $this->assignmentEligibility->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);

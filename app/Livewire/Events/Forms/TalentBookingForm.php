@@ -45,17 +45,27 @@ class TalentBookingForm extends Form
             'form.reason' => ['nullable', 'string', 'max:500'],
         ], ['form.fee.regex' => __('talent-bookings.errors.fee')])->validate();
         $fee = null;
+
         if ($this->fee !== '') {
             $parts = explode('.', $this->fee);
             $fee = (int) $parts[0] * 100 + (int) str_pad($parts[1] ?? '', 2, '0');
         }
+
         $arrival = $this->arrival === '' ? null : PromotionTimeZoneService::parseLocalTime($event->promotion, $this->arrival);
+
         // Keep the stored instant in the repeated hour, just as the event date form does.
         if ($booking?->arrival_at !== null && $this->arrival === $booking->arrival_at->copy()->setTimezone(PromotionTimeZoneService::zoneOf($event->promotion))->format('Y-m-d\\TH:i')) {
             $arrival = $booking->arrival_at;
         }
 
-        return new TalentBookingData(TalentBookingStatus::from($this->status), $fee, $arrival, PromotionTimeZoneService::zoneOf($event->promotion),
-            filled($this->travelNotes) ? $this->travelNotes : null, $attest, filled($this->reason) ? $this->reason : null);
+        return new TalentBookingData(
+            TalentBookingStatus::from($this->status),
+            $fee,
+            $arrival,
+            PromotionTimeZoneService::zoneOf($event->promotion),
+            filled($this->travelNotes) ? $this->travelNotes : null,
+            $attest,
+            filled($this->reason) ? $this->reason : null,
+        );
     }
 }

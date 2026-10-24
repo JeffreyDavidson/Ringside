@@ -32,6 +32,7 @@ class MutateBudgetAction
             $budget = EventBudget::query()->forEventId($event->id)->lockForUpdate()->first();
             $hash = hash('sha256', json_encode([$operation->value, $payload, $reason], JSON_THROW_ON_ERROR));
             $prior = $budget?->revisions()->where('request_key', $requestKey)->first();
+
             if ($prior !== null) {
                 if (! hash_equals($prior->request_hash, $hash)) {
                     throw BudgetException::keyConflict();
@@ -39,9 +40,11 @@ class MutateBudgetAction
 
                 return $budget;
             }
+
             if (($budget->version ?? 0) !== $version) {
                 throw RecordChangedException::changed();
             }
+
             if ($budget === null) {
                 $budget = new EventBudget;
                 $budget->event_id = $event->id;
@@ -50,10 +53,13 @@ class MutateBudgetAction
                 $budget->version = 0;
                 $budget->save();
             }
+
             $result = $change($budget);
+
             if ($result === null) {
                 return $budget;
             }
+
             $budget->version++;
             $budget->save();
             $revision = new EventBudgetRevision;

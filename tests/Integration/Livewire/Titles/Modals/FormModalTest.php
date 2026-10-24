@@ -11,7 +11,6 @@ use App\Lifecycle\Naming\RecordNameLock;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -131,7 +130,8 @@ describe('authorized title form interactions', function () {
         $modal->assertHasNoErrors();
         expect($title->activityPeriods()->count())->toBe(1)
             ->and($title->activityPeriods()->sole()->started_at->toDateString())->toBe('2026-11-15')
-            ->and($title->lifecycleTransitions()->sole()->effective_at->toDateString())->toBe('2026-11-15');
+            ->and($title->lifecycleTransitions()->count())->toBe(2)
+            ->and($title->lifecycleTransitions()->reorder('id', 'desc')->firstOrFail()->effective_at->toDateString())->toBe('2026-11-15');
     });
 
     it('still refuses a new debut date for a title that is already active', function () {
@@ -193,6 +193,7 @@ describe('authorized title form interactions', function () {
         } else {
             $modal->assertHasErrors([$field => $rule]);
         }
+
         expect(Title::query()->doesntExist())->toBeTrue();
     })->with([
         'long name',
@@ -347,15 +348,15 @@ describe('title name races past the form rule', function () {
 
     it('shows a name taken after validation on the name field', function () {
         $failure = NameTakenException::name('Existing Championship Title');
-        app()->instance(CreateAction::class, new class($failure, resolve(DebutAction::class), resolve(RecordNameLock::class), resolve(PromotionContextService::class)) extends CreateAction
+        app()->instance(CreateAction::class, new class($failure, resolve(DebutAction::class), resolve(RecordNameLock::class)) extends CreateAction
         {
-            public function __construct(private readonly NameTakenException $failure, DebutAction $debut, RecordNameLock $nameLock, PromotionContextService $promotionContext)
+            public function __construct(private readonly NameTakenException $failure, DebutAction $debut, RecordNameLock $nameLock)
             {
-                parent::__construct($debut, $nameLock, $promotionContext);
+                parent::__construct($debut, $nameLock);
             }
 
             #[Override]
-            public function handle(TitleData $titleData): never
+            public function handle(TitleData $titleData, ?int $promotionId): never
             {
                 throw $this->failure;
             }

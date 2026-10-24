@@ -15,6 +15,7 @@ use App\Models\Scopes\PromotionContextScope;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use LogicException;
 
 class PromotionContextService
 {
@@ -126,7 +127,7 @@ class PromotionContextService
     public function required(): Promotion
     {
         if (! $this->promotion instanceof Promotion) {
-            throw new \LogicException('No active promotion context has been established.');
+            throw new LogicException('No active promotion context has been established.');
         }
 
         return $this->promotion;

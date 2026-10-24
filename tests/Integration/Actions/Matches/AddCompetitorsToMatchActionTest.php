@@ -30,12 +30,12 @@ test('it adds wrestler competitors to a match', function () {
 
     $addWrestlersAction = Double::for(AddWrestlersToMatchAction::class);
     $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
-    $addWrestlersAction->expects('handleWithinTransaction')->times(2);
+    $addWrestlersAction->expects('handle')->times(2);
 
     instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
     instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
 
-    resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
+    assignWithinLockedMatch($eventMatch, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors));
 
     $addWrestlersAction->verify();
     $addTagTeamsAction->unused();
@@ -56,12 +56,12 @@ test('it adds tag team competitors to a match', function () {
 
     $addWrestlersAction = Double::for(AddWrestlersToMatchAction::class);
     $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
-    $addTagTeamsAction->expects('handleWithinTransaction')->times(2);
+    $addTagTeamsAction->expects('handle')->times(2);
 
     instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
     instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
 
-    resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
+    assignWithinLockedMatch($eventMatch, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors));
 
     $addTagTeamsAction->verify();
     $addWrestlersAction->unused();
@@ -76,7 +76,7 @@ test('it rejects competitor assignments without the required populated sides', f
         ],
     ]));
 
-    expect(fn () => resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors))
+    expect(fn () => assignWithinLockedMatch($eventMatch, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors)))
         ->toThrow(InvalidMatchConfigurationException::class, 'This match requires exactly 2 competitor sides.');
 });
 
@@ -88,7 +88,7 @@ test('it rejects duplicate competitors across match sides', function () {
         ['wrestlers' => [$wrestler]],
     ]));
 
-    expect(fn () => resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors))
+    expect(fn () => assignWithinLockedMatch($eventMatch, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors)))
         ->toThrow(InvalidMatchConfigurationException::class, 'The same competitor cannot compete multiple times in a match.');
 });
 
@@ -97,6 +97,6 @@ test('it enforces individual entrant limits outside form validation', function (
     $wrestlers = Wrestler::factory()->bookable()->count(9)->create();
     $competitors = new MatchSides($wrestlers->map(fn (Wrestler $wrestler): array => ['wrestlers' => [$wrestler]]));
 
-    expect(fn () => resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors))
+    expect(fn () => assignWithinLockedMatch($eventMatch, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors)))
         ->toThrow(InvalidMatchConfigurationException::class, 'This match requires between 10 and 30 competitors.');
 });

@@ -28,6 +28,7 @@ class TournamentBracketService
         /** @var Collection<int, TournamentBoutData> $bouts */
         $bouts = collect();
         $shape = new BracketShape($tournament->capacity);
+
         foreach ($nodes as $node) {
             $feeders = array_map(
                 fn (array $feeder): ?TournamentBoutData => $positions->get("{$feeder[0]}:{$feeder[1]}"),
@@ -42,20 +43,24 @@ class TournamentBracketService
             $winner = null;
             $complete = false;
             $bye = false;
+
             if ($resolved && ($first === null || $second === null)) {
                 $winner = $first ?? $second;
                 $complete = true;
                 $bye = $winner !== null;
             }
+
             if ($node->walkover_entry_id !== null) {
                 $winner = $entries->firstWhere('id', $node->walkover_entry_id);
                 $complete = true;
             }
+
             if ($link !== null && ! $link->match->trashed() && $link->match->match_finish?->requiresWinningSide()) {
                 $competitor = $link->match->winningSide?->competitors->first();
                 $winner = $competitor instanceof MatchCompetitor ? $entries->first(fn (TournamentEntry $entry): bool => $entry->competitor_type === $competitor->competitor_type && $entry->competitor_id === $competitor->competitor_id) : null;
                 $complete = $winner !== null;
             }
+
             $bout = new TournamentBoutData($node, $first, $second, (bool) $resolved, $link, $winner, $complete, $bye);
             $positions->put($node->round.':'.$node->position, $bout);
             $bouts->put($node->id, $bout);

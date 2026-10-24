@@ -45,12 +45,14 @@ test('production save races with live preparation or review without changing an 
         $data = resolve(EventPackViewModel::class)->data($event);
         $input = $fixture['production'];
         $version = 1;
+
         if ($operation === 'review') {
             resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
             $input['cues'][0]['instruction'] = 'Adoptable version two';
             resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false, administrator());
             $version = 2;
         }
+
         $input['cues'][0]['instruction'] = 'Next plan only';
         $save = ['production_save_event_id' => $event->id, 'user_id' => $userId, 'version' => $version,
             'fingerprint' => $data['card']['fingerprint'], 'production_json' => json_encode($input, JSON_THROW_ON_ERROR)];
@@ -66,6 +68,7 @@ test('production save races with live preparation or review without changing an 
             ->and(deadlocksResolvedSince($deadlocks))->toBe(0)
             ->and($event->pack()->firstOrFail()->version)->toBe($version + 1);
         $run = EventLiveRun::query()->where('event_id', $event->id)->first();
+
         if ($run !== null) {
             expect(data_get($run->content, 'items.0.cues.0.instruction'))->not->toBe('Next plan only')
                 ->and($run->pack_version)->toBeLessThan($version + 1);

@@ -14,13 +14,13 @@ return new class extends Migration
         match ($connection->getDriverName()) {
             'sqlite', 'pgsql', 'sqlsrv' => $connection->statement(
                 'CREATE UNIQUE INDEX tag_teams_employments_one_open_period_unique '
-                .'ON tag_teams_employments (tag_team_id) WHERE ended_at IS NULL'
+                .'ON tag_teams_employments (tag_team_id) WHERE ended_at IS NULL',
             ),
             'mysql', 'mariadb' => $connection->statement(
                 'ALTER TABLE tag_teams_employments '
                 .'ADD COLUMN current_tag_team_id BIGINT UNSIGNED '
                 .'GENERATED ALWAYS AS (CASE WHEN ended_at IS NULL THEN tag_team_id ELSE NULL END) STORED, '
-                .'ADD UNIQUE INDEX tag_teams_employments_one_open_period_unique (current_tag_team_id)'
+                .'ADD UNIQUE INDEX tag_teams_employments_one_open_period_unique (current_tag_team_id)',
             ),
             default => throw new LogicException('The database driver does not support open employment period constraints.'),
         };

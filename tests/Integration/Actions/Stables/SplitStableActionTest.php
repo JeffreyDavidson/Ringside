@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Stables\CreateAction;
 use App\Actions\Stables\RemoveStableMembersAction;
 use App\Actions\Stables\SplitStableAction;
@@ -11,6 +10,7 @@ use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
@@ -102,7 +102,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             $originalTransition = $originalStable->lifecycleTransitions()->sole();
@@ -137,7 +137,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify new stable was created
@@ -169,7 +169,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify exact members were transferred
@@ -181,6 +181,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify members are no longer in original stable
             $refreshedOriginal = freshModel($originalStable);
+
             foreach ($transferWrestlerIds as $wrestlerId) {
                 expect($refreshedOriginal->currentWrestlers()->where('wrestlers.id', $wrestlerId)->exists())->toBeFalse();
             }
@@ -200,7 +201,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify new stable memberships have correct join dates
@@ -229,6 +230,7 @@ describe('SplitStableAction Integration Tests', function () {
             // Verify original stable memberships were ended properly
             // Check that transferred wrestlers are no longer current members
             $refreshedOriginal = freshModel($originalStable);
+
             foreach ($transferWrestlers as $wrestler) {
                 expect($refreshedOriginal->currentWrestlers()->where('wrestlers.id', $wrestler->id)->exists())->toBeFalse();
             }
@@ -248,7 +250,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify all members are preserved across both stables
@@ -276,7 +278,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForSplit,
-                $splitDate
+                $splitDate,
             );
 
             // Verify new stable has only wrestlers
@@ -302,7 +304,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForSplit,
-                $splitDate
+                $splitDate,
             );
 
             // Verify new stable has only tag teams
@@ -324,7 +326,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify new stable has all transferred member types
@@ -350,7 +352,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForSplit,
-                $splitDate
+                $splitDate,
             ))->toThrow(CannotBeSplitException::class);
 
             // Verify original stable unchanged
@@ -373,7 +375,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForSplit,
-                $splitDate
+                $splitDate,
             ))->toThrow(CannotBeSplitException::class);
 
             // Verify original stable still has all members (transaction rolled back)
@@ -447,7 +449,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForSplit,
-                $splitDate
+                $splitDate,
             ))->toThrow(CannotBeSplitException::class)
                 ->and(Stable::query()->where('name', $newStableName)->exists())->toBeFalse();
         });
@@ -465,7 +467,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $retiredStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             ))->toThrow(Exception::class);
         });
     });
@@ -481,7 +483,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify new stable has correct properties
@@ -630,7 +632,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify stable count increased by one
@@ -662,14 +664,14 @@ describe('SplitStableAction Integration Tests', function () {
                 resolve(RemoveStableMembersAction::class),
                 resolve(StableRestructuringEligibility::class),
                 resolve(StableNameLock::class),
-                resolve(RecordLifecycleTransitionAction::class),
+                resolve(LifecycleTransitionRecorder::class),
             );
 
             expect(fn () => $action->handle(
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             ))
                 ->toThrow(LogicException::class, 'Stable creation failed.')
                 ->and(Stable::count())->toBe($initialStableCount)
@@ -695,7 +697,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify both stables meet minimum requirements
@@ -718,7 +720,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify all transferred members have proper employment status
@@ -750,7 +752,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify all members still exist in the system
@@ -773,7 +775,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $originalStable,
                 $newStableName,
                 $membersForNewStable,
-                $splitDate
+                $splitDate,
             );
 
             // Verify new stable is active

@@ -7,6 +7,7 @@ namespace App\Livewire\Table\Columns;
 use App\Livewire\Table\Column;
 use Closure;
 use LogicException;
+use Override;
 use Stringable;
 
 class ArrayColumn extends Column
@@ -48,7 +49,7 @@ class ArrayColumn extends Column
                 }
 
                 return static::linkHtml($linkTitle, $linkLocation);
-            }
+            },
         );
     }
 
@@ -66,7 +67,7 @@ class ArrayColumn extends Column
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function resolveValue(mixed $row): string
     {
         $items = $this->dataCallback instanceof Closure
@@ -95,7 +96,7 @@ class ArrayColumn extends Column
         return e((string) $item);
     }
 
-    #[\Override]
+    #[Override]
     public function isHtml(): bool
     {
         return true;

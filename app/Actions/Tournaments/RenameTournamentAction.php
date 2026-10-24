@@ -18,13 +18,25 @@ class RenameTournamentAction
     {
         DB::transaction(function () use ($tournament, $version, $name, $description, $actor): void {
             $tournament = $this->locks->lock($tournament->id);
+
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
-            $tournament->fill(['name' => mb_trim($name), 'description' => $description]);
-            $tournament->version++;
-            $tournament->save();
-            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'name' => $name, 'description' => $description])->log('tournament.renamed');
+
+            $tournament->increment('version', extra: [
+                'name' => mb_trim($name),
+                'description' => $description,
+            ]);
+
+            activity('tournaments')
+                ->causedBy($actor)
+                ->withProperties([
+                    'promotion_id' => $tournament->promotion_id,
+                    'tournament_id' => $tournament->id,
+                    'name' => $name,
+                    'description' => $description,
+                ])
+                ->log('tournament.renamed');
         }, attempts: 3);
     }
 }

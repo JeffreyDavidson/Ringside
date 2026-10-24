@@ -6,6 +6,7 @@ namespace App\Actions\Lifecycle;
 
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Models\Contracts\HasActivityPeriods;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Support\ModelKey;
@@ -16,7 +17,7 @@ use LogicException;
 
 class StartActivityPeriodAction
 {
-    public function __construct(private readonly RecordLifecycleTransitionAction $recordLifecycleTransition) {}
+    public function __construct(private readonly LifecycleTransitionRecorder $transitionRecorder) {}
 
     /**
      * Open an activity period, recording the given transition (when any) in the same transaction.
@@ -75,6 +76,6 @@ class StartActivityPeriodAction
             return;
         }
 
-        $this->recordLifecycleTransition->handle($activeable, LifecycleDimension::Activity, $transition, $date, $context);
+        $this->transitionRecorder->record($activeable, LifecycleDimension::Activity, $transition, $date, $context);
     }
 }

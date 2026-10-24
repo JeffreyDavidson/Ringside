@@ -8,11 +8,12 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 /** @extends DataTableComponent<User> */
 class UnsearchableDataTableComponent extends DataTableComponent
 {
-    #[\Override]
+    #[Override]
     protected function configure(): void
     {
         $this->setPerPageAccepted([25, 50]);

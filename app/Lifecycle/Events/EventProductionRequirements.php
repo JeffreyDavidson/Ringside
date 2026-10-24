@@ -113,16 +113,20 @@ final readonly class EventProductionRequirements
     {
         $old = collect($plan->assignments())->keyBy('id');
         $assignments = [];
+
         foreach ($entries as $index => $entry) {
             $contact = $contacts->get((int) $entry['contact_id']);
             $retained = $old->get($entry['id']);
             $sameContact = $retained !== null && $retained['contact_id'] === (int) $entry['contact_id'];
+
             if ($contact === null || ($contact->archived_at !== null && (! $sameContact || ! $retained['active']))) {
                 throw ValidationException::withMessages(["assignments.{$index}.contact_id" => __('production.invalid_contact')]);
             }
+
             if (($entry['call_at'] ?? null) !== null && ! $this->timing->wallTime($entry['call_at'], $entry['timezone'], $entry['offset'] ?? null) instanceof Carbon) {
                 throw ValidationException::withMessages(["assignments.{$index}.call_at" => __('production.invalid_assignment')]);
             }
+
             $assignments[] = ['id' => $entry['id'], 'contact_id' => $contact->id,
                 'name' => $sameContact && ! ($entry['refresh_name'] ?? false) ? $retained['name'] : $contact->name,
                 'role' => $entry['role'], 'station' => $entry['station'] ?? null, 'call_at' => $entry['call_at'] ?? null,
@@ -130,6 +134,7 @@ final readonly class EventProductionRequirements
                 'setup' => $entry['setup'] ?? null, 'during' => $entry['during'] ?? null, 'strike' => $entry['strike'] ?? null, 'active' => true];
             $old->forget($entry['id']);
         }
+
         foreach ($old as $entry) {
             $assignments[] = [...$entry, 'active' => false];
         }
@@ -154,21 +159,27 @@ final readonly class EventProductionRequirements
         $owners = collect($assignments)->keyBy('id');
         $cues = [];
         $counts = [];
+
         foreach ($entries as $index => $cue) {
             if (! in_array($cue['item_key'], $itemKeys, true)) {
                 throw ValidationException::withMessages(["cues.{$index}.item_key" => __('production.invalid_cue')]);
             }
+
             $counts[$cue['item_key']] = ($counts[$cue['item_key']] ?? 0) + 1;
             $owner = isset($cue['owner_id']) ? $owners->get($cue['owner_id']) : null;
+
             if ($counts[$cue['item_key']] > 20 || (isset($cue['owner_id']) && $owner === null)) {
                 throw ValidationException::withMessages(["cues.{$index}.owner_id" => __('production.invalid_cue')]);
             }
+
             $cues[] = ['id' => $cue['id'], 'item_key' => $cue['item_key'], 'subject' => $cue['subject'],
                 'trigger' => $cue['trigger'], 'instruction' => $cue['instruction'], 'role' => $cue['role'] ?? null,
                 'owner_id' => $cue['owner_id'] ?? null, 'owner_name' => $owner['name'] ?? null, 'owner_station' => $owner['station'] ?? null, 'owner_role' => $owner['role'] ?? null, 'owner_contact_id' => $owner['contact_id'] ?? null,
                 'pronunciation' => $cue['pronunciation'] ?? null, 'track' => $cue['track'] ?? null, 'url' => $cue['url'] ?? null];
         }
+
         $submitted = array_column($cues, 'id');
+
         foreach ($plan->cues() as $cue) {
             if (! in_array($cue['item_key'], $itemKeys, true) && ! in_array($cue['id'], $submitted, true)) {
                 $cues[] = $cue;

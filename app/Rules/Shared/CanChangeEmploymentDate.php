@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Rules\Shared;
 
-use App\Builders\Lifecycle\LifecyclePeriodBuilder;
-use App\Models\Contracts\Employable;
+use App\Lifecycle\Roster\EmploymentDateRequirements;
 use App\Models\Lifecycle\Employment;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Closure;
 use DateTimeInterface;
@@ -20,10 +23,10 @@ use Illuminate\Support\Carbon;
  */
 class CanChangeEmploymentDate implements ValidationRule
 {
-    /**
-     * @param  (Model&Employable<*>)|null  $model
-     */
-    public function __construct(private readonly (Model&Employable)|null $model) {}
+    public function __construct(
+        private readonly Manager|Referee|TagTeam|Wrestler|null $model,
+        private readonly EmploymentDateRequirements $requirements = new EmploymentDateRequirements,
+    ) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -48,28 +51,14 @@ class CanChangeEmploymentDate implements ValidationRule
         $currentEmployment = $this->model->currentEmployment()->first();
 
         if ($currentEmployment === null) {
-            // A scheduled employment can move to today or later; an earlier day would start it retroactively.
-            $isBeforeToday = $this->model->soleScheduledEmployment() instanceof Employment
-                && PromotionTimeZoneService::toLocalTime($promotion, $targetDate)->lt(PromotionTimeZoneService::toLocalTime($promotion, now())->startOfDay());
-
-            if ($isBeforeToday) {
+            if ($this->model->soleScheduledEmployment() instanceof Employment && $this->requirements->movesScheduledIntoThePast($this->model, $targetDate)) {
                 $fail(__('core.validation.employment_date_scheduled_past'));
             }
 
             return;
         }
 
-        // The form only holds the day, so the day employment started stays valid whatever time of day it started.
-        $startDay = PromotionTimeZoneService::toLocalTime($promotion, $currentEmployment->started_at);
-
-        if ($startDay->isSameDay(PromotionTimeZoneService::toLocalTime($promotion, $targetDate))) {
-            return;
-        }
-
-        $query = $this->model->employments()->getQuery();
-        LifecyclePeriodBuilder::constrainToActiveOn($query, $targetDate);
-
-        if (! $query->exists()) {
+        if (! $this->requirements->keepsStartDay($this->model, $currentEmployment, $targetDate)) {
             $fail(__('core.validation.employment_date_employed', ['name' => $this->getModelName($this->model)]));
         }
     }

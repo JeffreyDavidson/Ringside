@@ -129,6 +129,7 @@ test('a forwarded port header is never trusted, even from Cloudflare', function 
 test('a visitor cannot bypass their exhausted registration quota through Cloudflare', function (): void {
     // Arrange
     $url = route('register');
+
     foreach (range(1, 6) as $attempt) {
         $baseline = withServerVariables(['REMOTE_ADDR' => '173.245.48.10'])
             ->from($url)
@@ -154,6 +155,7 @@ test('a visitor cannot bypass their exhausted registration quota through Cloudfl
 test('another visitor behind the same Cloudflare address has an independent registration quota', function (): void {
     // Arrange
     $url = route('register');
+
     foreach (range(1, 6) as $attempt) {
         $baseline = withServerVariables(['REMOTE_ADDR' => '173.245.48.10'])
             ->from($url)

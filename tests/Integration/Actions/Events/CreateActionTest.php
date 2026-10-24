@@ -17,7 +17,7 @@ test('it creates a scheduled event with its venue and preview', function (): voi
     $date = now()->addWeek()->setTime(19, 0);
     $data = new EventData('Summer Slam', $date, $venue, 'A major event.');
 
-    $event = resolve(CreateAction::class)->handle($data);
+    $event = resolve(CreateAction::class)->handle($data, null);
 
     expect($event)
         ->toBeInstanceOf(Event::class)
@@ -36,6 +36,7 @@ test('it assigns the active promotion when promotion context is enforced', funct
 
     $event = resolve(CreateAction::class)->handle(
         new EventData('Promotion Event', null, null, null),
+        $promotion->id,
     );
 
     expect($event->promotion_id)->toBe($promotion->id)
@@ -48,7 +49,7 @@ test('it locks the venue row before checking the venue is free and creating the 
     $data = new EventData('Locked Venue Event', now()->addWeek()->setTime(19, 0), $venue, null);
 
     // Act
-    $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
+    $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data, null));
 
     // Assert
     $venueLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "venues"'));
@@ -70,7 +71,7 @@ describe('event name guard', function (): void {
         $lock = resolve(RecordNameLock::class);
 
         // Act
-        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
+        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data, $promotion->id));
 
         // Assert
         $nameLock = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "record_name_locks"'));
@@ -87,7 +88,7 @@ describe('event name guard', function (): void {
         $data = new EventData('  Summer Slam ', null, null, null);
 
         // Act
-        $event = resolve(CreateAction::class)->handle($data);
+        $event = resolve(CreateAction::class)->handle($data, null);
 
         // Assert
         expect($event->name)->toBe('Summer Slam');
@@ -104,7 +105,7 @@ describe('event name guard', function (): void {
         }
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(new EventData($name, null, null, null));
+        $create = fn () => resolve(CreateAction::class)->handle(new EventData($name, null, null, null), $promotion->id);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class, "An event named 'Summer Slam' already exists in this promotion.")
@@ -120,7 +121,7 @@ describe('event name guard', function (): void {
         Event::factory()->create(['name' => 'Summer Slam']);
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(new EventData('Summer Slam', null, null, null));
+        $create = fn () => resolve(CreateAction::class)->handle(new EventData('Summer Slam', null, null, null), null);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class)
@@ -134,9 +135,37 @@ describe('event name guard', function (): void {
         enforcePromotionContext($promotion);
 
         // Act
-        $event = resolve(CreateAction::class)->handle(new EventData('Summer Slam', null, null, null));
+        $event = resolve(CreateAction::class)->handle(new EventData('Summer Slam', null, null, null), $promotion->id);
 
         // Assert
         expect($event->promotion_id)->toBe($promotion->id);
+    });
+});
+
+describe('explicit promotion', function (): void {
+    test('it creates the event in the promotion it is given, whatever the context holds', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $data = new EventData('Summer Slam', null, null, null);
+
+        // Act
+        $event = resolve(CreateAction::class)->handle($data, $promotion->id);
+
+        // Assert
+        expect($event->promotion_id)->toBe($promotion->id);
+    });
+
+    test('it checks the name against the promotion it is given', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        Event::factory()->for($promotion, 'promotion')->create(['name' => 'Summer Slam']);
+        $data = new EventData('Summer Slam', null, null, null);
+
+        // Act
+        $create = fn () => resolve(CreateAction::class)->handle($data, $promotion->id);
+
+        // Assert
+        expect($create)->toThrow(NameTakenException::class)
+            ->and(Event::query()->withoutGlobalScopes()->where('name', 'Summer Slam')->count())->toBe(1);
     });
 });

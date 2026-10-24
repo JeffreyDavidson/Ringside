@@ -26,15 +26,19 @@ class CorrectBudgetMovementAction
             $line = $budget->lines()->whereKey($lineId)->lockForUpdate()->firstOrFail();
             $movements = $line->movements()->orderBy('id')->lockForUpdate()->get();
             $movement = $movements->find($movementId);
+
             if ($movement === null) {
                 throw BudgetException::movementMissing();
             }
+
             if ($movement->voided_at !== null) {
                 throw BudgetException::alreadyVoided();
             }
+
             if ($movements->refundsOf($movementId)->unvoided()->isNotEmpty()) {
                 throw BudgetException::dependentRefunds();
             }
+
             $before = $movement->attributesToArray();
             $movement->voided_at = now();
             $movement->voided_by = $actor->id;

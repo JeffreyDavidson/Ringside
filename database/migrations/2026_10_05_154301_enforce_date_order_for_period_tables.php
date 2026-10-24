@@ -64,7 +64,7 @@ return new class extends Migration
         throw new RuntimeException(
             'Cannot enforce date order: '.implode('; ', $violations).'. '
             .'No changes were made. Correct or delete these rows (end must not be before start), '
-            .'then re-run "php artisan migrate".'
+            .'then re-run "php artisan migrate".',
         );
     }
 
@@ -81,7 +81,7 @@ return new class extends Migration
             'sqlite' => $this->createSqliteTriggers($table, $start, $end),
             'pgsql', 'mysql', 'mariadb' => $connection->statement(
                 "ALTER TABLE {$table} ADD CONSTRAINT {$table}_dates_ordered "
-                ."CHECK ({$end} IS NULL OR {$start} IS NULL OR {$end} >= {$start})"
+                ."CHECK ({$end} IS NULL OR {$start} IS NULL OR {$end} >= {$start})",
             ),
             default => throw new LogicException('The database driver does not support date order constraints.'),
         };
@@ -103,7 +103,7 @@ return new class extends Migration
                 "CREATE TRIGGER {$table}_dates_ordered_{$suffix} BEFORE {$event} ON {$table} "
                 ."WHEN NEW.{$end} IS NOT NULL AND NEW.{$start} IS NOT NULL "
                 ."AND datetime(NEW.{$end}) < datetime(NEW.{$start}) "
-                ."BEGIN SELECT RAISE(ABORT, '{$table}: end before start'); END"
+                ."BEGIN SELECT RAISE(ABORT, '{$table}: end before start'); END",
             );
         }
     }

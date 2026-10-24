@@ -19,17 +19,30 @@ class UnpublishEventPublicationAction
         DB::transaction(function () use ($event, $actor, $version, $fingerprint, $section): void {
             $locked = $this->lock->handle($event, $version, $fingerprint);
             $publication = $locked['publication'];
+
             if (! $publication->exists) {
                 throw EventPublicationException::invalid();
             }
+
             $publication->results_published_at = null;
+
             if ($section === PublicSection::Card) {
                 $publication->published_at = null;
                 $publication->unpublished_at = now();
             }
+
             $publication->version++;
             $publication->save();
-            activity('publication')->performedOn($locked['event'])->causedBy($actor)->withProperties(['publication_id' => $publication->id, 'section' => $section->value, 'version' => $publication->version])->log('unpublished');
+
+            activity('publication')
+                ->performedOn($locked['event'])
+                ->causedBy($actor)
+                ->withProperties([
+                    'publication_id' => $publication->id,
+                    'section' => $section->value,
+                    'version' => $publication->version,
+                ])
+                ->log('unpublished');
         }, attempts: 3);
     }
 }

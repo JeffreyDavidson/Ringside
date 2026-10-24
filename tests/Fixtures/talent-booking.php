@@ -19,9 +19,15 @@ function talentBookingFixture(): array
     actingAs(administrator());
     $event = Event::factory()->create(['name' => 'Harbor Showcase', 'date' => now()->addDay(), 'venue_id' => Venue::factory()]);
     $person = Wrestler::factory()->bookable()->create(['name' => 'Talent Cedar']);
-    $booking = resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0,
+    $booking = resolve(SaveTalentBookingAction::class)->handle(
+        $event,
+        'wrestler',
+        $person->id,
+        0,
         resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
-        new TalentBookingData(TalentBookingStatus::Confirmed, 123456, now()->utc(), 'UTC', 'LEAK-TRAVEL-7Q', true), signedInUser());
+        new TalentBookingData(TalentBookingStatus::Confirmed, 123456, now()->utc(), 'UTC', 'LEAK-TRAVEL-7Q', true),
+        signedInUser(),
+    );
 
     return ['event' => $event, 'person' => $person, 'booking' => $booking->refresh()];
 }
@@ -33,7 +39,13 @@ function talentBookingFixture(): array
  */
 function saveTalentFixture(array $fixture, TalentBookingData $data, ?int $version = null): EventTalentBooking
 {
-    return resolve(SaveTalentBookingAction::class)->handle($fixture['event'], 'wrestler', $fixture['person']->id,
+    return resolve(SaveTalentBookingAction::class)->handle(
+        $fixture['event'],
+        'wrestler',
+        $fixture['person']->id,
         $version ?? $fixture['booking']->refresh()->version,
-        resolve(TalentBookingFingerprintService::class)->fingerprint($fixture['event']->refresh(), "wrestler:{$fixture['person']->id}"), $data, signedInUser())->refresh();
+        resolve(TalentBookingFingerprintService::class)->fingerprint($fixture['event']->refresh(), "wrestler:{$fixture['person']->id}"),
+        $data,
+        signedInUser(),
+    )->refresh();
 }

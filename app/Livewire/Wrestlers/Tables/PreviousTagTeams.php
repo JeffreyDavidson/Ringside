@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Attributes\Locked;
+use Override;
 
 /**
  * Livewire table component for displaying a wrestler's previous tag team memberships.
@@ -38,7 +39,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      *
      * @var string The name of the tag_teams_wrestlers pivot table
      */
-    #[\Override]
+    #[Override]
     public string $databaseTableName = 'tag_teams_wrestlers';
 
     /** @return TagTeamMembershipBuilder<TagTeamWrestler> */

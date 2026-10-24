@@ -22,9 +22,11 @@ class TransitionStorylineAction
             $story = $this->lock->handle($storyline, $version, allowClosed: true);
             $this->states->ensureCanMove($story, $status, $story->steps()->whereIn('status', [StepStatus::Planned, StepStatus::Postponed])->exists());
             $before = $story->attributesToArray();
+
             if ($status === StorylineStatus::Archived) {
                 $story->previous_status = $story->status;
             }
+
             $story->status = $status;
             $story->save();
             $this->revision->handle($story, $story, StorylineRevisionOperation::StoryStatus, $actor, $before, $reason);

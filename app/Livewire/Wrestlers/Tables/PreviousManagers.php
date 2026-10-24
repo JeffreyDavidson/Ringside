@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousManagersTable<WrestlerManager> */
 class PreviousManagers extends BasePreviousManagersTable
@@ -19,7 +20,7 @@ class PreviousManagers extends BasePreviousManagersTable
     #[Locked]
     public ?int $wrestlerId = null;
 
-    #[\Override]
+    #[Override]
     public string $databaseTableName = 'wrestlers_managers';
 
     /** @return ManagerAssignmentBuilder<WrestlerManager> */

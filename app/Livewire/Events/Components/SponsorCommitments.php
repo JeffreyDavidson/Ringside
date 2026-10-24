@@ -116,11 +116,13 @@ class SponsorCommitments extends Component
     {
         $event = $this->event();
         Gate::authorize('manageSponsors', $event);
+
         if ($event->trashed() || $event->promotion_id === null) {
             $this->addError('save', __('sponsors.event_unavailable'));
 
             return;
         }
+
         $this->form->reset();
         $this->form->timezone = PromotionTimeZoneService::zoneOf($event->loadMissing('promotion')->promotion);
         $this->draftId = null;
@@ -161,6 +163,7 @@ class SponsorCommitments extends Component
         Gate::authorize('manageSponsors', $event);
         $data = $this->form->toData($timing);
         Validator::make(['sponsorId' => $data->sponsorId], ['sponsorId' => [Rule::exists('sponsors', 'id')->where('promotion_id', $event->promotion_id)]])->validate();
+
         try {
             $action->handle($event, $this->draftId, $this->draftVersion, $this->submissionKey, $data, $this->actor(), $this->form->reason ?: null, $this->form->reviewed, $this->form->refreshSponsorName);
             $this->formShown = false;
@@ -208,9 +211,11 @@ class SponsorCommitments extends Component
     {
         $event = $this->event();
         Gate::authorize('manageSponsors', $event);
-        Validator::make(['mode' => $this->mode, 'targetKey' => $this->targetKey, 'afterMatchId' => $this->afterMatchId, 'instructionReason' => $this->instructionReason],
+        Validator::make(
+            ['mode' => $this->mode, 'targetKey' => $this->targetKey, 'afterMatchId' => $this->afterMatchId, 'instructionReason' => $this->instructionReason],
             ['mode' => [Rule::enum(SponsorInstructionMode::class)], 'targetKey' => ['nullable', 'string', 'max:80'],
-                'afterMatchId' => ['nullable', 'integer'], 'instructionReason' => ['nullable', 'string', 'max:2000']])->validate();
+                'afterMatchId' => ['nullable', 'integer'], 'instructionReason' => ['nullable', 'string', 'max:2000']],
+        )->validate();
         $commitment = $this->commitment($this->instructionId ?? 0);
         $data = $this->packs->data($event);
         $this->instructionVersion = $commitment->version;
@@ -227,9 +232,17 @@ class SponsorCommitments extends Component
         $event = $this->event();
         Gate::authorize('manageSponsors', $event);
         Validator::make(['reason' => $this->instructionReason], ['reason' => ['nullable', 'string', 'max:2000']])->validate();
+
         try {
-            $action->handle($event, $this->instructionId ?? 0, $this->instructionVersion, $this->previewPackVersion, $this->previewFingerprint,
-                new SponsorInstructionData(SponsorInstructionMode::tryFrom($this->previewMode) ?? throw RecordChangedException::changed(), $this->previewPackKey(), $this->previewAfter, $this->previewHash, $this->instructionReason ?: null), $this->actor());
+            $action->handle(
+                $event,
+                $this->instructionId ?? 0,
+                $this->instructionVersion,
+                $this->previewPackVersion,
+                $this->previewFingerprint,
+                new SponsorInstructionData(SponsorInstructionMode::tryFrom($this->previewMode) ?? throw RecordChangedException::changed(), $this->previewPackKey(), $this->previewAfter, $this->previewHash, $this->instructionReason ?: null),
+                $this->actor(),
+            );
             $this->instructionId = null;
             $this->previewHash = '';
             $this->notice = __('sponsors.instruction_saved');
@@ -257,6 +270,7 @@ class SponsorCommitments extends Component
         if (in_array($property, ['mode', 'targetKey', 'afterMatchId'], true)) {
             $this->previewHash = '';
         }
+
         if ($property === 'filter') {
             $this->resetPage('commitmentsPage');
         }

@@ -11,6 +11,8 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Override;
+use SensitiveParameter;
 
 /**
  * Looks users up by email ignoring case, so accounts stored with a mixed-case address can still sign in
@@ -19,8 +21,8 @@ use Illuminate\Support\Str;
 class CaseInsensitiveEmailUserProvider extends EloquentUserProvider
 {
     /** @param  array<string, mixed>  $credentials */
-    #[\Override]
-    public function retrieveByCredentials(#[\SensitiveParameter] array $credentials): ?Authenticatable
+    #[Override]
+    public function retrieveByCredentials(#[SensitiveParameter] array $credentials): ?Authenticatable
     {
         if (! isset($credentials['email']) || ! is_string($credentials['email'])) {
             return parent::retrieveByCredentials($credentials);

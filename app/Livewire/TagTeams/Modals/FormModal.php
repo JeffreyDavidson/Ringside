@@ -18,6 +18,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, TagTeam>
@@ -28,7 +29,7 @@ class FormModal extends BaseFormModal
 {
     use SearchesRosterMembers;
 
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.wrestlerA';
 
     public CreateEditForm $form;
@@ -66,7 +67,7 @@ class FormModal extends BaseFormModal
      * A name or signature move taken since validation shows on its own field, and so does a manager who stopped
      * being available; any other failure on the first wrestler.
      */
-    #[\Override]
+    #[Override]
     protected function businessErrorField(BaseBusinessException $exception): string
     {
         if ($exception instanceof CannotBeAssignedException) {
@@ -87,7 +88,7 @@ class FormModal extends BaseFormModal
 
     protected function createForm(): void
     {
-        $this->createAction->handle($this->form->toData());
+        $this->createAction->handle($this->form->toData(), $this->form->formPromotionId());
     }
 
     /** @return array<int, RosterMemberKind> */

@@ -76,8 +76,13 @@ test('directory errors preserve an edit and cancel clears private draft fields',
     actingAs(administrator());
     $contact = CrewContact::factory()->create();
     $page = livewire(Directory::class)->call('edit', $contact->id)->set('form.name', 'My draft');
-    resolve(SaveCrewContactAction::class)->handle($contact, 1, $contact->client_id,
-        new CrewContactData('Other editor', null, null, null), signedInUser());
+    resolve(SaveCrewContactAction::class)->handle(
+        $contact,
+        1,
+        $contact->client_id,
+        new CrewContactData('Other editor', null, null, null),
+        signedInUser(),
+    );
 
     // Act
     $page->call('save');
@@ -94,8 +99,13 @@ test('a stale contact save and archive show the shared changed-by-someone-else m
     actingAs(administrator());
     $contact = CrewContact::factory()->create();
     $page = livewire(Directory::class)->call('edit', $contact->id)->set('form.name', 'My draft');
-    resolve(SaveCrewContactAction::class)->handle($contact, 1, $contact->client_id,
-        new CrewContactData('Other editor', null, null, null), signedInUser());
+    resolve(SaveCrewContactAction::class)->handle(
+        $contact,
+        1,
+        $contact->client_id,
+        new CrewContactData('Other editor', null, null, null),
+        signedInUser(),
+    );
 
     // Act
     $page->call('save');
@@ -220,6 +230,7 @@ test('the directory refuses invalid contact details without writing', function (
     foreach ($input as $property => $value) {
         $page->set("form.{$property}", $value);
     }
+
     $page->call('save');
 
     // Assert

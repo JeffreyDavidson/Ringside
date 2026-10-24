@@ -35,12 +35,15 @@ class EventPackSourceService
         $timings = collect($content['matches'])->keyBy('match_id');
         $segments = collect($content['segments']);
         $running = [];
+
         foreach ($segments->whereNull('after_match_id') as $segment) {
             $running[] = ['key' => 'segment:'.$segment['id'], 'label' => $segment['label'], 'details' => '', 'referees' => '', 'warning' => false, 'timing' => $segment];
         }
+
         foreach ($card['rows'] as $row) {
             $running[] = ['key' => 'match:'.$row['id'], 'label' => $row['number'].'. '.($row['label'] ?: __('event-pack.no_competitors')),
                 'details' => $row['details'], 'referees' => $row['referees'], 'warning' => $row['warning'], 'timing' => $timings->get($row['id'], [])];
+
             foreach ($segments->where('after_match_id', $row['id']) as $segment) {
                 $running[] = ['key' => 'segment:'.$segment['id'], 'label' => $segment['label'], 'details' => '', 'referees' => '', 'warning' => false, 'timing' => $segment];
             }

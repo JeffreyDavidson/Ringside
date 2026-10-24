@@ -11,11 +11,12 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Queries\Roster\PreviousManagersQuery;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousManagersTable<Manager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
-    #[\Override]
+    #[Override]
     public string $databaseTableName = 'managers';
 
     #[Locked]
@@ -41,7 +42,7 @@ class PreviousManagers extends BasePreviousManagersTable
     /**
      * @return array<int, Column>
      */
-    #[\Override]
+    #[Override]
     public function columns(): array
     {
         return [

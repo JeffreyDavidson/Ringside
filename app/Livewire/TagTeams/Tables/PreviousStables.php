@@ -9,11 +9,12 @@ use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
 {
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'stables';
 
     #[Locked]

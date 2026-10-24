@@ -92,10 +92,13 @@ class Directory extends Component
     {
         $promotion = $this->promotion();
         Gate::authorize('manageSponsors', $promotion);
+
         if ($this->draftId !== null) {
             Gate::authorize('manageSponsors', Sponsor::query()->where('promotion_id', $promotion->id)->findOrFail($this->draftId));
         }
+
         $data = $this->form->toData();
+
         try {
             $action->handle($promotion, $this->draftId, $this->draftVersion, $this->submissionKey, $data);
             $this->formShown = false;
@@ -130,6 +133,7 @@ class Directory extends Component
     private function promotion(): Promotion
     {
         $promotion = Promotion::query()->findOrFail($this->promotionId);
+
         if ($this->promotionContext->isEnforced()) {
             abort_unless($this->promotionContext->current()?->id === $promotion->id, 404);
         }

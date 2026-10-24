@@ -28,6 +28,7 @@ final readonly class EventRosterSchedulingEligibility
         if (! $date instanceof Carbon) {
             return;
         }
+
         if ($lock) {
             $entries = $this->roster->forEvent($event)['entries'];
             $this->rosterLock->lock(
@@ -36,8 +37,10 @@ final readonly class EventRosterSchedulingEligibility
                 $entries->filter(fn (Wrestler|Referee|TagTeam $person): bool => $person instanceof TagTeam)->values(),
             );
         }
+
         $proposed = clone $event;
         $proposed->date = $date;
+
         foreach ($this->roster->forEvent($event)['people'] as $person) {
             $this->availability->ensureForEvent($person, $proposed);
         }

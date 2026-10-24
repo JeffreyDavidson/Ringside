@@ -29,6 +29,7 @@ test('loads the latest earlier matches of each subject, newest event first, up t
         ->for($promotion, 'promotion')
         ->create(['date' => now()->subDays(10)]);
     $matches = [];
+
     foreach ([$oldest, $newest, $middle] as $event) {
         $matches[$event->id] = EventMatch::factory()
             ->for($event)
@@ -38,7 +39,11 @@ test('loads the latest earlier matches of each subject, newest event first, up t
 
     // Act
     $loaded = resolve(BookingHistoryRecentMatchesQuery::class)->get(
-        new Collection([$subject]), $promotion->id, $reference, null, 2,
+        new Collection([$subject]),
+        $promotion->id,
+        $reference,
+        null,
+        2,
     );
 
     // Assert
@@ -77,7 +82,11 @@ test('orders events on the same date by the higher event id first, then by match
 
     // Act
     $loaded = resolve(BookingHistoryRecentMatchesQuery::class)->get(
-        new Collection([$subject]), $promotion->id, now(), null, 5,
+        new Collection([$subject]),
+        $promotion->id,
+        now(),
+        null,
+        5,
     );
 
     // Assert
@@ -119,10 +128,18 @@ test('leaves out later events, deleted matches, the excluded match and other pro
 
     // Act
     $loaded = resolve(BookingHistoryRecentMatchesQuery::class)->get(
-        new Collection([$subject]), $promotion->id, now(), $excluded->id, 5,
+        new Collection([$subject]),
+        $promotion->id,
+        now(),
+        $excluded->id,
+        5,
     );
     $otherPromotion = resolve(BookingHistoryRecentMatchesQuery::class)->get(
-        new Collection([Wrestler::query()->findOrFail($subject->id)]), Promotion::factory()->create()->id, now(), null, 5,
+        new Collection([Wrestler::query()->findOrFail($subject->id)]),
+        Promotion::factory()->create()->id,
+        now(),
+        null,
+        5,
     );
 
     // Assert

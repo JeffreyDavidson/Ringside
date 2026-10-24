@@ -33,8 +33,15 @@ class SaveTalentBookingAction
     {
         return DB::transaction(function () use ($event, $personType, $personId, $version, $fingerprint, $data, $actor): EventTalentBooking {
             // Match edits and event rescheduling also lock the event before touching child records.
-            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            $booking = $event->talentBookings()->where('person_type', $personType)->where('person_id', $personId)->lockForUpdate()->first();
+            $event = Event::query()
+                ->whereKey($event->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $booking = $event->talentBookings()
+                ->where('person_type', $personType)
+                ->where('person_id', $personId)
+                ->lockForUpdate()
+                ->first();
             // Keep timezone and location stable while checking and recording the agreed context.
             $event->promotion()->lockForUpdate()->first();
             $event->venue()->withTrashed()->lockForUpdate()->first();
@@ -43,18 +50,24 @@ class SaveTalentBookingAction
                 (new Referee)->getMorphClass() => Referee::query()->withTrashed()->where('promotion_id', $event->promotion_id)->find($personId),
                 default => throw TalentBookingException::person(),
             };
+
             if ($person === null && $booking === null) {
                 throw TalentBookingException::person();
             }
+
             $key = $personType.':'.$personId;
+
             if (($booking->version ?? 0) !== $version || ! hash_equals($this->fingerprints->fingerprint($event, $key), $fingerprint)) {
                 throw RecordChangedException::changed();
             }
+
             $this->states->ensureCanMove($booking, $data->status, $data->reason);
             $this->states->ensureCanConfirm($booking, $data->status, $event->date !== null, $data->attest);
+
             if ($data->feeMinor !== null && $data->feeMinor < 0) {
                 throw TalentBookingException::fee();
             }
+
             $booking ??= new EventTalentBooking;
             $previousTerms = $this->terms($booking);
             $terms = $data->status === TalentBookingStatus::Cancelled || $booking->status === TalentBookingStatus::Cancelled
@@ -74,14 +87,17 @@ class SaveTalentBookingAction
                 'travel_notes' => $terms['travel_notes'],
             ]);
             $booking->terms_need_review = $booking->terms_need_review || ($data->status === TalentBookingStatus::Confirmed && $previousTerms !== $terms);
+
             if ($data->status === TalentBookingStatus::Confirmed && $data->attest) {
                 $booking->confirmed_snapshot = ['context' => $this->context->get($event), 'on_card' => $this->fingerprints->onCard($event, $key),
                     'terms' => $terms, 'confirmed_at' => now()->utc()->toIso8601String()];
                 $booking->terms_need_review = false;
             }
+
             if ($booking->exists && ! $booking->isDirty()) {
                 return $booking;
             }
+
             $booking->version = $version + 1;
             $booking->save();
             $revision = new EventTalentBookingRevision;

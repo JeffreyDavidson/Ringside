@@ -12,16 +12,12 @@ use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Scopes\PromotionContextScope;
-use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
-    public function __construct(
-        private readonly RecordNameLock $nameLock,
-        private readonly PromotionContextService $promotionContext,
-    ) {}
+    public function __construct(private readonly RecordNameLock $nameLock) {}
 
     /**
      * Create an event.
@@ -30,14 +26,15 @@ class CreateAction
      * Nothing in the database keeps it unique, so the name lock is the first lock of the transaction, before the
      * venue row lock, and the check that follows sees the other transaction's committed event.
      *
+     * @param  int|null  $promotionId  The promotion the event belongs to: the enforced promotion for a member, null for an administrator without one
+     *
      * @throws NameTakenException When another event of the promotion already has the name
      * @throws VenueDeletedException When the venue is deleted
      */
-    public function handle(EventData $eventData): Event
+    public function handle(EventData $eventData, ?int $promotionId): Event
     {
-        return DB::transaction(function () use ($eventData): Event {
+        return DB::transaction(function () use ($eventData, $promotionId): Event {
             $name = mb_trim($eventData->name);
-            $promotionId = $this->promotionContext->isEnforced() ? $this->promotionContext->current()?->id : null;
 
             $this->nameLock->lock(GuardedName::EventName, $promotionId, $name);
 
@@ -61,12 +58,15 @@ class CreateAction
                 VenueSchedulingEligibility::ensureAvailable($venue, $eventData->date);
             }
 
-            $event = Event::query()->create([
-                'name' => $name,
-                'date' => $eventData->date,
-                'venue_id' => $eventData->venue?->id,
-                'preview' => $eventData->preview,
-            ]);
+            $event = Event::query()
+                ->make([
+                    'name' => $name,
+                    'date' => $eventData->date,
+                    'venue_id' => $eventData->venue?->id,
+                    'preview' => $eventData->preview,
+                ])
+                ->forceFill(['promotion_id' => $promotionId]);
+            $event->save();
 
             return $event;
         }, attempts: 3);

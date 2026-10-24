@@ -20,6 +20,7 @@ final readonly class ReopenLiveItem implements LiveItemTransition
         $items = $run->content['items'];
         $item = $items[$index];
         $state = LiveItemStatus::from($item['state']);
+
         if (! in_array($state, [LiveItemStatus::Finished, LiveItemStatus::Skipped], true)
             || collect($items)->contains('state', LiveItemStatus::Running->value)
             || collect(array_slice($items, $index + 1))->contains(fn (array $later): bool => $later['start'] !== null)) {

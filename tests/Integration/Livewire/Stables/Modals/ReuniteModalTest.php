@@ -29,6 +29,7 @@ describe('reunite modal', function (): void {
         $modal
             ->assertSet('form.wrestlerIds', $wrestlerIds)
             ->assertSet('form.tagTeamIds', $tagTeamIds);
+
         foreach ($stable->previousWrestlers()->get() as $wrestler) {
             $modal->assertSee($wrestler->name);
         }

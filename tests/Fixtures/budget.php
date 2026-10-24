@@ -65,14 +65,17 @@ function budgetBusinessFingerprint(): array
     $fingerprints = [];
     // Cache, sessions and worker queues are operational state rather than business records.
     $skip = ['cache', 'cache_locks', 'sessions', 'jobs', 'job_batches', 'failed_jobs', 'sqlite_sequence'];
+
     foreach (Schema::getTableListing(schemaQualified: false) as $table) {
         if (in_array($table, $skip, true)) {
             continue;
         }
+
         $rows = DB::table($table)->get()->map(fn (object $row): string => json_encode($row, JSON_THROW_ON_ERROR))->all();
         sort($rows);
         $fingerprints[$table] = hash('sha256', implode("\n", $rows));
     }
+
     ksort($fingerprints);
 
     return $fingerprints;
@@ -84,9 +87,11 @@ function budgetBusinessFingerprint(): array
 function budgetSharedSurfaces(Event $event): array
 {
     $surfaces = [];
+
     foreach (['event' => 'events.show', 'pack' => 'events.pack.show', 'live' => 'events.live-show.show'] as $name => $routeName) {
         $surfaces[$name] = (string) \Pest\Laravel\get(route($routeName, $event))->assertOk()->getContent();
     }
+
     $surfaces['print'] = (string) \Pest\Laravel\get(route('events.pack.show', ['event' => $event, 'print' => 1]))->assertOk()->getContent();
     auth()->logout();
     app(PromotionContextService::class)->clear();

@@ -59,6 +59,11 @@ final readonly class StableRetirementEligibility
             throw CannotBeUnretiredException::notRetired($stable);
         }
 
+        // A stable that was already disbanded (or never active) comes back as it was, with no members to count.
+        if (! $this->formerMemberEligibility->wasActiveWhenRetired($stable)) {
+            return;
+        }
+
         $availableHeadcount = $this->formerMemberEligibility->availableMembersAtRetirementFor($stable)->getTotalMemberCount();
 
         if (! StableMembershipRequirements::hasMinimumHeadcount($availableHeadcount)) {

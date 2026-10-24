@@ -9,8 +9,10 @@ use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Enums\Naming\GuardedName;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Exceptions\Roster\TagTeams\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
+use App\Lifecycle\Roster\EmploymentDateRequirements;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Support\Carbon;
@@ -28,6 +30,7 @@ class UpdateAction
         protected EmployCurrentManagersAction $employCurrentManagersAction,
         protected RecordNameLock $nameLock,
         protected ChangeScheduledEmploymentAction $changeScheduledEmployment,
+        protected EmploymentDateRequirements $employmentDates,
     ) {}
 
     /**
@@ -38,6 +41,7 @@ class UpdateAction
      * before the tag team's own row lock, and the check that follows sees the other transaction's committed tag team.
      *
      * @throws NameTakenException When another tag team of the promotion has the name or the signature move
+     * @throws EmploymentDateException When the date is another day than the one employment started, or a scheduled hire moves to a day before today
      */
     public function handle(TagTeam $tagTeam, TagTeamData $tagTeamData): TagTeam
     {
@@ -53,6 +57,11 @@ class UpdateAction
             $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->ensureNameIsAvailable($lockedTagTeam, $name, $tagTeamData->signature_move);
+
+            // A team that is employed keeps the date employment started; another one is refused, not dropped.
+            if ($tagTeamData->employment_date instanceof Carbon) {
+                $this->employmentDates->ensureCurrentStartIsUnchanged($lockedTagTeam, $tagTeamData->employment_date);
+            }
 
             $lockedTagTeam->update([
                 'name' => $name,

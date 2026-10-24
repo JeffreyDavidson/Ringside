@@ -42,6 +42,7 @@ class EventBudgetViewModel
     public function historyChanges(iterable $revisions): array
     {
         $changes = [];
+
         foreach ($revisions as $revision) {
             $changes[$revision->id] = $this->changes($revision);
         }
@@ -55,18 +56,23 @@ class EventBudgetViewModel
         $after = is_array($revision->after['voided'] ?? null) ? $revision->after['voided'] : $revision->after;
         $before = $revision->before;
         $changes = [];
+
         foreach (['description', 'counterparty', 'planned_cents', 'confirmed_cents', 'due_date', 'notes', 'amount_cents', 'effective_date', 'reference', 'void_reason'] as $field) {
             $old = $before[$field] ?? null;
             $new = $after[$field] ?? null;
+
             if ($old === $new) {
                 continue;
             }
+
             $key = match ($field) {
                 'planned_cents' => 'planned', 'confirmed_cents' => 'confirmed', 'amount_cents' => 'amount', 'void_reason' => 'reason', default => $field,
             };
             $changes[] = ['label' => __('event-budget.'.$key), 'before' => $this->historyValue($old, $field), 'after' => $this->historyValue($new, $field)];
         }
+
         $replacement = $revision->after['replacement'] ?? null;
+
         if (is_array($replacement) && is_int($replacement['amount_cents'] ?? null)) {
             $changes[] = ['label' => __('event-budget.replace'), 'before' => __('event-budget.unknown'), 'after' => UsdAmount::display($replacement['amount_cents'])];
         }
@@ -79,9 +85,11 @@ class EventBudgetViewModel
         if (str_ends_with($field, '_cents')) {
             return UsdAmount::display(is_int($value) ? $value : null);
         }
+
         if (! is_string($value) || $value === '') {
             return __('event-budget.unknown');
         }
+
         if (in_array($field, ['due_date', 'effective_date'], true)) {
             return substr($value, 0, 10);
         }

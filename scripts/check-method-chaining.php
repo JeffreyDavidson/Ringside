@@ -26,7 +26,7 @@ foreach ($paths as $path) {
     }
 
     $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($absolutePath, FilesystemIterator::SKIP_DOTS)
+        new RecursiveDirectoryIterator($absolutePath, FilesystemIterator::SKIP_DOTS),
     );
 
     foreach ($iterator as $file) {

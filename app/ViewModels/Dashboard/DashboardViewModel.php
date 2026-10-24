@@ -35,6 +35,7 @@ final readonly class DashboardViewModel
     public function data(): array
     {
         $champions = [];
+
         foreach ($this->championedTitles() as $title) {
             $championship = $title->currentChampionship ?? throw new LogicException('A championed title has a current championship.');
             $champions[] = ['title' => $title, 'championship' => $championship, 'url' => $this->routeResolver->urlFor($championship->champion),

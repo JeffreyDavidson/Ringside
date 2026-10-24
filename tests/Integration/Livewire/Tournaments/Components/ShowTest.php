@@ -10,6 +10,8 @@ use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Livewire\Tournaments\Components\Show;
+use App\Models\Events\Event;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
 use JMac\Testing\Double;
@@ -112,13 +114,17 @@ it('performs reviewed entry administration through the protected screen', functi
     $node = $t->nodes()->where('round', 1)->where('position', 1)->firstOrFail();
     $entry = $t->entries()->firstOrFail();
     $replacement = Wrestler::factory()->employed()->for($world['promotion'])->create();
+
     if ($operation === 'walkover') {
         resolve(WithdrawTournamentEntryAction::class)->handle($entry, $t->refresh()->version, 'Unavailable', signedInUser());
     }
+
     $page = livewire(Show::class, ['tournamentId' => $t->id])->call('begin', $operation, in_array($operation, ['replace', 'withdraw'], true) ? $entry->id : $node->id)->set('draft.reason', 'Reviewed tournament change')->set('draft.confirmed', true);
+
     if ($operation === 'replace') {
         $page->set('draft.replacementId', $replacement->id);
     }
+
     $page->call('confirm')->assertHasNoErrors();
     match ($operation) {
         default => throw new InvalidArgumentException('Unknown operation'),
@@ -208,6 +214,7 @@ it('refuses invalid tournament fields when saving an existing tournament', funct
     $tournament = $world['tournament'];
     $name = $tournament->name;
     $page = livewire(Show::class, ['tournamentId' => $tournament->id]);
+
     foreach ($changes as $field => $value) {
         $page->set($field, $value);
     }
@@ -268,3 +275,69 @@ it('refuses a client change to a locked draft property and keeps the draft uncha
     'entrant kind' => ['entrantKind', 'tag_team'],
     'operation' => ['operation', 'cancel'],
 ]);
+
+describe('searching events from the tournament page', function (): void {
+    it('returns the matching events of the tournament promotion with the date in its time zone', function (): void {
+        // Arrange
+        $world = tournamentFixture();
+        $world['promotion']->update(['timezone' => 'America/New_York']);
+        $dated = Event::factory()
+            ->for($world['promotion'])
+            ->create(['name' => 'Autumn Brawl', 'date' => '2030-05-01 18:30:00']);
+        $undated = Event::factory()
+            ->for($world['promotion'])
+            ->create(['name' => 'Autumn Someday', 'date' => null]);
+        Event::factory()
+            ->for(Promotion::factory())
+            ->create(['name' => 'Autumn Foreign']);
+        actingAs(administrator());
+        $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id]);
+
+        // Act
+        $page->call('searchEvents', 'autumn');
+
+        // Assert
+        $page->assertReturned([
+            ['id' => $dated->id, 'name' => 'Autumn Brawl · 2030-05-01 14:30 EDT'],
+            ['id' => $undated->id, 'name' => 'Autumn Someday · Unscheduled'],
+        ]);
+    });
+
+    it('refuses the search to a member who may only view the tournament', function (): void {
+        // Arrange
+        $world = tournamentFixture();
+        $user = basicUser();
+        $world['promotion']->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+        actingAs($user);
+        $context = resolve(PromotionContextService::class);
+        $context->set($world['promotion']);
+        $context->enforce();
+        $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id]);
+
+        // Act
+        $page->call('searchEvents', '');
+
+        // Assert
+        $page->assertForbidden();
+    });
+
+    it('shows the name of the already chosen event when the booking panel opens', function (): void {
+        // Arrange
+        $world = tournamentFixture();
+        $planned = Event::factory()
+            ->for($world['promotion'])
+            ->create(['name' => 'Chosen Championship Night']);
+        $node = $world['tournament']->nodes()->firstOrFail();
+        $node->planned_event_id = $planned->id;
+        $node->save();
+        actingAs(administrator());
+
+        // Act
+        $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])
+            ->call('begin', 'book', $node->id);
+
+        // Assert
+        $page->assertSet('draft.eventId', $planned->id)
+            ->assertSee('Chosen Championship Night');
+    });
+});

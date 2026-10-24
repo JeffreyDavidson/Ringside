@@ -25,6 +25,7 @@ function tournamentRace(array $specs): array
 {
     $processes = [];
     $inputs = [];
+
     foreach ($specs as $index => $spec) {
         $inputs[$index] = new InputStream;
         $processes[$index] = new Process([PHP_BINARY, __DIR__.'/tournament-worker.php', json_encode($spec, JSON_THROW_ON_ERROR)]);
@@ -32,38 +33,49 @@ function tournamentRace(array $specs): array
         $processes[$index]->setInput($inputs[$index]);
         $processes[$index]->start();
     }
+
     $deadline = microtime(true) + 15;
+
     foreach ($processes as $process) {
         while (! str_contains($process->getOutput(), 'READY') && $process->isRunning() && microtime(true) < $deadline) {
             usleep(10000);
         }
+
         if (! str_contains($process->getOutput(), 'READY')) {
             throw new RuntimeException('Tournament worker failed to initialize: '.$process->getErrorOutput());
         }
     }
+
     $start = microtime(true) + 0.2;
+
     foreach ($inputs as $input) {
         $input->write($start."\n");
         $input->close();
     }
+
     while (microtime(true) < $start) {
         foreach ($processes as $process) {
             $process->isRunning();
         } usleep(1000);
     }
+
     $outcomes = [];
+
     foreach ($processes as $process) {
         $process->wait();
         preg_match('/RESULT:(.*)/', $process->getOutput(), $matches);
         $outcome = json_decode($matches[1] ?? '', true);
+
         if (! is_array($outcome) || ! isset($outcome['ok'], $outcome['deadlock']) || ! is_bool($outcome['ok']) || ! is_bool($outcome['deadlock'])) {
             throw new RuntimeException('Tournament worker failed: '.$process->getErrorOutput());
         }
+
         $outcomes[] = ['ok' => $outcome['ok'], 'deadlock' => $outcome['deadlock']];
     }
 
     return $outcomes;
 }
+
 /** @param array{tournament:Tournament,promotion:Promotion,event:Event,referees:Collection<int,Referee>} $world
  * @return array{operation:string,node_id:int,event_id:int,referee_id:int,version:int,match_id:int,side_id:int}
  */
@@ -71,6 +83,7 @@ function tournamentWorkerSpec(array $world): array
 {
     return ['operation' => 'book', 'node_id' => $world['tournament']->nodes()->firstOrFail()->id, 'event_id' => $world['event']->id, 'referee_id' => $world['referees']->sole()->id, 'version' => $world['tournament']->refresh()->version, 'match_id' => 0, 'side_id' => 0];
 }
+
 it('serializes duplicate node bookings without duplicate matches or deadlocks', function (): void {
     withCommittedData(function (): void {
         $world = tournamentFixture();
@@ -126,6 +139,7 @@ it('serializes a qualifier correction against a dependent booking', function ():
         $results = tournamentRace([[...$base, 'node_id' => $final->id], [...$base, 'operation' => 'result', 'match_id' => $first->id, 'side_id' => $first->sides()->where('position', 2)->firstOrFail()->id]]);
         expect(collect($results)->where('ok', true)->count())->toBe(1)->and(deadlocksResolvedSince($before))->toBe(0);
         $bout = resolve(TournamentBracketService::class)->bout($final);
+
         if ($bout->link !== null) {
             expect($bout->link->match->wrestlers()->pluck('wrestlers.id')->all())->toEqualCanonicalizing([$bout->first?->competitor_id, $bout->second?->competitor_id]);
         }

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Enums\Matches\MatchParticipantKind;
 use App\Enums\Matches\MatchType;
-use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Matches\MatchAssignmentEligibility;
-use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Roster\RosterDateAvailability;
@@ -16,7 +15,6 @@ use App\Lifecycle\Tournaments\TournamentMatchRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class AddWrestlersToMatchAction
 {
@@ -25,12 +23,15 @@ class AddWrestlersToMatchAction
         protected MatchAssignmentEligibility $assignmentEligibility,
         private readonly RosterBookingEligibility $bookingEligibility,
         private readonly RosterDateAvailability $dateAvailability,
-        private readonly MatchConfigurationRequirements $configurationRequirements,
         private readonly TournamentMatchRequirements $tournamentRequirements,
     ) {}
 
     /**
      * Add wrestlers to an event match.
+     *
+     * Runs inside the caller's transaction: the caller has locked the match and its event set with
+     * MatchSchedulingLock::lockMatchWithEventSet() and checked that every participant belongs to the event's
+     * promotion (MatchConfigurationRequirements::ensureWithinEventPromotion()).
      *
      * This handles the complete wrestler assignment workflow for matches:
      * - Validates wrestlers are available and eligible for competition
@@ -44,7 +45,6 @@ class AddWrestlersToMatchAction
      * - Wrestlers must be employed and active (not injured, suspended, or retired)
      * - Wrestlers cannot be assigned to multiple sides in the same match
      * - Wrestlers cannot be double-booked for the same event date
-     * - Side numbers must be valid for the match type
      *
      * BUSINESS IMPACT:
      * - Creates the foundation for match competition structure
@@ -52,41 +52,10 @@ class AddWrestlersToMatchAction
      * - Establishes competitor relationships for booking and storyline continuity
      * - Supports payroll and appearance fee calculations
      *
-     * @param  EventMatch  $eventMatch  The match to add wrestlers to
-     * @param  Collection<int, Wrestler>  $wrestlers  The wrestlers to add to the match
-     * @param  int  $sideNumber  The side/team number for the wrestlers (1, 2, 3, etc.)
-     */
-    public function handle(EventMatch $eventMatch, Collection $wrestlers, int $sideNumber): void
-    {
-        $requestedWrestlers = $wrestlers->unique('id')->values();
-
-        if ($requestedWrestlers->isEmpty()) {
-            throw EntityNotAvailableException::forMatchAssignment('wrestlers');
-        }
-
-        // Validate side number is reasonable for match structure
-        if ($sideNumber < 1) {
-            throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
-        }
-
-        DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
-            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
-            $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
-                $lockedMatch->event()->firstOrFail(),
-                'wrestlers',
-                $requestedWrestlers->all(),
-            );
-            $this->handleWithinTransaction($lockedMatch, $requestedWrestlers, $sideNumber);
-        }, attempts: 3);
-    }
-
-    /**
-     * Assign wrestlers while the caller owns the match transaction and lock.
-     *
      * @param  Collection<int, Wrestler>  $wrestlers
      * @param  list<string>  $retainedKeys  Server-derived assignments retained by the locked match update.
      */
-    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $wrestlers, int $sideNumber, array $retainedKeys = []): void
+    public function handle(EventMatch $lockedMatch, Collection $wrestlers, int $sideNumber, array $retainedKeys = []): void
     {
         $this->tournamentRequirements->ensureCompetitors($lockedMatch, $wrestlers);
         $requestedWrestlers = $wrestlers->unique('id')->values();
@@ -99,9 +68,9 @@ class AddWrestlersToMatchAction
             ->get();
 
         if ($lockedWrestlers->count() !== $requestedWrestlers->count() || $lockedWrestlers->contains(
-            fn (Wrestler $wrestler): bool => ! $this->bookingEligibility->allows($wrestler, $event->date)
+            fn (Wrestler $wrestler): bool => ! $this->bookingEligibility->allows($wrestler, $event->date),
         )) {
-            throw EntityNotAvailableException::forMatchAssignment('wrestlers');
+            throw EntityNotAvailableException::forMatchAssignment(MatchParticipantKind::Wrestler);
         }
 
         $this->assignmentEligibility->ensureWrestlersCanBeAssigned(
@@ -109,11 +78,13 @@ class AddWrestlersToMatchAction
             $lockedWrestlers,
             $lockedMatch,
         );
+
         foreach ($lockedWrestlers as $person) {
             if (! in_array(RosterDateAvailability::key($person), $retainedKeys, true)) {
                 $this->dateAvailability->ensureForEvent($person, $event);
             }
         }
+
         $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
         $lockedWrestlers->each(function (Wrestler $wrestler) use ($lockedMatch, $side): void {

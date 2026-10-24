@@ -15,6 +15,7 @@ final readonly class FinishLiveItem implements LiveItemTransition
     public function apply(EventLiveRun $run, int $index, ?Carbon $start, ?Carbon $finish): array
     {
         $item = $run->content['items'][$index];
+
         if (LiveItemStatus::from($item['state']) !== LiveItemStatus::Running || $item['start'] === null || Carbon::parse($item['start'])->gt(now())) {
             throw LiveShowException::transitionInvalid();
         }

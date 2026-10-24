@@ -30,6 +30,7 @@ test('a failed financial mutation rolls back both its state and retained history
         $line = $budget->lines()->firstOrFail();
         $line->description = 'Should roll back';
         $line->save();
+
         throw new RuntimeException('Caller failed');
     }, signedInUser()))->toThrow(RuntimeException::class);
     expect($f['line']->refresh()->description)->toBe('Talent fee')->and($f['budget']->refresh()->version)->toBe(0)->and($f['budget']->revisions()->count())->toBe(0);

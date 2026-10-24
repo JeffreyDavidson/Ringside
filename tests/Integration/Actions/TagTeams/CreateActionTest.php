@@ -29,7 +29,7 @@ test('it creates a new tag team', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = resolve(CreateAction::class)->handle($data);
+    $tagTeam = resolve(CreateAction::class)->handle($data, null);
 
     expect($tagTeam->name)->toBe('The Test Team')
         ->and($tagTeam->signature_move)->toBe('Double Suplex');
@@ -53,7 +53,7 @@ test('it creates tag team with minimal data', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = resolve(CreateAction::class)->handle($data);
+    $tagTeam = resolve(CreateAction::class)->handle($data, null);
 
     expect($tagTeam->name)->toBe('Minimal Team')
         ->and($tagTeam->signature_move)->toBeNull();
@@ -76,7 +76,7 @@ test('it creates partnerships for both wrestlers', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = resolve(CreateAction::class)->handle($data);
+    $tagTeam = resolve(CreateAction::class)->handle($data, null);
 
     // Verify partnerships were created
     assertDatabaseHas('tag_teams_wrestlers', [
@@ -106,7 +106,7 @@ test('it handles database transactions correctly', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = resolve(CreateAction::class)->handle($data);
+    $tagTeam = resolve(CreateAction::class)->handle($data, null);
 
     expect($tagTeam->exists)->toBeTrue()
         ->and($tagTeam->wrestlers()->count())->toBe(2);
@@ -145,7 +145,7 @@ test('it creates tag team with all optional fields', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = resolve(CreateAction::class)->handle($data);
+    $tagTeam = resolve(CreateAction::class)->handle($data, null);
 
     expect($tagTeam->name)->toBe('Full Data Team')
         ->and($tagTeam->signature_move)->toBe('Ultimate Finisher')
@@ -164,10 +164,11 @@ test('it creates partnerships with correct timestamps', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = resolve(CreateAction::class)->handle($data);
+    $tagTeam = resolve(CreateAction::class)->handle($data, null);
 
     // Check partnerships have current timestamp
     $partnerships = $tagTeam->wrestlers()->get();
+
     foreach ($partnerships as $wrestler) {
         $membership = TagTeamWrestler::query()
             ->whereBelongsTo($tagTeam, 'tagTeam')
@@ -185,14 +186,17 @@ test('it employs the tag team and its founding members', function () {
     $manager = Manager::factory()->employed()->create();
     $employmentDate = now()->subDay();
 
-    $tagTeam = resolve(CreateAction::class)->handle(new TagTeamData(
-        name: 'Employed Team',
-        signature_move: null,
-        employment_date: $employmentDate,
-        wrestlerA: $wrestlerA,
-        wrestlerB: $wrestlerB,
-        managers: new Collection([$manager]),
-    ));
+    $tagTeam = resolve(CreateAction::class)->handle(
+        new TagTeamData(
+            name: 'Employed Team',
+            signature_move: null,
+            employment_date: $employmentDate,
+            wrestlerA: $wrestlerA,
+            wrestlerB: $wrestlerB,
+            managers: new Collection([$manager]),
+        ),
+        null,
+    );
 
     expect($tagTeam->currentEmployment()->exists())->toBeTrue()
         ->and($wrestlerA->currentEmployment()->exists())->toBeTrue()
@@ -220,7 +224,7 @@ describe('tag team name guard', function (): void {
         $lock = resolve(RecordNameLock::class);
 
         // Act
-        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
+        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data, $promotion->id));
 
         // Assert
         $lockPositions = array_keys(array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "record_name_locks"')));
@@ -238,7 +242,7 @@ describe('tag team name guard', function (): void {
         $data = newTagTeamData('The Kings');
 
         // Act
-        resolve(CreateAction::class)->handle($data);
+        resolve(CreateAction::class)->handle($data, null);
 
         // Assert
         expect(DB::table('record_name_locks')->count())->toBe(1);
@@ -255,7 +259,7 @@ describe('tag team name guard', function (): void {
         }
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(newTagTeamData($name));
+        $create = fn () => resolve(CreateAction::class)->handle(newTagTeamData($name), $promotion->id);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class, "A tag team named 'The Kings' already exists in this promotion.")
@@ -271,7 +275,7 @@ describe('tag team name guard', function (): void {
         TagTeam::factory()->create(['name' => 'The Kings', 'signature_move' => 'Royal Flush']);
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(newTagTeamData('The Queens', 'Royal Flush'));
+        $create = fn () => resolve(CreateAction::class)->handle(newTagTeamData('The Queens', 'Royal Flush'), null);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class, "A tag team with the signature move 'Royal Flush' already exists in this promotion.")
@@ -285,9 +289,40 @@ describe('tag team name guard', function (): void {
         enforcePromotionContext($promotion);
 
         // Act
-        $tagTeam = resolve(CreateAction::class)->handle(newTagTeamData('The Kings', 'Royal Flush'));
+        $tagTeam = resolve(CreateAction::class)->handle(newTagTeamData('The Kings', 'Royal Flush'), $promotion->id);
 
         // Assert
         expect($tagTeam->promotion_id)->toBe($promotion->id);
     });
+});
+
+describe('explicit promotion', function (): void {
+    test('it creates the tag team in the promotion it is given, whatever the context holds', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $data = newTagTeamData('The Kings');
+
+        // Act
+        $tagTeam = resolve(CreateAction::class)->handle($data, $promotion->id);
+
+        // Assert
+        expect($tagTeam->promotion_id)->toBe($promotion->id);
+    });
+
+    test('it checks the name and signature move against the promotion it is given', function (string $name, ?string $signatureMove): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        TagTeam::factory()->for($promotion, 'promotion')->create(['name' => 'The Kings', 'signature_move' => 'Royal Flush']);
+        $data = newTagTeamData($name, $signatureMove);
+
+        // Act
+        $create = fn () => resolve(CreateAction::class)->handle($data, $promotion->id);
+
+        // Assert
+        expect($create)->toThrow(NameTakenException::class)
+            ->and(TagTeam::query()->withoutGlobalScopes()->count())->toBe(1);
+    })->with([
+        'name' => ['The Kings', null],
+        'signature move' => ['The Queens', 'Royal Flush'],
+    ]);
 });

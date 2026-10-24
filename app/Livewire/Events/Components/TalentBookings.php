@@ -124,6 +124,7 @@ class TalentBookings extends Component
         $booking = $event->talentBookings()->where('person_type', $this->personType)->where('person_id', $this->personId)->first();
         $data = $this->form->toData($event, $booking, $attest);
         $this->resetErrorBag();
+
         try {
             $action->handle($event, $this->personType, $this->personId, $this->version, $this->fingerprint, $data, $this->actor());
             $this->personId = 0;
@@ -161,9 +162,11 @@ class TalentBookings extends Component
             'referees' => Referee::query(),
             default => null,
         };
+
         if ($query === null) {
             return [];
         }
+
         $column = $kind === 'referees' ? 'full_name' : 'name';
         $like = LikeTerm::from($term, 100);
 

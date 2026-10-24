@@ -42,6 +42,7 @@ final readonly class StorylineDevelopmentRequirements
     public function ensureSourceExplained(?StorylineStep $step, array $source, ?string $reason): void
     {
         $contextChanged = $step instanceof StorylineStep && collect($step->source_context)->sortKeys()->all() !== collect($source['context'])->sortKeys()->all();
+
         if (($source['warnings'] !== [] || $contextChanged) && mb_trim($reason ?? '') === '') {
             throw StorylineConflictException::source();
         }
@@ -70,16 +71,21 @@ final readonly class StorylineDevelopmentRequirements
         if ($participants->count() !== count($participantIds)) {
             throw StorylineConflictException::source();
         }
+
         $savedLabels = collect($savedCast ?? [])->keyBy(fn (array $person): string => $person['type'].':'.$person['id']);
         $cast = [];
+
         foreach ($participants as $participant) {
             if ($participant->joined_on->toDateString() > $occurredOn || ($participant->left_on !== null && $participant->left_on->toDateString() < $occurredOn)) {
                 throw StorylineConflictException::source();
             }
+
             $person = $participant->participant;
+
             if (! $person instanceof Wrestler && ! $person instanceof TagTeam) {
                 throw StorylineConflictException::source();
             }
+
             $cast[] = ['type' => $participant->participant_type, 'id' => $participant->participant_id, 'label' => $savedLabels->get($participant->participant_type.':'.$participant->participant_id)['label'] ?? $person->name];
         }
 

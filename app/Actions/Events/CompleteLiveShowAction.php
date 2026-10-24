@@ -16,8 +16,13 @@ use Illuminate\Support\Facades\DB;
 
 class CompleteLiveShowAction
 {
-    public function __construct(private readonly LockLiveShowAction $lock, private readonly PersistLiveShowAction $persist,
-        private readonly LiveShowSourceRequirements $source, private readonly LiveShowDayRequirements $showDay, private readonly LiveShowStateMachine $states) {}
+    public function __construct(
+        private readonly LockLiveShowAction $lock,
+        private readonly PersistLiveShowAction $persist,
+        private readonly LiveShowSourceRequirements $source,
+        private readonly LiveShowDayRequirements $showDay,
+        private readonly LiveShowStateMachine $states,
+    ) {}
 
     public function handle(Event $event, int $version, User $actor): void
     {
@@ -25,9 +30,11 @@ class CompleteLiveShowAction
             $run = $this->lock->handle($event, $version);
             $this->showDay->ensureShowDay($run);
             $this->states->ensureCanComplete($run);
+
             if ($this->source->hasChanged($run->event, $run)) {
                 throw LiveShowException::reviewRequired();
             }
+
             $before = ['status' => $run->status->value];
             $run->status = LiveShowStatus::Completed;
             $run->completed_at = now();

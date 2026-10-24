@@ -17,13 +17,13 @@ return new class extends Migration
         match ($connection->getDriverName()) {
             'sqlite', 'pgsql' => $connection->statement(
                 'CREATE UNIQUE INDEX titles_championships_one_open_reign_unique '
-                .'ON titles_championships (title_id) WHERE lost_at IS NULL AND deleted_at IS NULL'
+                .'ON titles_championships (title_id) WHERE lost_at IS NULL AND deleted_at IS NULL',
             ),
             'mysql', 'mariadb' => $connection->statement(
                 'ALTER TABLE titles_championships '
                 .'ADD COLUMN open_reign_title_id BIGINT UNSIGNED '
                 .'GENERATED ALWAYS AS (CASE WHEN lost_at IS NULL AND deleted_at IS NULL THEN title_id ELSE NULL END) STORED, '
-                .'ADD UNIQUE INDEX titles_championships_one_open_reign_unique (open_reign_title_id)'
+                .'ADD UNIQUE INDEX titles_championships_one_open_reign_unique (open_reign_title_id)',
             ),
             default => throw new LogicException('The database driver does not support open reign constraints.'),
         };
@@ -57,7 +57,7 @@ return new class extends Migration
         throw new RuntimeException(
             "Cannot enforce one open reign per title: {$conflicts}. "
             .'No changes were made. End or delete all but one open reign for each title, '
-            .'then re-run "php artisan migrate".'
+            .'then re-run "php artisan migrate".',
         );
     }
 };

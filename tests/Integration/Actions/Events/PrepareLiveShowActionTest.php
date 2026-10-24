@@ -140,21 +140,27 @@ test('a new live show requires a dated valid reviewed pack', function (string $c
     // Arrange
     actingAs(administrator());
     $event = Event::factory()->create(['date' => $case === 'undated' ? null : now()]);
+
     if ($case !== 'empty') {
         EventMatch::factory()->for($event)->create();
     }
+
     $data = resolve(EventPackViewModel::class)->data($event);
+
     if ($case !== 'missing pack') {
         resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     }
+
     if ($case === 'unreviewed') {
         $event->update(['name' => 'Renamed after pack review']);
     }
+
     if ($case === 'old') {
         $event->update(['date' => now()->subDay()]);
         $data = resolve(EventPackViewModel::class)->data($event);
         resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), true);
     }
+
     $version = $case === 'old' ? 2 : 1;
 
     // Act / Assert

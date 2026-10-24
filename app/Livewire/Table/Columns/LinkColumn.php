@@ -6,6 +6,7 @@ namespace App\Livewire\Table\Columns;
 
 use App\Livewire\Table\Column;
 use Closure;
+use Override;
 
 class LinkColumn extends Column
 {
@@ -27,7 +28,7 @@ class LinkColumn extends Column
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function resolveValue(mixed $row): string
     {
         $title = $this->titleCallback instanceof Closure ? ($this->titleCallback)($row) : '';
@@ -40,7 +41,7 @@ class LinkColumn extends Column
         return static::linkHtml($title, $location);
     }
 
-    #[\Override]
+    #[Override]
     public function isHtml(): bool
     {
         return true;

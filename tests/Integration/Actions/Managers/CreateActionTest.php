@@ -60,7 +60,7 @@ test('it creates manager with all optional fields', function () {
     $data = new ManagerData(
         first_name: 'John',
         last_name: 'Doe',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(CreateAction::class)->handle($data);

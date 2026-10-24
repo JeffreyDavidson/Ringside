@@ -136,6 +136,7 @@ test('a form that breaks a field rule saves nothing and names the field', functi
     $page->call('begin', $mode);
     $page->set('form.heading', 'A heading')->set('form.description', 'A description.')->set('form.reason', 'A reason.');
     $page->set('form.joinedOn', today()->toDateString())->set('form.participantId', 1);
+
     foreach ($fields as $field => $value) {
         $page->set("form.{$field}", $value);
     }
@@ -238,9 +239,11 @@ test('a manager downgraded while a form is open writes nothing from any form', f
     $id = ['step_status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant_end' => $person->id, 'step' => $step->id][$mode] ?? null;
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
     $page->call('begin', $mode, $id)->set('form.heading', 'Downgraded')->set('form.description', 'Should not save.')->set('form.reason', 'Reason.')->set('form.status', $mode === 'step_status' ? 'postponed' : 'paused')->set('form.sequence', 7);
+
     if ($mode === 'participant') {
         $page->set('form.participantId', Wrestler::factory()->for($promotion)->create()->id);
     }
+
     $promotion->users()->updateExistingPivot($manager->id, ['role' => MembershipRole::Member->value]);
     $context->forgetMemberships();
 

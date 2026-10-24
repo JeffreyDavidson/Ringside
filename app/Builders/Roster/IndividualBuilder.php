@@ -61,6 +61,7 @@ abstract class IndividualBuilder extends Builder
         } else {
             $this->bookable();
         }
+
         if ($date === null) {
             return $this;
         }

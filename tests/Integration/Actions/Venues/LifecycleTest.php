@@ -40,7 +40,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '123 Test Street',
                 city: 'Test City',
                 state: 'Texas',
-                zipcode: '12345'
+                zipcode: '12345',
             );
 
             $venue = resolve(CreateAction::class)->handle($venueData);
@@ -60,7 +60,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '456 Database Lane',
                 city: 'Database City',
                 state: 'Delaware',
-                zipcode: '54321'
+                zipcode: '54321',
             );
 
             $venue = resolve(CreateAction::class)->handle($venueData);
@@ -79,7 +79,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '789 O\'Connor St.',
                 city: 'St. Louis',
                 state: 'Missouri',
-                zipcode: '63101'
+                zipcode: '63101',
             );
 
             $venue = resolve(CreateAction::class)->handle($venueData);
@@ -97,7 +97,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '100 Basic St',
                 city: 'Basic City',
                 state: 'California',
-                zipcode: '10000'
+                zipcode: '10000',
             );
 
             $venue = resolve(CreateAction::class)->handle($venueData);
@@ -122,7 +122,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: $venue->street_address,
                 city: 'Updated City',
                 state: $venue->state,
-                zipcode: $venue->zipcode
+                zipcode: $venue->zipcode,
             );
 
             $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
@@ -143,7 +143,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: $venue->street_address,
                 city: $venue->city,
                 state: 'Utah',
-                zipcode: $venue->zipcode
+                zipcode: $venue->zipcode,
             );
 
             resolve(UpdateAction::class)->handle($venue, $venueData);
@@ -163,7 +163,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: $venue->street_address,
                 city: $venue->city,
                 state: $venue->state,
-                zipcode: $venue->zipcode
+                zipcode: $venue->zipcode,
             );
 
             $updatedVenue = resolve(UpdateAction::class)->handle($staleVenue, $venueData);
@@ -188,7 +188,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '456 New Avenue',
                 city: 'New City',
                 state: 'Nevada',
-                zipcode: '54321'
+                zipcode: '54321',
             );
 
             $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
@@ -208,7 +208,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: $venue->street_address,
                 city: $venue->city,
                 state: $venue->state,
-                zipcode: $venue->zipcode
+                zipcode: $venue->zipcode,
             );
 
             $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
@@ -336,7 +336,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '123 Event St',
                 city: 'Event City',
                 state: 'Colorado',
-                zipcode: '12345'
+                zipcode: '12345',
             );
 
             $venue = resolve(CreateAction::class)->handle($venueData);
@@ -356,7 +356,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: $venue->street_address,
                 city: $venue->city,
                 state: $venue->state,
-                zipcode: $venue->zipcode
+                zipcode: $venue->zipcode,
             );
 
             $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
@@ -383,7 +383,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '123 Validation St',
                 city: 'Validation City',
                 state: 'Virginia',
-                zipcode: '12345'
+                zipcode: '12345',
             );
 
             $venue = resolve(CreateAction::class)->handle($venueData);
@@ -403,7 +403,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '456 Updated St',
                 city: 'Updated City',
                 state: 'Connecticut',
-                zipcode: '54321'
+                zipcode: '54321',
             );
 
             $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
@@ -423,7 +423,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: '123 Time St',
                 city: 'Time City',
                 state: 'Tennessee',
-                zipcode: '12345'
+                zipcode: '12345',
             );
 
             $venue = resolve(CreateAction::class)->handle($venueData);
@@ -446,7 +446,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: $venue->street_address,
                 city: $venue->city,
                 state: $venue->state,
-                zipcode: $venue->zipcode
+                zipcode: $venue->zipcode,
             );
 
             $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
@@ -464,7 +464,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: $venue->street_address,
                 city: $venue->city,
                 state: $venue->state,
-                zipcode: $venue->zipcode
+                zipcode: $venue->zipcode,
             );
 
             $venueData2 = new VenueData(
@@ -472,7 +472,7 @@ describe('Venue Action Integration Tests', function () {
                 street_address: $venue->street_address,
                 city: $venue->city,
                 state: $venue->state,
-                zipcode: $venue->zipcode
+                zipcode: $venue->zipcode,
             );
 
             $updatedVenue1 = resolve(UpdateAction::class)->handle($venue, $venueData1);

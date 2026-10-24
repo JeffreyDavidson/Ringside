@@ -95,7 +95,10 @@ class BookingHistoryViewModel
 
             if ($this->directType($type, $firstEntry['type'])) {
                 $snapshot['direct'] = $this->directRecord(
-                    $event->promotion_id, $reference, $excludedMatchId, $subjects->firstOrFail(),
+                    $event->promotion_id,
+                    $reference,
+                    $excludedMatchId,
+                    $subjects->firstOrFail(),
                     $subjects->sole(fn (Wrestler|TagTeam $subject): bool => $this->key($subject) === $secondEntry['type'].':'.$secondEntry['id']),
                 );
             }

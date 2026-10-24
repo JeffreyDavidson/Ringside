@@ -46,8 +46,13 @@ test('a stale edit cannot replace an archived crew contact', function (): void {
     $archive->handle($contact, 1, signedInUser());
 
     // Assert
-    expect(fn () => resolve(SaveCrewContactAction::class)->handle($stale, 1, $stale->client_id,
-        new CrewContactData('Wrong update', null, null, null), signedInUser()))
+    expect(fn () => resolve(SaveCrewContactAction::class)->handle(
+        $stale,
+        1,
+        $stale->client_id,
+        new CrewContactData('Wrong update', null, null, null),
+        signedInUser(),
+    ))
         ->toThrow(RecordChangedException::class)
         ->and($contact->refresh()->archived_at)->not->toBeNull()
         ->and($contact->name)->toBe('Alex Sound');
@@ -65,8 +70,13 @@ test('repeated archive and invalid new-contact version cannot change records', f
 
     // Act / Assert
     expect(fn () => $archive->handle($contact, 1, signedInUser()))->toThrow(RecordChangedException::class);
-    expect(fn () => resolve(SaveCrewContactAction::class)->handle(null, 5, 'eed36a82-90cb-4a79-b2cc-92e6c4051888',
-        new CrewContactData('New contact', null, null, null), signedInUser()))->toThrow(RecordChangedException::class)
+    expect(fn () => resolve(SaveCrewContactAction::class)->handle(
+        null,
+        5,
+        'eed36a82-90cb-4a79-b2cc-92e6c4051888',
+        new CrewContactData('New contact', null, null, null),
+        signedInUser(),
+    ))->toThrow(RecordChangedException::class)
         ->and(CrewContact::query()->count())->toBe(1)
         ->and($contact->refresh()->version)->toBe(2);
 });

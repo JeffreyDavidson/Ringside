@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousManagedTable;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousManagedTable<TagTeamManager> */
 class PreviousTagTeams extends BasePreviousManagedTable
@@ -19,22 +20,22 @@ class PreviousTagTeams extends BasePreviousManagedTable
     #[Locked]
     public ?int $managerId = null;
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'tag_teams_managers';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'tag teams';
 
-    #[\Override]
+    #[Override]
     protected string $managedRelation = 'tagTeam';
 
-    #[\Override]
+    #[Override]
     protected string $managedLabelGroup = 'tag-teams';
 
-    #[\Override]
+    #[Override]
     protected string $hiredLabelKey = 'managers.date_hired';
 
-    #[\Override]
+    #[Override]
     protected string $firedLabelKey = 'managers.date_fired';
 
     /** @return ManagerAssignmentBuilder<TagTeamManager> */

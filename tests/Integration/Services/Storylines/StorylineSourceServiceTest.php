@@ -31,9 +31,11 @@ test('stable match and segment identities show source evidence without treating 
     $source = new SourceData($f['event']->id, $kind === 'match' ? $f['match']->id : null, $kind === 'segment' ? $f['segment'] : null);
     $step = plannedStorylineStep($f['story'], $source);
     $content = $f['run']->content;
+
     foreach ($content['items'] as &$item) {
         $item['state'] = 'finished';
     }
+
     $f['run']->content = $content;
     $f['run']->save();
     // Act
@@ -47,9 +49,11 @@ test('removed segment UUIDs never attach to a replacement with the same label', 
     $old = storylineEvidence($source, $f['story']->promotion_id);
     $pack = $f['event']->pack()->firstOrFail();
     $content = $pack->content;
+
     foreach ($content['segments'] as &$segment) {
         $segment['id'] = (string) Str::uuid();
     }
+
     unset($segment);
     $pack->content = $content;
     $pack->save();
@@ -105,11 +109,13 @@ test('skipped sources require an explanation and never cancel the planned story 
     $source = new SourceData($f['event']->id, segmentId: $f['segment']);
     $step = plannedStorylineStep($f['story'], $source);
     $content = $f['run']->content;
+
     foreach ($content['items'] as &$item) {
         if ($item['key'] === 'segment:'.$f['segment']) {
             $item['state'] = 'skipped';
         }
     }
+
     unset($item);
     $f['run']->content = $content;
     $f['run']->save();

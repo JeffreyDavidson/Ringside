@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class UpdatePromotionMemberRoleAction
 {
-    public function __construct(private EnsureAnotherActiveOwnerAction $ensureAnotherActiveOwner) {}
+    public function __construct(
+        private EnsureAnotherActiveOwnerAction $ensureAnotherActiveOwner,
+        private PromotionContextService $context,
+    ) {}
 
     public function handle(Promotion $promotion, User $user, MembershipRole $role): void
     {
@@ -35,7 +38,7 @@ final readonly class UpdatePromotionMemberRoleAction
                 'role' => $role,
             ]);
 
-            app(PromotionContextService::class)->forgetMemberships();
+            $this->context->forgetMemberships();
         });
     }
 }

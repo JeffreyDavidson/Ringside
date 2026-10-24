@@ -26,12 +26,15 @@ class BookTournamentMatchAction
     public function handle(TournamentNode $node, int $version, TournamentBookingData $data, User $actor): EventMatch
     {
         $bout = $this->bracket->bout($node);
+
         if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry) {
             throw TournamentException::unresolved();
         }
+
         $kind = $node->tournament()->firstOrFail()->entrant_kind;
         $first = $bout->first->competitor;
         $second = $bout->second->competitor;
+
         if ($kind === EntrantKind::Wrestler) {
             if (! $first instanceof Wrestler || ! $second instanceof Wrestler) {
                 throw TournamentException::entrantsChanged();
@@ -39,6 +42,7 @@ class BookTournamentMatchAction
 
             return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::Singles, $data->referees, $data->titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), null, $data->stipulation), $actor, $node, $version);
         }
+
         if (! $first instanceof TagTeam || ! $second instanceof TagTeam) {
             throw TournamentException::entrantsChanged();
         }

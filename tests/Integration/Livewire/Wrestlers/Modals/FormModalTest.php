@@ -217,6 +217,46 @@ describe('FormModal Form Integration', function () {
     });
 });
 
+describe('FormModal employment date', function () {
+    beforeEach(function () {
+        travelTo(Date::parse('2024-06-01 12:00:00'));
+    });
+
+    it('shows on the date field that the start of a current employment cannot move, even to another day inside it', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
+        $wrestler->employments()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.name', 'Renamed Wrestler');
+        $modal->set('form.employment_date', '2024-02-01');
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.employment_date' => 'The employment date cannot be changed while Original Name is currently employed.'])
+            ->assertNotDispatched('closeModal');
+        expect($wrestler->refresh()->name)->toBe('Original Name');
+    });
+
+    it('shows on the date field that a scheduled hire cannot move to a day before today', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
+        $wrestler->employments()->create(['started_at' => '2024-07-01']);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-05-31');
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.employment_date' => 'A scheduled employment can only move to today or a later day.']);
+        expect($wrestler->employments()->sole()->started_at->toDateString())->toBe('2024-07-01');
+    });
+});
+
 describe('FormModal Dummy Data', function () {
     it('can fill dummy data', function () {
         $component = livewire(FormModal::class);

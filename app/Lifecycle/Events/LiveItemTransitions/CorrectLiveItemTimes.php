@@ -19,12 +19,14 @@ final readonly class CorrectLiveItemTimes implements LiveItemTransition
     {
         $item = $run->content['items'][$index];
         $state = LiveItemStatus::from($item['state']);
+
         if (! in_array($state, [LiveItemStatus::Running, LiveItemStatus::Finished], true) || ! $start instanceof Carbon
             || $start->gt(now()) || ($state === LiveItemStatus::Finished && ! $finish instanceof Carbon)
             || ($state === LiveItemStatus::Running && $finish instanceof Carbon)
             || ($finish instanceof Carbon && ($finish->lt($start) || $finish->gt(now())))) {
             throw LiveShowException::invalidTimes();
         }
+
         foreach ($run->content['items'] as $position => $other) {
             if (($position < $index && $other['finish'] !== null && Carbon::parse($other['finish'])->gt($start))
                 || ($position > $index && $other['start'] !== null && (! $finish instanceof Carbon || Carbon::parse($other['start'])->lt($finish)))) {

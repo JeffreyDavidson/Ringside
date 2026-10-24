@@ -16,13 +16,13 @@ return new class extends Migration
         match ($connection->getDriverName()) {
             'sqlite', 'pgsql', 'sqlsrv' => $connection->statement(
                 'CREATE UNIQUE INDEX tag_teams_wrestlers_one_current_membership_unique '
-                .'ON tag_teams_wrestlers (wrestler_id) WHERE left_at IS NULL'
+                .'ON tag_teams_wrestlers (wrestler_id) WHERE left_at IS NULL',
             ),
             'mysql', 'mariadb' => $connection->statement(
                 'ALTER TABLE tag_teams_wrestlers '
                 .'ADD COLUMN current_wrestler_id BIGINT UNSIGNED '
                 .'GENERATED ALWAYS AS (CASE WHEN left_at IS NULL THEN wrestler_id ELSE NULL END) STORED, '
-                .'ADD UNIQUE INDEX tag_teams_wrestlers_one_current_membership_unique (current_wrestler_id)'
+                .'ADD UNIQUE INDEX tag_teams_wrestlers_one_current_membership_unique (current_wrestler_id)',
             ),
             default => throw new LogicException('The database driver does not support current tag team membership constraints.'),
         };
@@ -63,7 +63,7 @@ return new class extends Migration
         throw new RuntimeException(
             "Cannot enforce one current tag team per wrestler: {$conflicts}. "
             .'No changes were made. End the extra memberships by setting left_at on the '
-            .'tag_teams_wrestlers rows that should no longer be current, then re-run "php artisan migrate".'
+            .'tag_teams_wrestlers rows that should no longer be current, then re-run "php artisan migrate".',
         );
     }
 };

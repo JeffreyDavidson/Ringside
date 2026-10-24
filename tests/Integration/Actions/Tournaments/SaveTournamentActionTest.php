@@ -23,8 +23,12 @@ it('creates an eight entrant seeded bracket without booking fictional matches', 
 
     // Act
     $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData(
-        name: 'Autumn Cup', description: null, kind: EntrantKind::Wrestler,
-        capacity: 8, repeatAppearances: false, competitorIds: array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all()),
+        name: 'Autumn Cup',
+        description: null,
+        kind: EntrantKind::Wrestler,
+        capacity: 8,
+        repeatAppearances: false,
+        competitorIds: array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all()),
     ), administrator());
 
     // Assert

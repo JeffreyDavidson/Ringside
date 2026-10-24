@@ -70,19 +70,19 @@ $bookingScenarios = [
         $match = EventMatch::factory()->forEvent($event)->create();
         $wrestlers = Wrestler::factory()->bookable()->count(2)->create();
 
-        return [$event, fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, 1)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, $wrestlers, 1))];
     }],
     'add tag teams' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create();
         $tagTeams = TagTeam::factory()->bookable()->count(2)->create();
 
-        return [$event, fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 1)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, $tagTeams, 1))];
     }],
     'add referees' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create();
         $referees = Referee::factory()->bookable()->count(2)->create();
 
-        return [$event, fn () => resolve(AddRefereesToMatchAction::class)->handle($match, $referees)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, $referees))];
     }],
     'add titles' => [function (Event $event): array {
         $match = EventMatch::factory()
@@ -91,7 +91,7 @@ $bookingScenarios = [
             ->create();
         $titles = Title::factory()->active()->count(2)->create(['type' => TitleType::Singles]);
 
-        return [$event, fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles))];
     }],
     'add competitors' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create(['match_type' => MatchType::Singles]);
@@ -100,7 +100,7 @@ $bookingScenarios = [
             2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
         ]));
 
-        return [$event, fn () => resolve(AddCompetitorsToMatchAction::class)->handle($match, $competitors)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors))];
     }],
 ];
 
@@ -146,12 +146,12 @@ test('it locks the complete ordered same-date event set before anything else', f
         ->and($firstLock['bindings'])->toContain($event->id)
         ->and(collect($firstLock['bindings'])->contains(
             fn (mixed $binding): bool => $binding instanceof DateTimeInterface
-                && $binding->getTimestamp() === $event->date->getTimestamp()
+                && $binding->getTimestamp() === $event->date->getTimestamp(),
         ))->toBeTrue()
         ->and($writesBeforeFirstLock)->toBeEmpty()
         ->and($lockedStatements->filter(
             fn (array $statement): bool => str_contains($statement['sql'], 'from "events"')
-                && ! str_contains($statement['sql'], 'order by "id" asc')
+                && ! str_contains($statement['sql'], 'order by "id" asc'),
         ))->toBeEmpty()
         ->and($sameDateEvent->id)->toBeGreaterThan($event->id);
 })->with('scheduling lock scenarios');

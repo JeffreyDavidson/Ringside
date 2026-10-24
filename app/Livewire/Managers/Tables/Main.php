@@ -18,32 +18,33 @@ use App\Livewire\Table\Filter;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Override;
 
 /** @extends BaseTable<Manager> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = Manager::class;
 
-    #[\Override]
+    #[Override]
     protected ?string $indexView = 'livewire.managers.tables.main';
 
-    #[\Override]
+    #[Override]
     protected string $actionsView = 'components.tables.columns.manager-actions';
 
-    #[\Override]
+    #[Override]
     protected string $actionsRowVariable = 'manager';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'managers';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'managers';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'managers';
 
     /**
@@ -57,7 +58,7 @@ class Main extends BaseTable
             ->orderBy('managers.id');
     }
 
-    #[\Override]
+    #[Override]
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists(IndividualBuilder::ROSTER_STATE);
@@ -83,7 +84,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

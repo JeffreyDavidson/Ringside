@@ -171,9 +171,11 @@ function declaresExecutableControllerTest(string $source): bool
         }
 
         $callback = $call->args[1]->value ?? null;
+
         if ($callback instanceof ArrowFunction) {
             return true;
         }
+
         if ($callback instanceof Closure && $callback->stmts !== []) {
             return true;
         }
@@ -197,6 +199,7 @@ function controllerTestProblems(array $controllers, string $testDirectory): arra
 
         $relative = str_replace('\\', '/', Str::after($controller, 'App\\Http\\Controllers\\')).'Test.php';
         $path = $testDirectory.'/'.$relative;
+
         if (! is_file($path)) {
             $problems[] = "{$relative}: missing matching file";
 
@@ -226,6 +229,7 @@ test('controller matching rejects missing or misplaced files and exempts abstrac
     $directory = sys_get_temp_dir().'/ringside-controller-tests-'.Str::uuid();
     File::ensureDirectoryExists($directory.'/WrongFolder');
     $controller = $case === 'abstract' ? Controller::class : DashboardController::class;
+
     if ($case === 'wrong path') {
         File::put($directory.'/WrongFolder/DashboardControllerTest.php', '<?php test("dashboard", fn () => expect(true)->toBeTrue());');
     }

@@ -16,12 +16,21 @@ class LockLiveShowAction
 
     public function handle(Event $event, int $version): EventLiveRun
     {
-        $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
+        $event = Event::query()
+            ->whereKey($event->id)
+            ->lockForUpdate()
+            ->firstOrFail();
         $event->load('promotion');
-        $run = EventLiveRun::query()->forEventId($event->id)->lockForUpdate()->firstOrFail();
+
+        $run = EventLiveRun::query()
+            ->forEventId($event->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
         if ($run->version !== $version) {
             throw RecordChangedException::changed();
         }
+
         $this->states->ensureOpen($run);
 
         return $run->setRelation('event', $event);

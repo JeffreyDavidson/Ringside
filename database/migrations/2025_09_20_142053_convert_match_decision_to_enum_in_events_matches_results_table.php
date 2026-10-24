@@ -23,11 +23,14 @@ return new class extends Migration
 
         // Migrate existing data from match_decision_id to match_decision enum values
         $results = DB::table('events_matches_results')->get();
+
         foreach ($results as $result) {
             $matchDecisionModel = MatchDecisionModel::find($result->match_decision_id);
+
             if ($matchDecisionModel) {
                 // Convert the slug to enum value by finding matching enum case
                 $enumValue = $this->getEnumValueFromSlug($matchDecisionModel->slug);
+
                 if ($enumValue) {
                     DB::table('events_matches_results')
                         ->where('id', $result->id)
@@ -59,8 +62,10 @@ return new class extends Migration
 
         // Migrate data back from enum to foreign key
         $results = DB::table('events_matches_results')->get();
+
         foreach ($results as $result) {
             $matchDecisionModel = MatchDecisionModel::where('slug', $result->match_decision)->first();
+
             if ($matchDecisionModel) {
                 DB::table('events_matches_results')
                     ->where('id', $result->id)

@@ -31,9 +31,11 @@ class SponsorCommitmentsViewModel
     {
         $query = EventSponsorCommitment::query()->forEventId($event->id)
             ->with(['event.promotion', 'event.pack', 'event.liveRun', 'event.matches', 'sponsor']);
+
         if (in_array($filter, ['pending', 'completed', 'cancelled'], true)) {
             $query->where(function (Builder $query) use ($filter): void {
                 $query->where('status', $filter);
+
                 if ($filter === 'pending') {
                     $query->orWhere(fn (Builder $review): Builder => $review->where('status', SponsorCommitmentStatus::Cancelled)->whereNotNull('pack_key'));
                 }
@@ -56,6 +58,7 @@ class SponsorCommitmentsViewModel
     public function statuses(iterable $commitments): array
     {
         $statuses = [];
+
         foreach ($commitments as $commitment) {
             $statuses[$commitment->id] = $this->status($commitment);
         }
@@ -73,6 +76,7 @@ class SponsorCommitmentsViewModel
     public function details(iterable $commitments): array
     {
         $details = [];
+
         foreach ($commitments as $commitment) {
             $details[$commitment->id] = ['status' => $this->status($commitment), 'overdue' => $this->isOverdue($commitment),
                 'eventNeedsReview' => $this->eventNeedsReview($commitment), 'instructionNeedsReview' => $this->instructionNeedsReview($commitment),
@@ -87,6 +91,7 @@ class SponsorCommitmentsViewModel
         if ($commitment->status === SponsorCommitmentStatus::Completed && $commitment->deadline_at !== null && $commitment->completed_at?->gt($commitment->deadline_at)) {
             return __('sponsors.completed_late');
         }
+
         if ($this->isOverdue($commitment)) {
             return __('sponsors.overdue');
         }
@@ -109,6 +114,7 @@ class SponsorCommitmentsViewModel
     {
         $content = $commitment->event->pack->content ?? [];
         $target = $this->instructions->target($content, $commitment->pack_key);
+
         if (str_starts_with($commitment->pack_key ?? '', 'segment:') && ($target['after_match_id'] ?? null) !== null
             && ! $commitment->event->matches->contains('id', $target['after_match_id'])) {
             return true;

@@ -166,7 +166,7 @@ test('wrestlers may be filtered by retirement status', function (): void {
             Retirement::factory()
                 ->started(Date::now()->subMonth())
                 ->ended(Date::now()->subDays(2)),
-            'retirements'
+            'retirements',
         )
         ->create();
 
@@ -189,7 +189,7 @@ test('managers may be filtered by retirement status', function (): void {
             Retirement::factory()
                 ->started(Date::now()->subMonth())
                 ->ended(Date::now()->subDays(2)),
-            'retirements'
+            'retirements',
         )
         ->create();
 
@@ -212,7 +212,7 @@ test('referees may be filtered by retirement status', function (): void {
             Retirement::factory()
                 ->started(Date::now()->subMonth())
                 ->ended(Date::now()->subDays(2)),
-            'retirements'
+            'retirements',
         )
         ->create();
 
@@ -235,7 +235,7 @@ test('tag teams may be filtered by retirement status', function (): void {
             Retirement::factory()
                 ->started(Date::now()->subMonth())
                 ->ended(Date::now()->subDays(2)),
-            'retirements'
+            'retirements',
         )
         ->create();
 

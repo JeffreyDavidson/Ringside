@@ -27,24 +27,45 @@ class AwardTournamentWalkoverAction
     {
         DB::transaction(function () use ($node, $version, $reason, $actor): void {
             $tournament = $this->locks->lock($node->tournament_id);
+
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
+
             $this->states->ensureActive($tournament);
             $node = $tournament->nodes()->findOrFail($node->id);
             $bout = $this->bracket->bout($node);
+
             if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry || $bout->complete || $bout->link instanceof TournamentMatchLink || $bout->first->withdrawn === $bout->second->withdrawn) {
                 throw TournamentException::walkoverInvalid();
             }
+
             $winner = $bout->first->withdrawn ? $bout->second : $bout->first;
-            $competitor = $tournament->entrant_kind->modelClass()::query()->whereKey($winner->competitor_id)->when($tournament->entrant_kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))->lockForUpdate()->first();
+            $competitor = $tournament->entrant_kind->modelClass()::query()
+                ->whereKey($winner->competitor_id)
+                ->when($tournament->entrant_kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))
+                ->lockForUpdate()
+                ->first();
+
             if ($competitor === null || ! $this->eligibility->allows($competitor)) {
                 throw TournamentException::entrantUnavailable();
             }
+
             $node->fill(['walkover_reason' => $reason]);
             $node->walkover_entry_id = $winner->id;
             $node->save();
-            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'winner_entry_id' => $winner->id, 'reason' => $reason])->log('tournament.walkover');
+
+            activity('tournaments')
+                ->causedBy($actor)
+                ->withProperties([
+                    'promotion_id' => $tournament->promotion_id,
+                    'tournament_id' => $tournament->id,
+                    'node_id' => $node->id,
+                    'winner_entry_id' => $winner->id,
+                    'reason' => $reason,
+                ])
+                ->log('tournament.walkover');
+
             $this->outcomes->synchronize($tournament, $actor);
         }, attempts: 3);
     }

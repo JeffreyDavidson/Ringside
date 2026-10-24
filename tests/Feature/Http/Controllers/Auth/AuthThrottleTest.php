@@ -8,6 +8,7 @@ use function Pest\Laravel\travel;
 test('guest account endpoints stop responding after six requests a minute', function (string $routeName): void {
     // Arrange
     $url = route($routeName);
+
     foreach (range(1, 6) as $attempt) {
         post($url, []);
     }
@@ -39,6 +40,7 @@ test('the guest account endpoints accept requests again after the window passes'
     foreach (range(1, 7) as $attempt) {
         post(route('register'), []);
     }
+
     travel(61)->seconds();
 
     // Act
