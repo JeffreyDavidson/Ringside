@@ -12,37 +12,27 @@ final class CannotBeUpdatedException extends BaseBusinessException
 {
     public static function startDateLocked(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.updated.start_date_locked', ['context' => $context]));
+        return self::forModel('stables.errors.updated.start_date_locked', $stable);
     }
 
     public static function endsOpenPeriod(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.updated.ends_open_period', ['context' => $context]));
+        return self::forModel('stables.errors.updated.ends_open_period', $stable);
     }
 
     public static function startsAfterMembership(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.updated.starts_after_membership', ['context' => $context]));
+        return self::forModel('stables.errors.updated.starts_after_membership', $stable);
     }
 
     public static function endsBeforeMembership(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.updated.ends_before_membership', ['context' => $context]));
+        return self::forModel('stables.errors.updated.ends_before_membership', $stable);
     }
 
     public static function inactiveWithMembers(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.updated.inactive_with_members', ['context' => $context]));
+        return self::forModel('stables.errors.updated.inactive_with_members', $stable);
     }
 
     public static function nameTaken(string $name): static

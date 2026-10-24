@@ -14,8 +14,6 @@ final class CannotBeRestoredException extends BaseBusinessException
 {
     public static function notDeleted(Wrestler|Manager|Referee $entity): static
     {
-        $context = self::formatModelContext($entity);
-
-        return self::forReason(BusinessRuleReason::NotDeleted, __('individuals.errors.restore.not_deleted', ['context' => $context]));
+        return self::forModel('individuals.errors.restore.not_deleted', $entity, reason: BusinessRuleReason::NotDeleted);
     }
 }

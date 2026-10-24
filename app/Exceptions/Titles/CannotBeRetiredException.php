@@ -11,22 +11,16 @@ final class CannotBeRetiredException extends BaseBusinessException
 {
     public static function unactivated(Title $title): static
     {
-        $context = self::formatModelContext($title);
-
-        return new self(__('titles.errors.retired.unactivated', ['context' => $context]));
+        return self::forModel('titles.errors.retired.unactivated', $title);
     }
 
     public static function hasFutureDebut(Title $title): static
     {
-        $context = self::formatModelContext($title);
-
-        return new self(__('titles.errors.retired.has_future_debut', ['context' => $context]));
+        return self::forModel('titles.errors.retired.has_future_debut', $title);
     }
 
     public static function alreadyRetired(Title $title): static
     {
-        $context = self::formatModelContext($title);
-
-        return new self(__('titles.errors.retired.already_retired', ['context' => $context]));
+        return self::forModel('titles.errors.retired.already_retired', $title);
     }
 }

@@ -11,9 +11,7 @@ final class CannotBeMergedException extends BaseBusinessException
 {
     public static function selfMerge(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.merged.self_merge', ['context' => $context]));
+        return self::forModel('stables.errors.merged.self_merge', $stable);
     }
 
     public static function differentPromotions(Stable $primaryStable, Stable $secondaryStable): static
@@ -26,30 +24,22 @@ final class CannotBeMergedException extends BaseBusinessException
 
     public static function primaryRetired(Stable $primaryStable): static
     {
-        $context = self::formatModelContext($primaryStable);
-
-        return new self(__('stables.errors.merged.primary_retired', ['context' => $context]));
+        return self::forModel('stables.errors.merged.primary_retired', $primaryStable);
     }
 
     public static function secondaryRetired(Stable $secondaryStable): static
     {
-        $context = self::formatModelContext($secondaryStable);
-
-        return new self(__('stables.errors.merged.secondary_retired', ['context' => $context]));
+        return self::forModel('stables.errors.merged.secondary_retired', $secondaryStable);
     }
 
     public static function primaryNotActive(Stable $primaryStable): static
     {
-        $context = self::formatModelContext($primaryStable);
-
-        return new self(__('stables.errors.merged.primary_not_active', ['context' => $context]));
+        return self::forModel('stables.errors.merged.primary_not_active', $primaryStable);
     }
 
     public static function secondaryNotActive(Stable $secondaryStable): static
     {
-        $context = self::formatModelContext($secondaryStable);
-
-        return new self(__('stables.errors.merged.secondary_not_active', ['context' => $context]));
+        return self::forModel('stables.errors.merged.secondary_not_active', $secondaryStable);
     }
 
     /** @param array<int, string> $memberNames */

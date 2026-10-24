@@ -14,18 +14,11 @@ final class CannotBeDeletedException extends BaseBusinessException
 {
     public static function alreadyDeleted(Wrestler|Manager|Referee $entity): static
     {
-        $context = self::formatModelContext($entity);
-
-        return new self(__('core.delete_rejections.already_deleted', ['context' => $context]));
+        return self::forModel('core.delete_rejections.already_deleted', $entity);
     }
 
     public static function bookedInUpcomingMatch(Wrestler|Referee $individual): static
     {
-        $context = self::formatModelContext($individual);
-
-        return self::forReason(
-            BusinessRuleReason::BookedInMatch,
-            __('core.delete_rejections.booked_in_match', ['context' => $context]),
-        );
+        return self::forModel('core.delete_rejections.booked_in_match', $individual, reason: BusinessRuleReason::BookedInMatch);
     }
 }

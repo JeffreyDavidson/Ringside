@@ -14,15 +14,11 @@ final class CannotBeReleasedException extends BaseBusinessException
 {
     public static function unemployed(Wrestler|Manager|Referee $entity): static
     {
-        $context = self::formatModelContext($entity);
-
-        return self::forReason(BusinessRuleReason::Unemployed, __('individuals.errors.release.unemployed', ['context' => $context]));
+        return self::forModel('individuals.errors.release.unemployed', $entity, reason: BusinessRuleReason::Unemployed);
     }
 
     public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
     {
-        $context = self::formatModelContext($entity);
-
-        return new self(__('individuals.errors.release.future_employment', ['context' => $context]));
+        return self::forModel('individuals.errors.release.future_employment', $entity);
     }
 }

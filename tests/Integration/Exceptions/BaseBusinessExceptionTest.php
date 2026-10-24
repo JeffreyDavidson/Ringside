@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -118,3 +119,66 @@ test('a model context leaves the name empty for a record that has neither a name
     // Assert
     expect($context)->toBe("Referee ''");
 });
+
+/**
+ * Exposes the protected model-context factory the concrete exceptions share.
+ *
+ * @param  array<string, string>  $replacements
+ */
+function exceptionForModel(string $key, Model $model, array $replacements = [], BusinessRuleReason $reason = BusinessRuleReason::General, ?int $count = null): BaseBusinessException
+{
+    $probe = new class extends BaseBusinessException
+    {
+        /** @param array<string, string> $replacements */
+        public static function build(string $key, Model $model, array $replacements, BusinessRuleReason $reason, ?int $count): static
+        {
+            return self::forModel($key, $model, $replacements, $reason, $count);
+        }
+    };
+
+    return $probe::build($key, $model, $replacements, $reason, $count);
+}
+
+test('a model exception message puts the model context into the translated message', function (): void {
+    // Arrange
+    $stable = (new (Relation::getMorphedModel('stable')))->forceFill(['name' => 'The Harbor Crew']);
+
+    // Act
+    $exception = exceptionForModel('stables.errors.deleted.already_deleted', $stable);
+
+    // Assert
+    expect($exception->getMessage())->toBe(__('stables.errors.deleted.already_deleted', ['context' => "Stable 'The Harbor Crew'"]))
+        ->and($exception->getMessage())->toContain("Stable 'The Harbor Crew'")
+        ->and($exception->reason())->toBe(BusinessRuleReason::General)
+        ->and($exception->getCode())->toBe(0);
+});
+
+test('a model exception message adds the extra replacements and the reason', function (): void {
+    // Arrange
+    $referee = new class extends Model
+    {
+        public function getMorphClass(): string
+        {
+            return 'referee';
+        }
+    };
+    $referee->forceFill(['full_name' => 'Earl Hebner']);
+
+    // Act
+    $exception = exceptionForModel('individuals.errors.suspend.already_suspended', $referee, ['details' => ' since Monday'], BusinessRuleReason::AlreadySuspended);
+
+    // Assert
+    expect($exception->getMessage())->toBe("Referee 'Earl Hebner' is already suspended since Monday.")
+        ->and($exception->reason())->toBe(BusinessRuleReason::AlreadySuspended);
+});
+
+test('a model exception message picks the plural form from the count', function (int $count): void {
+    // Arrange
+    $stable = (new (Relation::getMorphedModel('stable')))->forceFill(['name' => 'The Harbor Crew']);
+
+    // Act
+    $exception = exceptionForModel('stables.errors.deleted.has_current_members', $stable, count: $count);
+
+    // Assert
+    expect($exception->getMessage())->toBe(trans_choice('stables.errors.deleted.has_current_members', $count, ['context' => "Stable 'The Harbor Crew'"]));
+})->with([1, 3]);

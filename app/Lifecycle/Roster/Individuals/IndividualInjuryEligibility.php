@@ -6,21 +6,18 @@ namespace App\Lifecycle\Roster\Individuals;
 
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 final class IndividualInjuryEligibility
 {
+    use AnswersEligibility;
+
     public function canInjure(Wrestler|Manager|Referee $individual): bool
     {
-        try {
-            $this->ensureCanInjure($individual);
-
-            return true;
-        } catch (CannotBeInjuredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanInjure($individual), CannotBeInjuredException::class);
     }
 
     public function ensureCanInjure(Wrestler|Manager|Referee $individual): void
@@ -44,13 +41,7 @@ final class IndividualInjuryEligibility
 
     public function canBeClearedFromInjury(Wrestler|Manager|Referee $individual): bool
     {
-        try {
-            $this->ensureCanBeClearedFromInjury($individual);
-
-            return true;
-        } catch (CannotBeClearedFromInjuryException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanBeClearedFromInjury($individual), CannotBeClearedFromInjuryException::class);
     }
 
     public function ensureCanBeClearedFromInjury(Wrestler|Manager|Referee $individual): void

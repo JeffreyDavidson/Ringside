@@ -12,15 +12,11 @@ final class CannotBeSuspendedException extends BaseBusinessException
 {
     public static function notEmployed(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::Unemployed, __('tag-team-lifecycle.errors.suspend.unemployed', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.suspend.unemployed', $tagTeam, reason: BusinessRuleReason::Unemployed);
     }
 
     public static function alreadySuspended(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::AlreadySuspended, __('tag-team-lifecycle.errors.suspend.already_suspended', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.suspend.already_suspended', $tagTeam, reason: BusinessRuleReason::AlreadySuspended);
     }
 }

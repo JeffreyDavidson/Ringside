@@ -7,21 +7,18 @@ namespace App\Lifecycle\Roster\Individuals;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 final class IndividualRetirementEligibility
 {
+    use AnswersEligibility;
+
     public function canRetire(Wrestler|Manager|Referee $individual): bool
     {
-        try {
-            $this->ensureCanRetire($individual);
-
-            return true;
-        } catch (CannotBeRetiredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanRetire($individual), CannotBeRetiredException::class);
     }
 
     public function ensureCanRetire(Wrestler|Manager|Referee $individual): void
@@ -41,13 +38,7 @@ final class IndividualRetirementEligibility
 
     public function canUnretire(Wrestler|Manager|Referee $individual): bool
     {
-        try {
-            $this->ensureCanUnretire($individual);
-
-            return true;
-        } catch (CannotBeUnretiredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanUnretire($individual), CannotBeUnretiredException::class);
     }
 
     public function ensureCanUnretire(Wrestler|Manager|Referee $individual): void

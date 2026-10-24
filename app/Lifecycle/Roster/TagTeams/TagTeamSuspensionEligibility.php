@@ -6,19 +6,16 @@ namespace App\Lifecycle\Roster\TagTeams;
 
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 
 final class TagTeamSuspensionEligibility
 {
+    use AnswersEligibility;
+
     public function canSuspend(TagTeam $tagTeam): bool
     {
-        try {
-            $this->ensureCanSuspend($tagTeam);
-
-            return true;
-        } catch (CannotBeSuspendedException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanSuspend($tagTeam), CannotBeSuspendedException::class);
     }
 
     public function ensureCanSuspend(TagTeam $tagTeam): void
@@ -34,13 +31,7 @@ final class TagTeamSuspensionEligibility
 
     public function canReinstate(TagTeam $tagTeam): bool
     {
-        try {
-            $this->ensureCanReinstate($tagTeam);
-
-            return true;
-        } catch (CannotBeReinstatedException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanReinstate($tagTeam), CannotBeReinstatedException::class);
     }
 
     public function ensureCanReinstate(TagTeam $tagTeam): void

@@ -5,43 +5,18 @@ declare(strict_types=1);
 namespace App\Livewire\Referees\Forms;
 
 use App\Data\Referees\RefereeData;
-use App\Livewire\Base\BaseForm;
+use App\Livewire\Base\BasePersonForm;
 use App\Models\Roster\Referees\Referee;
-use App\Rules\Shared\CanChangeEmploymentDate;
-use Illuminate\Database\Eloquent\Model;
-use Livewire\Attributes\Locked;
-use Override;
 
-/** @extends BaseForm<Referee> */
-class CreateEditForm extends BaseForm
+/** @extends BasePersonForm<Referee> */
+class CreateEditForm extends BasePersonForm
 {
-    public string $first_name = '';
-
-    public string $last_name = '';
-
-    public ?string $employment_date = null;
-
-    /**
-     * Set when editing someone whose employment history is kept, so the date field is not offered. The one
-     * exception is an only employment that has not started yet: its date is offered and can be moved or cleared.
-     */
-    #[Locked]
-    public bool $hasEmploymentHistory = false;
-
-    protected function loadModelData(Model $model): void
-    {
-        $scheduledEmployment = $model->soleScheduledEmployment();
-
-        $this->hasEmploymentHistory = $scheduledEmployment === null && $model->employments()->exists();
-        $this->employment_date = $this->localDateString($scheduledEmployment?->started_at);
-    }
-
     public function toData(): RefereeData
     {
         return new RefereeData(
             first_name: $this->first_name,
             last_name: $this->last_name,
-            employment_date: $this->employment_date ? $this->parseLocalDate($this->employment_date) : null,
+            employment_date: $this->employmentDateInstant($this->employment_date),
         );
     }
 
@@ -50,24 +25,13 @@ class CreateEditForm extends BaseForm
         return Referee::query()->findOrFail($this->modelId);
     }
 
-    protected function rules(): array
+    protected function personBeingEdited(): Referee
     {
-        $referee = $this->isEditing() ? $this->referee() : null;
-
-        return [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($referee)],
-        ];
+        return $this->referee();
     }
 
-    #[Override]
-    protected function validationAttributes(): array
+    protected function translationFile(): string
     {
-        return [
-            'first_name' => __('referees.validation.attributes.first_name'),
-            'last_name' => __('referees.validation.attributes.last_name'),
-            'employment_date' => __('referees.validation.attributes.employment_date'),
-        ];
+        return 'referees';
     }
 }

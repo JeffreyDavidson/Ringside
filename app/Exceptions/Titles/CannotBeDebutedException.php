@@ -11,8 +11,6 @@ final class CannotBeDebutedException extends BaseBusinessException
 {
     public static function alreadyDebuted(Title $title): static
     {
-        $context = self::formatModelContext($title);
-
-        return new self(__('titles.errors.debuted.already_debuted', ['context' => $context]));
+        return self::forModel('titles.errors.debuted.already_debuted', $title);
     }
 }

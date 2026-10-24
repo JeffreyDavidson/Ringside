@@ -8,6 +8,7 @@ use App\Data\Stables\StableMembershipData;
 use App\Enums\Stables\StableMemberUnavailability;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -16,17 +17,13 @@ use App\Services\Roster\Stables\StableMembershipService;
 
 final readonly class StableRestructuringEligibility
 {
+    use AnswersEligibility;
+
     public function __construct(private StableMembershipService $membershipService) {}
 
     public function canSplit(Stable $stable): bool
     {
-        try {
-            $this->ensureCanSplit($stable);
-
-            return true;
-        } catch (CannotBeSplitException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanSplit($stable), CannotBeSplitException::class);
     }
 
     /**
