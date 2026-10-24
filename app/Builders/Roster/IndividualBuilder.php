@@ -41,9 +41,7 @@ abstract class IndividualBuilder extends Builder
     public function bookable(): static
     {
         return $this->whereHas('currentEmployment')
-            ->whereDoesntHave('currentRetirement')
-            ->whereDoesntHave('currentSuspension')
-            ->whereDoesntHave('currentInjury');
+            ->withoutBlockingState();
     }
 
     /**
@@ -55,9 +53,7 @@ abstract class IndividualBuilder extends Builder
     {
         if ($at instanceof Carbon) {
             $this->whereHas('employments', fn (Builder $employments) => LifecyclePeriodBuilder::constrainToActiveOn($employments, $at->copy()->utc()))
-                ->whereDoesntHave('currentRetirement')
-                ->whereDoesntHave('currentSuspension')
-                ->whereDoesntHave('currentInjury');
+                ->withoutBlockingState();
         } else {
             $this->bookable();
         }
@@ -66,7 +62,17 @@ abstract class IndividualBuilder extends Builder
             return $this;
         }
 
-        return $this->whereDoesntHave('unavailabilities', fn (Builder $entries): Builder => $entries
-            ->whereNull('cancelled_at')->where('starts_on', '<=', $date)->where('ends_on', '>=', $date)->whereColumn('roster_unavailabilities.promotion_id', $this->qualifyColumn('promotion_id')));
+        return $this->whereDoesntHave('unavailabilities', function (Builder $entries) use ($date): void {
+            UnavailabilityBuilder::constrainToCovering($entries, $date);
+            $entries->whereColumn('roster_unavailabilities.promotion_id', $this->qualifyColumn('promotion_id'));
+        });
+    }
+
+    /** The clauses bookable() and bookableOn() share: not retired, suspended or injured as things stand now. */
+    private function withoutBlockingState(): static
+    {
+        return $this->whereDoesntHave('currentRetirement')
+            ->whereDoesntHave('currentSuspension')
+            ->whereDoesntHave('currentInjury');
     }
 }

@@ -109,6 +109,45 @@ describe('HasActivityPeriods Trait Integration Tests', function () {
     });
 
     describe('previous activity periods', function () {
+        test('previousActivityPeriod picks the latest ended period and ignores open and future ones, including when eager loaded', function () {
+            // Arrange
+            $first = Title::factory()->create();
+            $second = Title::factory()->create();
+            $none = Title::factory()->create();
+
+            ActivityPeriod::factory()->for($first, 'activeable')->create(['started_at' => now()->subYears(3), 'ended_at' => now()->subYears(2)]);
+            $latest = ActivityPeriod::factory()->for($first, 'activeable')->create(['started_at' => now()->subYear(), 'ended_at' => now()->subMonths(3)]);
+            ActivityPeriod::factory()->for($first, 'activeable')->create(['started_at' => now()->subMonth(), 'ended_at' => null]);
+            ActivityPeriod::factory()->for($second, 'activeable')->create(['started_at' => now()->subYears(2), 'ended_at' => now()->subYear()]);
+            ActivityPeriod::factory()->for($none, 'activeable')->create(['started_at' => now()->subMonth(), 'ended_at' => null]);
+
+            // Act
+            $single = Title::query()->findOrFail($first->id)->previousActivityPeriod;
+            $eager = Title::query()->with('previousActivityPeriod')->whereKey([$first->id, $second->id, $none->id])->get()->keyBy('id');
+
+            // Assert
+            expect($single?->id)->toBe($latest->id)
+                ->and($eager->get($first->id)?->previousActivityPeriod?->id)->toBe($latest->id)
+                ->and($eager->get($second->id)?->previousActivityPeriod)->not->toBeNull()
+                ->and($eager->get($none->id)?->previousActivityPeriod)->toBeNull();
+        });
+
+        test('previousActivityPeriod resolves to one of the tied periods when two ended at the same moment', function () {
+            // Arrange
+            $model = Title::factory()->create();
+            $endedAt = now()->subMonth()->startOfSecond();
+            $ties = collect([now()->subYear(), now()->subMonths(6)])
+                ->map(fn (Carbon $startedAt): ActivityPeriod => ActivityPeriod::factory()->for($model, 'activeable')->create(['started_at' => $startedAt, 'ended_at' => $endedAt]));
+
+            // Act
+            $single = Title::query()->findOrFail($model->id)->previousActivityPeriod;
+            $eager = Title::query()->with('previousActivityPeriod')->findOrFail($model->id)->previousActivityPeriod;
+
+            // Assert
+            expect($ties->pluck('id')->all())->toContain($single?->id)
+                ->and($ties->pluck('id')->all())->toContain($eager?->id);
+        });
+
         test('model can have previous activity periods', function () {
             ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
 

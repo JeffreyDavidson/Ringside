@@ -56,15 +56,7 @@ class TagTeamBuilder extends Builder
     public function bookable(): static
     {
         return $this->whereHas('currentEmployment')
-            ->whereDoesntHave('currentRetirement')
-            ->whereDoesntHave('currentSuspension')
-            ->has('currentWrestlers', '>=', TagTeamMembershipRequirements::MINIMUM_CURRENT_WRESTLERS)
-            ->whereDoesntHave(
-                'currentWrestlers',
-                fn (WrestlerBuilder $wrestlers): WrestlerBuilder => $wrestlers->whereNot(
-                    fn (WrestlerBuilder $wrestler): WrestlerBuilder => $wrestler->bookable(),
-                ),
-            );
+            ->withBookableMembers();
     }
 
     /**
@@ -76,15 +68,7 @@ class TagTeamBuilder extends Builder
     {
         if ($at instanceof Carbon) {
             $this->whereHas('employments', fn (Builder $employments) => LifecyclePeriodBuilder::constrainToActiveOn($employments, $at->copy()->utc()))
-                ->whereDoesntHave('currentRetirement')
-                ->whereDoesntHave('currentSuspension')
-                ->has('currentWrestlers', '>=', TagTeamMembershipRequirements::MINIMUM_CURRENT_WRESTLERS)
-                ->whereDoesntHave(
-                    'currentWrestlers',
-                    fn (WrestlerBuilder $wrestlers): WrestlerBuilder => $wrestlers->whereNot(
-                        fn (WrestlerBuilder $wrestler): WrestlerBuilder => $wrestler->bookableOn(null, $at),
-                    ),
-                );
+                ->withBookableMembers($at);
         } else {
             $this->bookable();
         }
@@ -96,5 +80,23 @@ class TagTeamBuilder extends Builder
         return $this->whereDoesntHave('currentWrestlers', fn (WrestlerBuilder $members): WrestlerBuilder => $members
             ->whereHas('unavailabilities', fn (UnavailabilityBuilder $entries): UnavailabilityBuilder => $entries
                 ->covering($date)->whereColumn('roster_unavailabilities.promotion_id', 'wrestlers.promotion_id')));
+    }
+
+    /**
+     * The clauses bookable() and bookableOn() share after the employment check: not retired or
+     * suspended, the minimum number of current wrestlers, and every current wrestler bookable
+     * (employed at `$at` when given, otherwise now).
+     */
+    private function withBookableMembers(?Carbon $at = null): static
+    {
+        return $this->whereDoesntHave('currentRetirement')
+            ->whereDoesntHave('currentSuspension')
+            ->has('currentWrestlers', '>=', TagTeamMembershipRequirements::MINIMUM_CURRENT_WRESTLERS)
+            ->whereDoesntHave(
+                'currentWrestlers',
+                fn (WrestlerBuilder $wrestlers): WrestlerBuilder => $wrestlers->whereNot(
+                    fn (WrestlerBuilder $wrestler): WrestlerBuilder => $wrestler->bookableOn(null, $at),
+                ),
+            );
     }
 }
