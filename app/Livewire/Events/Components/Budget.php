@@ -15,9 +15,8 @@ use App\Enums\Events\BudgetCategory;
 use App\Enums\Events\BudgetDirection;
 use App\Enums\Events\BudgetMovementKind;
 use App\Enums\Events\BudgetOperation;
-use App\Exceptions\Events\BudgetException;
-use App\Exceptions\RecordChangedException;
-use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ReportsBusinessErrors;
 use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Events\Forms\BudgetLineForm;
 use App\Livewire\Events\Forms\BudgetMovementForm;
@@ -32,13 +31,17 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * @property-read Event $event
+ */
 class Budget extends Component
 {
-    use ExplainsKeptInput;
+    use ReportsBusinessErrors;
     use ResolvesActor;
     use WithPagination;
 
@@ -82,16 +85,17 @@ class Budget extends Component
     public function mount(int $eventId): void
     {
         $this->eventId = $eventId;
-        Gate::authorize('viewBudget', $this->event());
+        Gate::authorize('viewBudget', $this->event);
     }
 
     public function beginLine(?int $lineId = null, string $direction = 'expense'): void
     {
-        Gate::authorize('updateBudget', $this->event());
-        Validator::make(['direction' => $direction], ['direction' => [Rule::enum(BudgetDirection::class)]])->validate();
+        Gate::authorize('updateBudget', $this->event);
+        $validated = Validator::make(['direction' => $direction], ['direction' => [Rule::enum(BudgetDirection::class)]])->validate();
+        $lineDirection = BudgetDirection::from($validated['direction']);
         $this->open(BudgetOperation::SaveLine, $lineId);
-        $this->lineForm->direction = $direction;
-        $this->lineForm->category = $direction === 'income' ? 'tickets' : 'talent';
+        $this->lineForm->direction = $lineDirection->value;
+        $this->lineForm->category = $lineDirection === BudgetDirection::Income ? 'tickets' : 'talent';
 
         if ($lineId !== null) {
             $line = $this->line($lineId);
@@ -106,13 +110,14 @@ class Budget extends Component
 
     public function beginMovement(int $lineId, string $kind = 'payment', ?int $movementId = null): void
     {
-        Gate::authorize('updateBudget', $this->event());
-        Validator::make(['kind' => $kind], ['kind' => [Rule::enum(BudgetMovementKind::class)]])->validate();
+        Gate::authorize('updateBudget', $this->event);
+        $validated = Validator::make(['kind' => $kind], ['kind' => [Rule::enum(BudgetMovementKind::class)]])->validate();
+        $movementKind = BudgetMovementKind::from($validated['kind']);
         $line = $this->line($lineId);
         $this->open($movementId === null ? BudgetOperation::RecordMovement : BudgetOperation::CorrectMovement, $lineId);
         $this->movementId = $movementId;
         $this->draftLabel = $line->description.' · '.$line->counterparty;
-        $this->movementForm->kind = $kind;
+        $this->movementForm->kind = $movementKind->value;
         $this->movementForm->effective_date = now($line->budget->timezone)->toDateString();
 
         if ($movementId !== null) {
@@ -125,7 +130,7 @@ class Budget extends Component
 
     public function updatedMovementFormKind(string $kind): void
     {
-        Gate::authorize('updateBudget', $this->event());
+        Gate::authorize('updateBudget', $this->event);
 
         if ($kind === 'payment') {
             $this->movementForm->source_id = null;
@@ -134,7 +139,7 @@ class Budget extends Component
 
     public function beginArchive(int $lineId): void
     {
-        Gate::authorize('updateBudget', $this->event());
+        Gate::authorize('updateBudget', $this->event);
         $line = $this->line($lineId);
         $this->open(BudgetOperation::ArchiveLine, $lineId);
         $this->draftLabel = $line->description;
@@ -142,7 +147,7 @@ class Budget extends Component
 
     public function cancelDraft(): void
     {
-        Gate::authorize('viewBudget', $this->event());
+        Gate::authorize('viewBudget', $this->event);
         $this->dispatch('budget-draft-closed');
         $this->operation = null;
         $this->lineForm->reset();
@@ -153,14 +158,14 @@ class Budget extends Component
 
     public function refreshState(): void
     {
-        Gate::authorize('viewBudget', $this->event());
+        Gate::authorize('viewBudget', $this->event);
         $this->draftVersion = EventBudget::query()->forEventId($this->eventId)->first()->version ?? 0;
         $this->dispatch('budget-refreshed');
     }
 
     public function showHistory(?int $lineId = null): void
     {
-        Gate::authorize('viewBudget', $this->event());
+        Gate::authorize('viewBudget', $this->event);
 
         if ($lineId !== null) {
             $this->line($lineId);
@@ -173,7 +178,7 @@ class Budget extends Component
 
     public function hideHistory(): void
     {
-        Gate::authorize('viewBudget', $this->event());
+        Gate::authorize('viewBudget', $this->event);
         $this->historyOpen = false;
     }
 
@@ -183,7 +188,7 @@ class Budget extends Component
         CorrectBudgetMovementAction $correctMovement,
         ArchiveBudgetLineAction $archiveLine,
     ): void {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('updateBudget', $event);
 
         if (! $this->operation instanceof BudgetOperation) {
@@ -192,25 +197,26 @@ class Budget extends Component
             return;
         }
 
-        $lineInput = $this->operation === BudgetOperation::SaveLine ? $this->lineForm->validate() : [];
-        $movementInput = $this->operation->needsMovementInput($this->replaceMovement)
+        $operation = $this->operation;
+        $lineInput = $operation === BudgetOperation::SaveLine ? $this->lineForm->validate() : [];
+        $movementInput = $operation->needsMovementInput($this->replaceMovement)
             ? $this->movementForm->validate()
             : [];
 
-        if ($this->operation->requiresReason()) {
+        if ($operation->requiresReason()) {
             Validator::make(['reason' => $this->reason], ['reason' => ['required', 'string', 'max:1000']])->validate();
         }
 
-        try {
-            match ($this->operation) {
+        $saved = $this->reportBusinessErrors(function () use ($saveLine, $recordMovement, $correctMovement, $archiveLine, $event, $operation, $lineInput, $movementInput): void {
+            match ($operation) {
                 BudgetOperation::SaveLine => $saveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, BudgetLineData::fromValidated($lineInput), $this->actor()),
                 BudgetOperation::RecordMovement => $recordMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, BudgetMovementData::fromValidated($movementInput), $this->actor()),
                 BudgetOperation::CorrectMovement => $correctMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, new BudgetCorrectionData($this->movementId ?? 0, $this->reason, $this->replaceMovement ? BudgetMovementData::fromValidated($movementInput) : null), $this->actor()),
                 BudgetOperation::ArchiveLine => $archiveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason, $this->actor()),
             };
-        } catch (BudgetException|RecordChangedException $exception) {
-            $this->addError('budget', $this->failureMessageKeepingInput($exception));
+        });
 
+        if (! $saved) {
             return;
         }
 
@@ -220,7 +226,7 @@ class Budget extends Component
 
     public function render(EventBudgetViewModel $screen, BudgetRevisionHistoryQuery $historyQuery): View
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('viewBudget', $event);
         $data = $screen->data($event);
         $direction = BudgetDirection::tryFrom($this->lineForm->direction);
@@ -238,7 +244,13 @@ class Budget extends Component
             'selectedLine' => $selectedLine, 'safeFilter' => in_array($this->filter, ['all', 'needs_amount', 'to_pay', 'to_collect', 'refunds'], true) ? $this->filter : 'all']);
     }
 
-    private function event(): Event
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return 'budget';
+    }
+
+    #[Computed]
+    public function event(): Event
     {
         return Event::query()->whereKey($this->eventId)->firstOrFail();
     }

@@ -8,7 +8,7 @@ use App\Actions\Events\SaveEventProductionAction;
 use App\Data\Events\EventProductionData;
 use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Events\EventProductionRequirements;
-use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ReportsBusinessErrors;
 use App\Livewire\Concerns\ResolvesActor;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -29,10 +30,12 @@ use Livewire\Component;
  * @phpstan-import-type Assignment from EventPack
  * @phpstan-import-type Cue from EventPack
  * @phpstan-import-type RunningRow from EventPackSourceService
+ *
+ * @property-read Event $event
  */
 class Production extends Component
 {
-    use ExplainsKeptInput;
+    use ReportsBusinessErrors;
     use ResolvesActor;
 
     #[Locked]
@@ -83,7 +86,7 @@ class Production extends Component
 
     public function reloadSaved(): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('updateProduction', $event);
         $data = $this->packs->data($event);
         $this->version = $data['pack']->version ?? 0;
@@ -102,13 +105,13 @@ class Production extends Component
 
     public function updated(): void
     {
-        Gate::authorize('updateProduction', $this->event());
+        Gate::authorize('updateProduction', $this->event);
         $this->saved = false;
     }
 
     public function addAssignment(): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('updateProduction', $event);
 
         if (count($this->assignments) >= 100) {
@@ -126,21 +129,21 @@ class Production extends Component
 
     public function removeAssignment(string $id): void
     {
-        Gate::authorize('updateProduction', $this->event());
+        Gate::authorize('updateProduction', $this->event);
         $this->assignments = array_values(array_filter($this->assignments, fn (array $entry): bool => $entry['id'] !== $id));
         $this->saved = false;
     }
 
     public function refreshName(string $id): void
     {
-        Gate::authorize('updateProduction', $this->event());
+        Gate::authorize('updateProduction', $this->event);
         $this->refreshNames[] = $id;
         $this->saved = false;
     }
 
     public function addCue(string $key): void
     {
-        Gate::authorize('updateProduction', $this->event());
+        Gate::authorize('updateProduction', $this->event);
         Validator::make(['item' => $key], ['item' => ['required', Rule::in(array_column($this->items, 'key'))]])->validate();
 
         if (count(array_filter($this->cues, fn (array $cue): bool => $cue['item_key'] === $key)) >= 20) {
@@ -156,14 +159,14 @@ class Production extends Component
 
     public function removeCue(string $id): void
     {
-        Gate::authorize('updateProduction', $this->event());
+        Gate::authorize('updateProduction', $this->event);
         $this->cues = array_values(array_filter($this->cues, fn (array $cue): bool => $cue['id'] !== $id));
         $this->saved = false;
     }
 
     public function restoreCue(string $id): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('updateProduction', $event);
         $data = $this->packs->data($event);
         $retained = array_values(array_filter($data['content']['production']['cues'] ?? [], fn (array $cue): bool => ! in_array($cue['item_key'], array_column($this->items, 'key'), true)));
@@ -185,7 +188,7 @@ class Production extends Component
 
     public function moveCue(string $id, int $direction): void
     {
-        Gate::authorize('updateProduction', $this->event());
+        Gate::authorize('updateProduction', $this->event);
         Validator::make(['direction' => $direction], ['direction' => [Rule::in([-1, 1])]])->validate();
         $index = array_search($id, array_column($this->cues, 'id'), true);
 
@@ -207,25 +210,23 @@ class Production extends Component
 
     public function save(SaveEventProductionAction $action, EventProductionRequirements $requirements): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('updateProduction', $event);
         $this->resetErrorBag();
         $previousVersion = $this->version;
 
-        try {
+        $this->reportBusinessErrors(function () use ($action, $event, $requirements, $previousVersion): void {
             $input = $this->validatedInput($requirements);
             $action->handle($event, $this->version, $this->fingerprint, EventProductionData::fromValidated($input), $this->reviewed, $this->actor());
             $this->reloadSaved();
             $this->saved = true;
             $this->dispatch('production-pack-saved', previousVersion: $previousVersion, version: $this->version, fingerprint: $this->fingerprint);
-        } catch (BaseBusinessException $exception) {
-            $this->addError('production', $this->failureMessageKeepingInput($exception));
-        }
+        });
     }
 
     public function render(CrewContactSearchQuery $search): View
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('updateProduction', $event);
         $data = $this->packs->data($event);
         $contacts = $search->get($this->search, $event->promotion_id);
@@ -247,7 +248,13 @@ class Production extends Component
         ]);
     }
 
-    private function event(): Event
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return 'production';
+    }
+
+    #[Computed]
+    public function event(): Event
     {
         return Event::query()->findOrFail($this->eventId);
     }

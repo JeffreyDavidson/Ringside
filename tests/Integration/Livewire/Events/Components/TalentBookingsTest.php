@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__.'/../../../../Fixtures/talent-booking.php';
 
+use App\Actions\Events\SaveTalentBookingAction;
 use App\Data\Events\TalentBookingData;
 use App\Enums\Events\TalentBookingStatus;
 use App\Enums\Promotions\MembershipRole;
@@ -18,6 +19,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Gate;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -256,4 +258,38 @@ test('unsupported editor identities fail closed without revealing a timeline', f
 
     // Act / Assert
     $component->call('edit', 'tag_team', $fixture['person']->id)->assertNotFound();
+});
+
+test('opening the editor loads the event once for the whole request', function (): void {
+    // Arrange
+    $fixture = talentBookingFixture();
+    $component = livewire(TalentBookings::class, ['eventId' => $fixture['event']->id]);
+
+    // Act
+    $statements = recordStatements(fn () => $component->call('edit', 'wrestler', $fixture['person']->id));
+
+    // Assert
+    $eventReads = array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'select * from "events" where "events"."id" = ?') && str_ends_with($statement['sql'], 'limit 1'));
+    expect($eventReads)->toHaveCount(1);
+});
+
+test('the screen shows the event as the saved booking left it', function (): void {
+    // Arrange
+    $fixture = talentBookingFixture();
+    $component = livewire(TalentBookings::class, ['eventId' => $fixture['event']->id]);
+    $component->call('edit', 'wrestler', $fixture['person']->id);
+    $save = Double::for(SaveTalentBookingAction::class);
+    $save->expects('handle')->resolves(function () use ($fixture): EventTalentBooking {
+        Event::query()->whereKey($fixture['event']->id)->update(['name' => 'Renamed During Save']);
+
+        return new EventTalentBooking;
+    });
+    app()->instance(SaveTalentBookingAction::class, $save);
+
+    // Act
+    $component->call('save', true);
+
+    // Assert
+    $component->assertSee('Renamed During Save');
+    $save->verify();
 });

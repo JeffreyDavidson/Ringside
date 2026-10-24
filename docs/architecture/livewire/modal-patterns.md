@@ -101,7 +101,7 @@ identifier protects transport integrity but does not replace authorization.
 from the Action becomes an error on the form field named by `$businessErrorField` (or by an
 overridden `businessErrorField($exception)` that can choose the field from the exception's
 `reason()`), a `RecordChangedException` message gains "Your changes are still here." through
-`ExplainsKeptInput` because the modal stays open with the input, and `storeForm()` returns `false` so no
+`ExplainsKeptInput` (both through the `ReportsBusinessErrors` concern) because the modal stays open with the input, and `storeForm()` returns `false` so no
 completion event is dispatched. A modal that sets neither lets the exception propagate.
 Validation failures throw and are shown by Livewire as usual.
 

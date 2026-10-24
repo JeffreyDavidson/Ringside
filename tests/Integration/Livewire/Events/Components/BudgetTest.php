@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use App\Actions\Events\SaveBudgetLineAction;
 use App\Livewire\Events\Components\Budget;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
@@ -9,6 +10,7 @@ use App\Models\Events\EventBudgetMovement;
 use App\Models\Promotions\Promotion;
 use App\Services\Events\BudgetSettlementService;
 use App\Services\Promotions\PromotionContextService;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -278,4 +280,45 @@ test('guests cannot open the budget component', function (): void {
     // Assert
     $component->assertForbidden();
     expect(EventBudget::query()->count())->toBe(0);
+});
+
+test('opening a line form loads the event once for the screen and once for its data', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create();
+    $component = livewire(Budget::class, ['eventId' => $event->id]);
+
+    // Act
+    $statements = recordStatements(fn () => $component->call('beginLine', null, 'income'));
+
+    // Assert
+    // The budget view model reads the event itself, so a second read belongs to it, not to the component.
+    $eventReads = array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'select * from "events" where "events"."id" = ?') && str_ends_with($statement['sql'], 'limit 1'));
+    expect($eventReads)->toHaveCount(2);
+});
+
+test('the screen shows the event as the saved line left it', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['name' => 'Harbor Showcase']);
+    $save = Double::for(SaveBudgetLineAction::class);
+    $save->expects('handle')->resolves(function () use ($event): EventBudget {
+        Event::query()->whereKey($event->id)->update(['name' => 'Renamed During Save']);
+
+        return new EventBudget;
+    });
+    app()->instance(SaveBudgetLineAction::class, $save);
+    $component = livewire(Budget::class, ['eventId' => $event->id]);
+    $component->call('beginLine', null, 'expense')
+        ->set('lineForm.description', 'Main event fee')
+        ->set('lineForm.counterparty', 'Casey')
+        ->set('lineForm.planned', '500.00')
+        ->set('lineForm.confirmed', '500.00');
+
+    // Act
+    $component->call('save');
+
+    // Assert
+    $component->assertHasNoErrors()->assertSee('Renamed During Save');
+    $save->verify();
 });
