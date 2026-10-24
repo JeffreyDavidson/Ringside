@@ -52,6 +52,28 @@ abstract class BaseBusinessException extends Exception
         return new static($message, reason: $reason);
     }
 
+    /**
+     * Builds the failure from a translation key whose message names a record through the `:context` placeholder.
+     * `$count` picks the plural form of the message.
+     *
+     * @param  array<string, bool|float|int|string|null>  $replacements
+     */
+    protected static function forModel(
+        string $key,
+        Model $model,
+        array $replacements = [],
+        BusinessRuleReason $reason = BusinessRuleReason::General,
+        ?int $count = null,
+    ): static {
+        $replacements = ['context' => self::formatModelContext($model), ...$replacements];
+
+        $message = $count === null
+            ? __($key, $replacements)
+            : trans_choice($key, $count, $replacements);
+
+        return self::forReason($reason, $message);
+    }
+
     protected static function formatModelContext(Model $model): string
     {
         $types = (array) trans('core.model_types');

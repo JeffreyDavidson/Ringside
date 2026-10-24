@@ -11,29 +11,21 @@ final class CannotBeDeletedException extends BaseBusinessException
 {
     public static function alreadyDeleted(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.deleted.already_deleted', ['context' => $context]));
+        return self::forModel('stables.errors.deleted.already_deleted', $stable);
     }
 
     public static function currentlyActive(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.deleted.currently_active', ['context' => $context]));
+        return self::forModel('stables.errors.deleted.currently_active', $stable);
     }
 
     public static function futureEstablishmentScheduled(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.deleted.future_establishment_scheduled', ['context' => $context]));
+        return self::forModel('stables.errors.deleted.future_establishment_scheduled', $stable);
     }
 
     public static function hasCurrentMembers(Stable $stable, int $memberCount): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(trans_choice('stables.errors.deleted.has_current_members', $memberCount, ['context' => $context]));
+        return self::forModel('stables.errors.deleted.has_current_members', $stable, count: $memberCount);
     }
 }

@@ -11,15 +11,11 @@ final class CannotBeRestoredException extends BaseBusinessException
 {
     public static function notDeleted(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.restored.not_deleted', ['context' => $context]));
+        return self::forModel('stables.errors.restored.not_deleted', $stable);
     }
 
     public static function nameConflict(Stable $stable, string $conflictingStableName): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.restored.name_conflict', ['context' => $context, 'conflicting_stable_name' => $conflictingStableName]));
+        return self::forModel('stables.errors.restored.name_conflict', $stable, ['conflicting_stable_name' => $conflictingStableName]);
     }
 }

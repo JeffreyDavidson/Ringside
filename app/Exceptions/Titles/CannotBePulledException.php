@@ -11,8 +11,6 @@ final class CannotBePulledException extends BaseBusinessException
 {
     public static function notActive(Title $title): static
     {
-        $context = self::formatModelContext($title);
-
-        return new self(__('titles.errors.pulled.not_active', ['context' => $context]));
+        return self::forModel('titles.errors.pulled.not_active', $title);
     }
 }

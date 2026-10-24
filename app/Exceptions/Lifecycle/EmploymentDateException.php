@@ -14,11 +14,11 @@ final class EmploymentDateException extends BaseBusinessException
 {
     public static function currentStartLocked(Manager|Referee|TagTeam|Wrestler $employable): static
     {
-        return new self(__('core.errors.employment_date.current_start_locked', ['context' => self::formatModelContext($employable)]));
+        return self::forModel('core.errors.employment_date.current_start_locked', $employable);
     }
 
     public static function scheduledInThePast(Manager|Referee|TagTeam|Wrestler $employable): static
     {
-        return new self(__('core.errors.employment_date.scheduled_in_past', ['context' => self::formatModelContext($employable)]));
+        return self::forModel('core.errors.employment_date.scheduled_in_past', $employable);
     }
 }
