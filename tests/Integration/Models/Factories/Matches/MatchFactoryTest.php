@@ -162,7 +162,7 @@ describe('MatchFactory', function () {
                 ->and($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
 
             // Should have a championship record
-            $championship = TitleChampionship::where('title_id', $title->id)->firstOrFail();
+            $championship = TitleChampionship::query()->where('title_id', $title->id)->firstOrFail();
             expect($championship)->not->toBeNull()
                 ->and($championship->champion_type)->toBe(Wrestler::class);
             // Champion should be one of the competitors
@@ -179,7 +179,7 @@ describe('MatchFactory', function () {
                 ->and($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
 
             // Should have a championship record
-            $championship = TitleChampionship::where('title_id', $title->id)->firstOrFail();
+            $championship = TitleChampionship::query()->where('title_id', $title->id)->firstOrFail();
             expect($championship)->not->toBeNull()
                 ->and($championship->champion_type)->toBe(TagTeam::class);
             // Champion should be one of the competitors

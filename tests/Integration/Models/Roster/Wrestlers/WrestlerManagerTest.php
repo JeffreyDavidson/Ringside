@@ -192,7 +192,7 @@ describe('WrestlerManager Pivot Model', function () {
                 ->and($wrestler->previousManagers()->count())->toBe(0);
 
             // Verify pivot record is deleted
-            expect(WrestlerManager::where('wrestler_id', $wrestler->id)
+            expect(WrestlerManager::query()->where('wrestler_id', $wrestler->id)
                 ->where('manager_id', $manager->id)
                 ->exists())->toBeFalse();
         });
@@ -273,7 +273,7 @@ describe('WrestlerManager Pivot Model', function () {
 
             createManagementRelationship($wrestler, $manager);
 
-            $pivotRecord = WrestlerManager::where('wrestler_id', $wrestler->id)
+            $pivotRecord = WrestlerManager::query()->where('wrestler_id', $wrestler->id)
                 ->where('manager_id', $manager->id)
                 ->firstOrFail();
 
@@ -288,7 +288,7 @@ describe('WrestlerManager Pivot Model', function () {
 
             createManagementRelationship($wrestler, $manager);
 
-            $pivotRecord = WrestlerManager::where('wrestler_id', $wrestler->id)
+            $pivotRecord = WrestlerManager::query()->where('wrestler_id', $wrestler->id)
                 ->where('manager_id', $manager->id)
                 ->firstOrFail();
 
@@ -308,7 +308,7 @@ describe('WrestlerManager Pivot Model', function () {
                 'fired_at' => $firedDate,
             ]);
 
-            $pivotRecord = WrestlerManager::where('wrestler_id', $wrestler->id)
+            $pivotRecord = WrestlerManager::query()->where('wrestler_id', $wrestler->id)
                 ->where('manager_id', $manager->id)
                 ->firstOrFail();
 

@@ -281,7 +281,7 @@ class Manage extends Component
         $events = Event::query()->where('promotion_id', $story->promotion_id)->when(! $like->isEmpty(), fn (Builder $query) => $query->whereLike('name', $like->contains()))->orderByDesc('date')->orderByDesc('id')->limit(20)->get();
         $selected = $this->form->eventId === null ? null : Event::query()->withTrashed()->where('promotion_id', $story->promotion_id)->with(['matches', 'pack', 'promotion'])->findOrFail($this->form->eventId);
 
-        if ($selected !== null && ! $events->contains('id', $selected->id)) {
+        if ($selected !== null && $events->doesntContain('id', $selected->id)) {
             $events->push($selected);
         }
 

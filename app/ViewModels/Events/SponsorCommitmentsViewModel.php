@@ -116,7 +116,7 @@ class SponsorCommitmentsViewModel
         $target = $this->instructions->target($content, $commitment->pack_key);
 
         if (str_starts_with($commitment->pack_key ?? '', 'segment:') && ($target['after_match_id'] ?? null) !== null
-            && ! $commitment->event->matches->contains('id', $target['after_match_id'])) {
+            && $commitment->event->matches->doesntContain('id', $target['after_match_id'])) {
             return true;
         }
 

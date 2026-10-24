@@ -141,7 +141,7 @@ test('application actions have a matching test file', function (): void {
     $missingTests = collect(iterator_to_array(
         Finder::create()->files()->in(app_path('Actions'))->name('*.php'),
     ))
-        ->filter(fn (SplFileInfo $file): bool => ! $testNames->has(
+        ->reject(fn (SplFileInfo $file): bool => $testNames->has(
             pathinfo($file->getFilename(), PATHINFO_FILENAME).'Test.php',
         ))
         ->map(fn (SplFileInfo $file): string => str($file->getPathname())

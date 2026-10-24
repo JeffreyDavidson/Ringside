@@ -135,7 +135,7 @@ describe('StableTagTeam Pivot Model', function () {
             expect($stable->currentTagTeams()->count())->toBe(2);
 
             // Verify total pivot record count
-            $tagTeamCount = StableTagTeam::where('stable_id', $stable->id)
+            $tagTeamCount = StableTagTeam::query()->where('stable_id', $stable->id)
                 ->whereNull('left_at')
                 ->count();
             expect($tagTeamCount)->toBe(2);
@@ -221,7 +221,7 @@ describe('StableTagTeam Pivot Model', function () {
                 ->and($tagTeam->previousStables()->count())->toBe(0);
 
             // Verify pivot record is deleted
-            expect(StableTagTeam::where('tag_team_id', $tagTeam->id)
+            expect(StableTagTeam::query()->where('tag_team_id', $tagTeam->id)
                 ->where('stable_id', $stable->id)
                 ->exists())->toBeFalse();
         });
@@ -237,7 +237,7 @@ describe('StableTagTeam Pivot Model', function () {
                 'updated_at' => now(),
             ]);
 
-            $pivotRecord = StableTagTeam::where('tag_team_id', $tagTeam->id)
+            $pivotRecord = StableTagTeam::query()->where('tag_team_id', $tagTeam->id)
                 ->where('stable_id', $stable->id)
                 ->firstOrFail();
 
@@ -265,7 +265,7 @@ describe('StableTagTeam Pivot Model', function () {
                 'updated_at' => now(),
             ]);
 
-            $tagTeamPivot = StableTagTeam::where('tag_team_id', $tagTeam->id)
+            $tagTeamPivot = StableTagTeam::query()->where('tag_team_id', $tagTeam->id)
                 ->where('stable_id', $stable->id)
                 ->firstOrFail();
 

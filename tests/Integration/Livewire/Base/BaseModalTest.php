@@ -259,7 +259,7 @@ describe('promotion-owned modals', function (): void {
         $event = $ownEvent
             ? Event::factory()->for($world['attacker'], 'promotion')->scheduled()->create()
             : $world['records']['event'];
-        $matchCount = EventMatch::withoutGlobalScopes()->where('event_id', $event->getKey())->count();
+        $matchCount = EventMatch::query()->withoutGlobalScopes()->where('event_id', $event->getKey())->count();
         $wrestlers = Wrestler::factory()->for($world['attacker'], 'promotion')->bookable()->count(2)->create();
         $referee = Referee::factory()->for($world['attacker'], 'promotion')->bookable()->create();
         $opened = openModalFromPage('dashboard', 'matches.modals.form-modal', ['eventId' => $event->getKey()]);
@@ -277,7 +277,7 @@ describe('promotion-owned modals', function (): void {
 
         // Assert
         expect($response->getStatusCode())->toBeIn($statuses);
-        expect(EventMatch::withoutGlobalScopes()->where('event_id', $event->getKey())->count())->toBe($matchCount + $addedMatches);
+        expect(EventMatch::query()->withoutGlobalScopes()->where('event_id', $event->getKey())->count())->toBe($matchCount + $addedMatches);
     })->with([
         'an event of the active promotion' => [true, [200], 1],
         'another promotion event passed when opening it' => [false, [403, 404], 0],
@@ -298,7 +298,7 @@ describe('promotion-owned modals', function (): void {
         // Assert
         // Livewire rejects the locked property: 419 in production, the exception page (500) in debug mode.
         expect($response->getStatusCode())->toBeIn([419, 500]);
-        expect(EventMatch::withoutGlobalScopes()->where('event_id', $victimEvent->getKey())->count())->toBe(1);
+        expect(EventMatch::query()->withoutGlobalScopes()->where('event_id', $victimEvent->getKey())->count())->toBe(1);
     });
 
     it('does not let an administrator who belongs to another promotion open the record from :dataset', function (string $page): void {
@@ -314,7 +314,7 @@ describe('promotion-owned modals', function (): void {
 
         // Assert
         expect($response->getStatusCode())->toBeIn([403, 404]);
-        expect(Wrestler::withoutGlobalScopes()->whereKey($wrestler->getKey())->value('name'))->toBe('VictimWrestler');
+        expect(Wrestler::query()->withoutGlobalScopes()->whereKey($wrestler->getKey())->value('name'))->toBe('VictimWrestler');
     })->with(['dashboard', 'venues.index', 'users.index', 'promotions.index']);
 });
 

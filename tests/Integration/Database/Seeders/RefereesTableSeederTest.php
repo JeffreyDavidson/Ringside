@@ -34,7 +34,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'RefereesTableSeeder']);
 
             // Assert - Should create multiple referees
-            expect(Referee::count())->toBeGreaterThan(0);
+            expect(Referee::query()->count())->toBeGreaterThan(0);
         });
     });
 
@@ -45,7 +45,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
         test('referees have required attributes', function () {
             // Arrange
-            $referees = Referee::take(10)->get();
+            $referees = Referee::query()->take(10)->get();
 
             // Assert
             foreach ($referees as $referee) {
@@ -57,7 +57,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
         test('referees have realistic names', function () {
             // Arrange
-            $referees = Referee::take(5)->get();
+            $referees = Referee::query()->take(5)->get();
 
             // Assert
             foreach ($referees as $referee) {
@@ -74,7 +74,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
         test('referees have valid employment status', function () {
             // Arrange
-            $referees = Referee::take(10)->get();
+            $referees = Referee::query()->take(10)->get();
 
             // Assert
             foreach ($referees as $referee) {
@@ -84,13 +84,13 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
         test('seeder creates consistent data', function () {
             // Arrange
-            $initialCount = Referee::count();
+            $initialCount = Referee::query()->count();
 
             // Act
             Artisan::call('db:seed', ['--class' => 'RefereesTableSeeder']);
 
             // Assert - Should maintain or increase count
-            expect(Referee::count())->toBeGreaterThanOrEqual($initialCount);
+            expect(Referee::query()->count())->toBeGreaterThanOrEqual($initialCount);
         });
     });
 });

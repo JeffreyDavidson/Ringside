@@ -17,7 +17,7 @@ test('it restores a soft-deleted manager', function () {
     $manager->delete();
 
     // Verify manager is soft deleted
-    expect(Manager::find($managerId))->toBeNull();
+    expect(Manager::query()->find($managerId))->toBeNull();
     expect(Manager::withTrashed()->find($managerId))->not()->toBeNull();
 
     // Restore the manager
@@ -25,7 +25,7 @@ test('it restores a soft-deleted manager', function () {
     resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored
-    $restoredManager = Manager::findOrFail($managerId);
+    $restoredManager = Manager::query()->findOrFail($managerId);
     expect($restoredManager->deleted_at)->toBeNull();
 });
 
@@ -53,7 +53,7 @@ test('it handles database transactions correctly', function () {
     resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify transaction was successful
-    $restoredManager = Manager::findOrFail($managerId);
+    $restoredManager = Manager::query()->findOrFail($managerId);
     expect($restoredManager->deleted_at)->toBeNull();
 
     // Verify historical records are preserved
@@ -80,7 +80,7 @@ test('it preserves all historical records during restoration', function () {
     resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify all historical records are preserved
-    $restoredManager = Manager::findOrFail($managerId);
+    $restoredManager = Manager::query()->findOrFail($managerId);
     expect($restoredManager->employments()->count())->toBe($originalEmploymentCount)
         ->and($restoredManager->suspensions()->count())->toBe($originalSuspensionCount)
         ->and($restoredManager->injuries()->count())->toBe($originalInjuryCount);
@@ -101,7 +101,7 @@ test('it does not automatically restore employment relationships', function () {
     resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored but not automatically employed
-    $restoredManager = Manager::findOrFail($managerId);
+    $restoredManager = Manager::query()->findOrFail($managerId);
 
     // Manager should not be automatically employed - requires separate action
     // This tests the business rule that restoration doesn't auto-employ
@@ -130,7 +130,7 @@ test('it does not automatically restore management relationships', function () {
     resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored
-    $restoredManager = Manager::findOrFail($managerId);
+    $restoredManager = Manager::query()->findOrFail($managerId);
 
     // Management relationships should be preserved but not automatically reactivated
     expect($restoredManager->wrestlers()->count())->toBe(1); // Historical preserved
@@ -162,7 +162,7 @@ test('it handles managers with complex deletion history', function () {
     resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify all complex history is preserved
-    $restoredManager = Manager::findOrFail($managerId);
+    $restoredManager = Manager::query()->findOrFail($managerId);
     expect($restoredManager->employments()->count())->toBe($originalRecordCounts['employments'])
         ->and($restoredManager->retirements()->count())->toBe($originalRecordCounts['retirements']);
 });
@@ -197,7 +197,7 @@ test('it maintains referential integrity during restoration', function () {
     resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify referential integrity is maintained
-    $restoredManager = Manager::findOrFail($managerId);
+    $restoredManager = Manager::query()->findOrFail($managerId);
 
     // All pivot relationships should be preserved
     expect($restoredManager->wrestlers()->count())->toBe(1);
@@ -233,7 +233,7 @@ test('it allows separate employment after restoration', function () {
     resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager can be employed separately after restoration
-    $restoredManager = Manager::findOrFail($managerId);
+    $restoredManager = Manager::query()->findOrFail($managerId);
     expect($restoredManager->currentEmployment()->exists())->toBeFalse();
 
     // This would require a separate EmployAction call

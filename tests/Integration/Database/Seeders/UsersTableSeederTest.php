@@ -51,7 +51,7 @@ describe('UsersTableSeeder Integration Tests', function () {
 
         test('creates correct number of administrator users', function () {
             // Assert
-            expect(User::where('role', Role::Administrator)->count())->toBe(2);
+            expect(User::query()->where('role', Role::Administrator)->count())->toBe(2);
         });
 
         test('creates primary administrator user', function () {
@@ -78,7 +78,7 @@ describe('UsersTableSeeder Integration Tests', function () {
 
         test('administrator users have required attributes', function () {
             // Arrange
-            $administrators = User::where('role', Role::Administrator)->get();
+            $administrators = User::query()->where('role', Role::Administrator)->get();
 
             // Assert
             foreach ($administrators as $admin) {
@@ -99,7 +99,7 @@ describe('UsersTableSeeder Integration Tests', function () {
 
         test('creates correct number of basic users', function () {
             // Assert
-            expect(User::where('role', Role::Basic)->count())->toBe(10);
+            expect(User::query()->where('role', Role::Basic)->count())->toBe(10);
         });
 
         test('creates primary basic user', function () {
@@ -115,7 +115,7 @@ describe('UsersTableSeeder Integration Tests', function () {
 
         test('basic users have sequential naming', function () {
             // Arrange
-            $basicUsers = User::where('role', Role::Basic)->orderBy('id')->take(5)->get();
+            $basicUsers = User::query()->where('role', Role::Basic)->orderBy('id')->take(5)->get();
 
             // Assert
             expect($basicUsers->slice(0)->firstOrFail()->first_name)->toBe('Basic');
@@ -127,7 +127,7 @@ describe('UsersTableSeeder Integration Tests', function () {
 
         test('basic users have required attributes', function () {
             // Arrange
-            $basicUsers = User::where('role', Role::Basic)->take(10)->get();
+            $basicUsers = User::query()->where('role', Role::Basic)->take(10)->get();
 
             // Assert
             foreach ($basicUsers as $user) {

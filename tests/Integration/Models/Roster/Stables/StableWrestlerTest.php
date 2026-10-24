@@ -137,7 +137,7 @@ describe('StableWrestler Pivot Model', function () {
             expect($stable->currentWrestlers()->count())->toBe(2);
 
             // Verify total pivot record count
-            $wrestlerCount = StableWrestler::where('stable_id', $stable->id)
+            $wrestlerCount = StableWrestler::query()->where('stable_id', $stable->id)
                 ->whereNull('left_at')
                 ->count();
             expect($wrestlerCount)->toBe(2);
@@ -223,7 +223,7 @@ describe('StableWrestler Pivot Model', function () {
                 ->and($wrestler->previousStables()->count())->toBe(0);
 
             // Verify pivot record is deleted
-            expect(StableWrestler::where('wrestler_id', $wrestler->id)
+            expect(StableWrestler::query()->where('wrestler_id', $wrestler->id)
                 ->where('stable_id', $stable->id)
                 ->exists())->toBeFalse();
         });
@@ -239,7 +239,7 @@ describe('StableWrestler Pivot Model', function () {
                 'updated_at' => now(),
             ]);
 
-            $pivotRecord = StableWrestler::where('wrestler_id', $wrestler->id)
+            $pivotRecord = StableWrestler::query()->where('wrestler_id', $wrestler->id)
                 ->where('stable_id', $stable->id)
                 ->firstOrFail();
 
@@ -267,7 +267,7 @@ describe('StableWrestler Pivot Model', function () {
                 'updated_at' => now(),
             ]);
 
-            $wrestlerPivot = StableWrestler::where('wrestler_id', $wrestler->id)
+            $wrestlerPivot = StableWrestler::query()->where('wrestler_id', $wrestler->id)
                 ->where('stable_id', $stable->id)
                 ->firstOrFail();
 

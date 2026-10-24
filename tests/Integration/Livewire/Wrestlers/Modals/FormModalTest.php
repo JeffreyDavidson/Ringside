@@ -100,7 +100,7 @@ describe('FormModal Form Integration', function () {
             ->set('form.signature_move', 'Test Finisher')
             ->call('submitForm');
 
-        expect(Wrestler::where('name', 'Test Wrestler')->exists())->toBeTrue();
+        expect(Wrestler::query()->where('name', 'Test Wrestler')->exists())->toBeTrue();
         $component->assertSuccessful();
     });
 
@@ -159,7 +159,7 @@ describe('FormModal Form Integration', function () {
             ->assertHasErrors(['form.height_inches' => 'min'])
             ->assertSuccessful();
 
-        expect(Wrestler::where('name', 'Zero Height Wrestler')->exists())->toBeFalse();
+        expect(Wrestler::query()->where('name', 'Zero Height Wrestler')->exists())->toBeFalse();
     });
 
     it('rejects negative heights', function (string $field) {
@@ -184,7 +184,7 @@ describe('FormModal Form Integration', function () {
             ->call('submitForm')
             ->assertHasNoErrors();
 
-        expect(Wrestler::where('name', 'Short Wrestler')->exists())->toBeTrue();
+        expect(Wrestler::query()->where('name', 'Short Wrestler')->exists())->toBeTrue();
     });
 
     it('handles form update correctly', function () {

@@ -57,7 +57,7 @@ describe('VenuesTableSeeder Integration Tests', function () {
 
         test('all venues have required attributes', function () {
             // Arrange
-            $venues = Venue::take(10)->get();
+            $venues = Venue::query()->take(10)->get();
 
             // Assert
             foreach ($venues as $venue) {
@@ -97,7 +97,7 @@ describe('VenuesTableSeeder Integration Tests', function () {
 
         test('venue naming follows sequential pattern', function () {
             // Arrange
-            $venues = Venue::orderBy('id')->get();
+            $venues = Venue::query()->orderBy('id')->get();
 
             // Assert
             foreach ($venues as $index => $venue) {
@@ -110,7 +110,7 @@ describe('VenuesTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'VenuesTableSeeder']);
 
             // Assert - Should not create duplicates, depends on seeder implementation
-            expect(Venue::count())->toBeGreaterThanOrEqual(100);
+            expect(Venue::query()->count())->toBeGreaterThanOrEqual(100);
         });
     });
 });

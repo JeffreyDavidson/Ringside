@@ -210,7 +210,7 @@ describe('User Role Integration Tests', function () {
                 ->and(Gate::forUser($user)->allows('create', User::class))->toBeTrue();
 
             // Verify in database
-            $userFromDb = User::findOrFail($user->id);
+            $userFromDb = User::query()->findOrFail($user->id);
             expect($userFromDb->role)->toBe(Role::Administrator)
                 ->and($userFromDb->role->isAdministrator())->toBeTrue();
         });
@@ -237,7 +237,7 @@ describe('User Role Integration Tests', function () {
                 ->and(Gate::forUser($user)->denies('create', User::class))->toBeTrue();
 
             // Verify in database
-            $userFromDb = User::findOrFail($user->id);
+            $userFromDb = User::query()->findOrFail($user->id);
             expect($userFromDb->role)->toBe(Role::Basic)
                 ->and($userFromDb->role->isAdministrator())->toBeFalse();
         });
@@ -255,10 +255,10 @@ describe('User Role Integration Tests', function () {
             }
 
             // Bulk promote to administrators
-            User::whereIn('id', $users->pluck('id'))->update(['role' => Role::Administrator]);
+            User::query()->whereIn('id', $users->pluck('id'))->update(['role' => Role::Administrator]);
 
             // Verify all are now administrators
-            $updatedUsers = User::whereIn('id', $users->pluck('id'))->get();
+            $updatedUsers = User::query()->whereIn('id', $users->pluck('id'))->get();
 
             foreach ($updatedUsers as $user) {
                 expect($user->role->isAdministrator())->toBeTrue()

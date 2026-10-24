@@ -36,7 +36,7 @@ test('it deletes using the current persisted referee state', function () {
 
     resolve(DeleteAction::class)->handle($staleReferee);
 
-    expect(Referee::find($referee->id))->toBeNull()
+    expect(Referee::query()->find($referee->id))->toBeNull()
         ->and(Referee::withTrashed()->findOrFail($referee->id)->trashed())->toBeTrue();
 });
 

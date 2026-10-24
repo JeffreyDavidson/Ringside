@@ -625,7 +625,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Count initial records
-            $initialStableCount = Stable::count();
+            $initialStableCount = Stable::query()->count();
 
             // Execute split
             $newStable = resolve(SplitStableAction::class)->handle(
@@ -636,7 +636,7 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify stable count increased by one
-            expect(Stable::count())->toBe($initialStableCount + 1);
+            expect(Stable::query()->count())->toBe($initialStableCount + 1);
 
             // Verify both stables exist and have members
             expect($newStable->currentWrestlers()->count())->toBe($transferWrestlers->count());
@@ -647,7 +647,7 @@ describe('SplitStableAction Integration Tests', function () {
             ['originalStable' => $originalStable, 'newStableName' => $newStableName, 'membersForNewStable' => $membersForNewStable] = stablesSplitStableActionFixtures();
 
             $splitDate = Carbon::now();
-            $initialStableCount = Stable::count();
+            $initialStableCount = Stable::query()->count();
             $originalMembershipIds = StableWrestler::query()
                 ->whereBelongsTo($originalStable)
                 ->whereNull('left_at')
@@ -674,7 +674,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $splitDate,
             ))
                 ->toThrow(LogicException::class, 'Stable creation failed.')
-                ->and(Stable::count())->toBe($initialStableCount)
+                ->and(Stable::query()->count())->toBe($initialStableCount)
                 ->and(StableWrestler::query()
                     ->whereKey($originalMembershipIds)
                     ->whereNull('left_at')->count())->toBe($originalMembershipIds->count())
@@ -757,11 +757,11 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify all members still exist in the system
             foreach ($originalWrestlerIds as $wrestlerId) {
-                expect(Wrestler::find($wrestlerId))->not()->toBeNull();
+                expect(Wrestler::query()->find($wrestlerId))->not()->toBeNull();
             }
 
             foreach ($originalTagTeamIds as $tagTeamId) {
-                expect(TagTeam::find($tagTeamId))->not()->toBeNull();
+                expect(TagTeam::query()->find($tagTeamId))->not()->toBeNull();
             }
         });
 

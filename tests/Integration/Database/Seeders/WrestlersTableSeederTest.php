@@ -35,7 +35,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'WrestlersTableSeeder']);
 
             // Assert - Should create multiple wrestlers
-            expect(Wrestler::count())->toBeGreaterThan(0);
+            expect(Wrestler::query()->count())->toBeGreaterThan(0);
         });
     });
 
@@ -46,7 +46,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
         test('wrestlers have required attributes', function () {
             // Arrange
-            $wrestlers = Wrestler::take(10)->get();
+            $wrestlers = Wrestler::query()->take(10)->get();
 
             // Assert
             foreach ($wrestlers as $wrestler) {
@@ -60,7 +60,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
         test('wrestlers have realistic physical attributes', function () {
             // Arrange
-            $wrestlers = Wrestler::take(10)->get();
+            $wrestlers = Wrestler::query()->take(10)->get();
 
             // Assert
             foreach ($wrestlers as $wrestler) {
@@ -72,7 +72,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
         test('wrestlers have realistic hometown format', function () {
             // Arrange
-            $wrestlers = Wrestler::take(5)->get();
+            $wrestlers = Wrestler::query()->take(5)->get();
 
             // Assert
             foreach ($wrestlers as $wrestler) {
@@ -96,7 +96,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
         test('wrestlers have valid employment status', function () {
             // Arrange
-            $wrestlers = Wrestler::take(10)->get();
+            $wrestlers = Wrestler::query()->take(10)->get();
 
             // Assert
             foreach ($wrestlers as $wrestler) {
@@ -106,13 +106,13 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
         test('seeder creates consistent data', function () {
             // Arrange
-            $initialCount = Wrestler::count();
+            $initialCount = Wrestler::query()->count();
 
             // Act
             Artisan::call('db:seed', ['--class' => 'WrestlersTableSeeder']);
 
             // Assert - Should maintain or increase count
-            expect(Wrestler::count())->toBeGreaterThanOrEqual($initialCount);
+            expect(Wrestler::query()->count())->toBeGreaterThanOrEqual($initialCount);
         });
     });
 });

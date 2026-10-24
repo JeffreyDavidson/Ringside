@@ -34,7 +34,7 @@ describe('EventsTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']);
 
             // Assert - Should create multiple events
-            expect(Event::count())->toBeGreaterThan(0);
+            expect(Event::query()->count())->toBeGreaterThan(0);
         });
     });
 
@@ -45,7 +45,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
         test('events have required attributes', function () {
             // Arrange
-            $events = Event::take(10)->get();
+            $events = Event::query()->take(10)->get();
 
             // Assert
             expect($events)->not->toBeEmpty();
@@ -63,7 +63,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
         test('events have realistic names', function () {
             // Arrange
-            $events = Event::take(5)->get();
+            $events = Event::query()->take(5)->get();
 
             // Assert
             expect($events)->not->toBeEmpty();
@@ -76,7 +76,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
         test('events have valid dates', function () {
             // Arrange
-            $events = Event::take(10)->get();
+            $events = Event::query()->take(10)->get();
 
             // Assert
             expect($events)->not->toBeEmpty();
@@ -104,7 +104,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
         test('events have valid venue associations', function () {
             // Arrange
-            $events = Event::take(10)->get();
+            $events = Event::query()->take(10)->get();
 
             // Assert
             expect($events)->not->toBeEmpty();
@@ -128,19 +128,19 @@ describe('EventsTableSeeder Integration Tests', function () {
                     ->not()->toBeNull()
                     ->name->toBeString();
             } else {
-                expect(Event::whereNotNull('venue_id')->count())->toBe(0);
+                expect(Event::query()->whereNotNull('venue_id')->count())->toBe(0);
             }
         });
 
         test('seeder creates consistent data', function () {
             // Arrange
-            $initialCount = Event::count();
+            $initialCount = Event::query()->count();
 
             // Act
             Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']);
 
             // Assert - Should maintain or increase count
-            expect(Event::count())->toBeGreaterThanOrEqual($initialCount);
+            expect(Event::query()->count())->toBeGreaterThanOrEqual($initialCount);
         });
     });
 });
