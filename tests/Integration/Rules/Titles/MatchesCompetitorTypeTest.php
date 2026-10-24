@@ -187,3 +187,20 @@ it('ignores empty sides when checking one competitor per side', function () {
     // Assert
     expect($validator->passes())->toBeTrue();
 });
+
+it('counts identifiers that are not ids as competitors on their side', function (): void {
+    // Arrange
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+
+    // Act
+    $validator = Validator::make([
+        'competitors' => [['wrestlers' => [null, [1]]]],
+        'titles' => [$title->id],
+    ], [
+        'titles.*' => [new MatchesCompetitorType],
+    ]);
+
+    // Assert
+    expect($validator->errors()->first('titles.0'))
+        ->toBe("The {$title->name} needs exactly one competitor of its type on each side.");
+});

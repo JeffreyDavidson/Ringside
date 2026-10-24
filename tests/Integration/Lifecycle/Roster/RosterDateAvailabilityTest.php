@@ -12,7 +12,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Rules\Wrestlers\IsBookable;
+use App\Rules\Shared\IsBookable;
 use Illuminate\Support\Facades\Validator;
 
 test('SQL and authoritative eligibility use inclusive promotion-local dates without changing lifecycle eligibility', function (string $type, string $instant, bool $expected): void {
@@ -77,7 +77,7 @@ test('promotion zone changes retain date strings and event instants but recomput
         ->and($event->date?->toDateTimeString())->toBe('2026-10-17 04:00:00');
 });
 
-test('event-aware validation permits only stored date-unavailable assignments to remain on that match', function (string $model, string $rule): void {
+test('event-aware validation permits only stored date-unavailable assignments to remain on that match', function (string $model): void {
     // Arrange
     $promotion = Promotion::factory()->create();
     $person = $model::factory()->bookable()->for($promotion)->create();
@@ -92,7 +92,7 @@ test('event-aware validation permits only stored date-unavailable assignments to
     $individual = $person instanceof TagTeam ? $person->currentWrestlers()->firstOrFail() : $person;
     $individual->forceFill(['promotion_id' => $promotion->id])->save();
     resolve(CreateAction::class)->handle($individual, new UnavailabilityData('2026-10-17', '2026-10-17', null), administrator());
-    $fresh = Validator::make(['person' => $person->id], ['person' => [new $rule($event)]]);
+    $fresh = Validator::make(['person' => $person->id], ['person' => [resolve(IsBookable::class, ['model' => $model, 'event' => $event])]]);
 
     if ($person instanceof Referee) {
         $match->referees()->attach($person);
@@ -102,14 +102,14 @@ test('event-aware validation permits only stored date-unavailable assignments to
     }
 
     // Act
-    $existing = Validator::make(['person' => $person->id], ['person' => [new $rule($event, $match)]]);
+    $existing = Validator::make(['person' => $person->id], ['person' => [resolve(IsBookable::class, ['model' => $model, 'event' => $event, 'match' => $match])]]);
     $foreign = Event::factory()->for($promotion)->create(['date' => '2026-10-17 19:00:00']);
-    $wrongMatch = Validator::make(['person' => $person->id], ['person' => [new $rule($foreign, $match)]]);
+    $wrongMatch = Validator::make(['person' => $person->id], ['person' => [resolve(IsBookable::class, ['model' => $model, 'event' => $foreign, 'match' => $match])]]);
 
     // Assert
     expect($fresh->fails())->toBeTrue()->and($existing->passes())->toBeTrue()->and($wrongMatch->fails())->toBeTrue();
 })->with([
-    [Wrestler::class, IsBookable::class],
-    [Referee::class, App\Rules\Referees\IsBookable::class],
-    [TagTeam::class, App\Rules\TagTeams\IsBookable::class],
+    [Wrestler::class],
+    [Referee::class],
+    [TagTeam::class],
 ]);
