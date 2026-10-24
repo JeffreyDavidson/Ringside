@@ -18,7 +18,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Tournaments\TournamentMatchLink;
-use App\Rules\Referees\IsBookable as RefereeIsBookable;
+use App\Rules\Shared\IsBookable;
 use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
 use App\Rules\Titles\MatchesCompetitorType;
@@ -169,7 +169,7 @@ class CreateEditForm extends BaseForm
             ],
             'preview' => ['sometimes', 'string'],
             'referees' => ['required', 'array', 'min:1'],
-            'referees.*' => ['bail', 'integer', $this->existsInPromotion('referees'), new RefereeIsBookable($this->bookingEvent, $this->modelId ? EventMatch::query()->find($this->modelId) : null)],
+            'referees.*' => ['bail', 'integer', $this->existsInPromotion('referees'), new IsBookable(Referee::class, $this->bookingEvent, $this->modelId ? EventMatch::query()->find($this->modelId) : null)],
             'titles' => ['sometimes', 'array'],
             'titles.*' => [
                 'bail',

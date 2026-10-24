@@ -7,6 +7,7 @@ namespace App\Rules\Titles;
 use App\Enums\Titles\TitleType;
 use App\Models\Events\Event;
 use App\Models\Titles\TitleChampionship;
+use App\ValueObjects\CompetitorSelection;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -42,43 +43,19 @@ class CurrentChampionIsCompeting implements DataAwareRule, ValidationRule
             return;
         }
 
-        $competitorKey = TitleType::tryFromChampionMorphClass(
-            $currentChampionship->champion_type,
-        )?->competitorInputKey();
+        $championType = TitleType::tryFromChampionMorphClass($currentChampionship->champion_type)?->championMorphClass();
 
-        if ($competitorKey !== null && $this->includesChampion($competitorKey, $currentChampionship->champion_id)) {
+        if ($championType !== null && $this->includesChampion($championType, $currentChampionship->champion_id)) {
             return;
         }
 
         $fail(__('titles.validation.champion_must_compete'));
     }
 
-    private function includesChampion(string $competitorKey, int $championId): bool
+    private function includesChampion(int|string $championType, int $championId): bool
     {
-        $competitorSides = $this->data['competitors'] ?? [];
+        $idsByType = CompetitorSelection::fromInput($this->data['competitors'] ?? null)->idsByType();
 
-        if (! is_array($competitorSides)) {
-            return false;
-        }
-
-        foreach ($competitorSides as $competitorSide) {
-            if (! is_array($competitorSide)) {
-                continue;
-            }
-
-            $competitorIds = $competitorSide[$competitorKey] ?? [];
-
-            if (! is_array($competitorIds)) {
-                continue;
-            }
-
-            foreach ($competitorIds as $competitorId) {
-                if ((is_int($competitorId) || is_string($competitorId)) && (int) $competitorId === $championId) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return in_array($championId, $idsByType[$championType] ?? [], true);
     }
 }
