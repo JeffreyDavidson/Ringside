@@ -162,7 +162,7 @@ class Main extends BaseTable
                 }),
             SelectFilter::make(__('core.venue'), 'venue')
                 ->options([
-                    '' => 'All',
+                    '' => __('core.all'),
                     ...array_map(
                         static fn (?string $name): string => $name ?? '',
                         $this->getVenues,

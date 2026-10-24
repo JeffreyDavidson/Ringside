@@ -10,7 +10,7 @@
             wire:model.live="status"
             :label="__('storylines.status')"
             size="lg"
-            :options="collect(\App\Enums\Storylines\StorylineStatus::cases())->mapWithKeys(fn ($state) => [$state->value => $state->label()])->all()"
+            :options="\App\Enums\Storylines\StorylineStatus::options()"
             :placeholder="__('storylines.all_status')"
             class="min-h-11"
         />
