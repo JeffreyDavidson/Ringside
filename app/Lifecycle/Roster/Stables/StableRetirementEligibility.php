@@ -6,21 +6,18 @@ namespace App\Lifecycle\Roster\Stables;
 
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\Stables\Stable;
 
 final readonly class StableRetirementEligibility
 {
+    use AnswersEligibility;
+
     public function __construct(private StableFormerMemberEligibility $formerMemberEligibility) {}
 
     public function canRetire(Stable $stable): bool
     {
-        try {
-            $this->ensureCanRetire($stable);
-
-            return true;
-        } catch (CannotBeRetiredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanRetire($stable), CannotBeRetiredException::class);
     }
 
     public function ensureCanRetire(Stable $stable): void
@@ -40,13 +37,7 @@ final readonly class StableRetirementEligibility
 
     public function canUnretire(Stable $stable): bool
     {
-        try {
-            $this->ensureCanUnretire($stable);
-
-            return true;
-        } catch (CannotBeUnretiredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanUnretire($stable), CannotBeUnretiredException::class);
     }
 
     public function ensureCanUnretire(Stable $stable): void

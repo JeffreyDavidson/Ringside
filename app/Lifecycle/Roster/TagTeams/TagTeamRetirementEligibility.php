@@ -6,6 +6,7 @@ namespace App\Lifecycle\Roster\TagTeams;
 
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -14,15 +15,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 final class TagTeamRetirementEligibility
 {
+    use AnswersEligibility;
+
     public function canRetire(TagTeam $tagTeam): bool
     {
-        try {
-            $this->ensureCanRetire($tagTeam);
-
-            return true;
-        } catch (CannotBeRetiredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanRetire($tagTeam), CannotBeRetiredException::class);
     }
 
     public function ensureCanRetire(TagTeam $tagTeam): void
@@ -38,13 +35,7 @@ final class TagTeamRetirementEligibility
 
     public function canUnretire(TagTeam $tagTeam): bool
     {
-        try {
-            $this->ensureCanUnretire($tagTeam);
-
-            return true;
-        } catch (CannotBeUnretiredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanUnretire($tagTeam), CannotBeUnretiredException::class);
     }
 
     public function ensureCanUnretire(TagTeam $tagTeam): void
