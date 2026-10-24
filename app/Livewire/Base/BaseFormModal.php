@@ -125,7 +125,8 @@ abstract class BaseFormModal extends BaseModal
         throw new LogicException('A form modal must define updateForm().');
     }
 
-    private function authorizeFormAccess(): void
+    /** Needs the ability that opening the form needs: `create`, or `update` on the edited record. */
+    protected function authorizeFormAccess(): void
     {
         $modelClass = $this->getModelClass();
 
