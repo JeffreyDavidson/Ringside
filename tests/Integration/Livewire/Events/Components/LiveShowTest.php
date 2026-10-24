@@ -393,3 +393,17 @@ test('the screen shows the event as the operation left it', function (): void {
     $component->assertSee('Renamed During Save');
     $complete->verify();
 });
+
+test('the item buttons refuse every operation except start and finish', function (string $operation): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $before = $fixture['run']->refresh()->content;
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+
+    // Act
+    $component->call('item', $fixture['key'], $operation);
+
+    // Assert
+    $component->assertHasErrors('operation');
+    expect($fixture['run']->refresh()->content)->toBe($before);
+})->with(['skip', 'correct', 'reopen']);
