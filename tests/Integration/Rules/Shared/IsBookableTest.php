@@ -27,18 +27,22 @@ test('booking validation reads employment on the event date', function (string $
     'a referee on an event before the start' => [Referee::class, -20, false],
 ]);
 
-it('refuses a tag team that is not employed on the event date', function (): void {
+test('booking validation reads a tag team employment on the event date', function (int $eventDaysAhead, bool $passes): void {
     // Arrange
     $tagTeam = TagTeam::factory()->bookable()->create();
     $tagTeam->employments()->update(['started_at' => now()->subDays(10)]);
-    $event = Event::factory()->create(['date' => now()->subDays(20)]);
+    $tagTeam->currentWrestlers->each(fn (Wrestler $member): int => $member->employments()->update(['started_at' => now()->subDays(10)]));
+    $event = Event::factory()->create(['date' => now()->addDays($eventDaysAhead)]);
 
     // Act
     $validator = Validator::make(['person' => $tagTeam->id], ['person' => [new IsBookable(TagTeam::class, $event)]]);
 
     // Assert
-    expect($validator->errors()->first('person'))->toBe(__('tag-teams.validation.not_bookable'));
-});
+    expect($validator->passes())->toBe($passes);
+})->with([
+    'a tag team on a back-filled event' => [-5, true],
+    'a tag team on an event before the start' => [-20, false],
+]);
 
 it('fails with the not bookable message for a missing record or a value that is not an id', function (string $model, string $message, mixed $value): void {
     // Arrange
