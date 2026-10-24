@@ -7,6 +7,7 @@ namespace App\Actions\Titles;
 use App\Data\Titles\TitleData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Titles\NameTakenException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Scopes\PromotionContextScope;
 use App\Models\Titles\Title;
@@ -17,6 +18,7 @@ class CreateAction
     public function __construct(
         private readonly DebutAction $debut,
         private readonly RecordNameLock $nameLock,
+        private readonly GuardedNameRequirements $nameRequirements,
     ) {}
 
     /**
@@ -41,15 +43,15 @@ class CreateAction
         return DB::transaction(function () use ($titleData, $promotionId): Title {
             $this->nameLock->lock(GuardedName::TitleName, $promotionId, $titleData->name);
 
-            $nameTaken = Title::query()
-                ->withoutGlobalScope(PromotionContextScope::class)
-                ->withTrashed()
-                ->whereNameInPromotion($titleData->name, $promotionId)
-                ->exists();
-
-            if ($nameTaken) {
-                throw NameTakenException::name($titleData->name);
-            }
+            $this->nameRequirements->ensureAvailable(
+                Title::query()
+                    ->withoutGlobalScope(PromotionContextScope::class)
+                    ->withTrashed()
+                    ->where('promotion_id', $promotionId),
+                'name',
+                $titleData->name,
+                fn (): NameTakenException => NameTakenException::name($titleData->name),
+            );
 
             // Create the base title record
             $title = Title::query()

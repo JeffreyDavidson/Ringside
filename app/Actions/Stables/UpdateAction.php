@@ -9,6 +9,7 @@ use App\Enums\Lifecycle\DateRangeContext;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Roster\Stables\StableActivityEligibility;
 use App\Lifecycle\Roster\Stables\StableActivityPeriodRequirements;
 use App\Lifecycle\Roster\Stables\StableNameLock;
@@ -30,6 +31,7 @@ class UpdateAction
         protected StableActivityEligibility $eligibility,
         protected StableActivityPeriodRequirements $periodRequirements,
         protected StableNameLock $nameLock,
+        protected GuardedNameRequirements $nameRequirements,
     ) {}
 
     /**
@@ -76,15 +78,15 @@ class UpdateAction
                 throw CannotBeUpdatedException::inactiveWithMembers($lockedStable);
             }
 
-            $nameTaken = Stable::query()
-                ->withoutGlobalScope(PromotionContextScope::class)
-                ->whereNameInPromotion($name, $lockedStable->promotion_id)
-                ->whereKeyNot($lockedStable->getKey())
-                ->exists();
-
-            if ($nameTaken) {
-                throw CannotBeUpdatedException::nameTaken($name);
-            }
+            $this->nameRequirements->ensureAvailable(
+                Stable::query()
+                    ->withoutGlobalScope(PromotionContextScope::class)
+                    ->where('promotion_id', $lockedStable->promotion_id),
+                'name',
+                $name,
+                fn (): CannotBeUpdatedException => CannotBeUpdatedException::nameTaken($name),
+                except: $lockedStable,
+            );
 
             try {
                 $lockedStable->update([

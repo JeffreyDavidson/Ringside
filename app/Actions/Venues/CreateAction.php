@@ -7,13 +7,17 @@ namespace App\Actions\Venues;
 use App\Data\Events\VenueData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Venues\NameTakenException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Events\Venue;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
-    public function __construct(private readonly RecordNameLock $nameLock) {}
+    public function __construct(
+        private readonly RecordNameLock $nameLock,
+        private readonly GuardedNameRequirements $nameRequirements,
+    ) {}
 
     /**
      * Create a venue.
@@ -37,9 +41,12 @@ class CreateAction
 
             $this->nameLock->lock(GuardedName::VenueName, null, $name);
 
-            if (Venue::query()->withTrashed()->whereName($name)->exists()) {
-                throw NameTakenException::name($name);
-            }
+            $this->nameRequirements->ensureAvailable(
+                Venue::query()->withTrashed(),
+                'name',
+                $name,
+                fn (): NameTakenException => NameTakenException::name($name),
+            );
 
             return Venue::query()->create([
                 'name' => $name,

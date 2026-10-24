@@ -12,6 +12,7 @@ use App\Lifecycle\Events\EventRosterSchedulingEligibility;
 use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Lifecycle\Events\SchedulingSlotLock;
 use App\Lifecycle\Matches\MatchAssignmentEligibility;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Tournaments\TournamentMatchRequirements;
@@ -31,6 +32,7 @@ class UpdateAction
         private readonly TournamentLocks $tournamentLocks,
         private readonly TournamentMatchRequirements $tournamentRequirements,
         private readonly RecordNameLock $nameLock,
+        private readonly GuardedNameRequirements $nameRequirements,
     ) {}
 
     /**
@@ -67,16 +69,16 @@ class UpdateAction
 
             $lockedEvent = $event->refreshForUpdate();
 
-            $nameTaken = Event::query()
-                ->withoutGlobalScope(PromotionContextScope::class)
-                ->withTrashed()
-                ->whereNameInPromotion($name, $lockedEvent->promotion_id)
-                ->whereKeyNot($lockedEvent->getKey())
-                ->exists();
-
-            if ($nameTaken) {
-                throw NameTakenException::name($name);
-            }
+            $this->nameRequirements->ensureAvailable(
+                Event::query()
+                    ->withoutGlobalScope(PromotionContextScope::class)
+                    ->withTrashed()
+                    ->where('promotion_id', $lockedEvent->promotion_id),
+                'name',
+                $name,
+                fn (): NameTakenException => NameTakenException::name($name),
+                except: $lockedEvent,
+            );
 
             $this->tournamentRequirements->ensureEventChronology($lockedEvent, $eventData->date);
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);

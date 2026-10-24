@@ -306,7 +306,11 @@ same promotion (or, without one, of no promotion) with the same value,
 soft-deleted records included, ignoring the record itself on update. A venue
 name is the exception that mirrors its form rule: it is unique across all
 promotions (venues belong to none), so its lock key and its check have no
-promotion. A taken value raises `NameTakenException` (each of the five domains
+promotion. The check itself is `GuardedNameRequirements::ensureAvailable()` (`app/Lifecycle/Naming`), shared by these
+Actions and by the stable ones: the Action passes the query that defines its scope (deleted records,
+promotion, promotion context scope), the column and value, the record being updated and the exception to
+throw, and the requirement only runs the lookup, so each domain keeps its own scope, exception and message and
+the check stays where the Action put it after its locks. A taken value raises `NameTakenException` (each of the five domains
 has one), which the form modal shows on the name or signature move field. The
 Actions store and compare the trimmed name of tag teams, wrestlers, events and
 venues, so " The Kings" can no longer slip past the form rule, which validates

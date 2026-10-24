@@ -7,6 +7,7 @@ use App\Actions\Titles\DebutAction;
 use App\Data\Titles\TitleData;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Titles\NameTakenException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
@@ -348,11 +349,11 @@ describe('title name races past the form rule', function () {
 
     it('shows a name taken after validation on the name field', function () {
         $failure = NameTakenException::name('Existing Championship Title');
-        app()->instance(CreateAction::class, new class($failure, resolve(DebutAction::class), resolve(RecordNameLock::class)) extends CreateAction
+        app()->instance(CreateAction::class, new class($failure, resolve(DebutAction::class), resolve(RecordNameLock::class), resolve(GuardedNameRequirements::class)) extends CreateAction
         {
-            public function __construct(private readonly NameTakenException $failure, DebutAction $debut, RecordNameLock $nameLock)
+            public function __construct(private readonly NameTakenException $failure, DebutAction $debut, RecordNameLock $nameLock, GuardedNameRequirements $nameRequirements)
             {
-                parent::__construct($debut, $nameLock);
+                parent::__construct($debut, $nameLock, $nameRequirements);
             }
 
             #[Override]

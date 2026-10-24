@@ -9,6 +9,7 @@ use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Titles\NameTakenException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Lifecycle\Titles\TitleTypeEligibility;
@@ -25,6 +26,7 @@ class UpdateAction
         private readonly DebutAction $debut,
         private readonly RecordNameLock $nameLock,
         private readonly LifecycleTransitionRecorder $transitionRecorder,
+        private readonly GuardedNameRequirements $nameRequirements,
     ) {}
 
     /**
@@ -51,16 +53,16 @@ class UpdateAction
 
             $lockedTitle = $title->refreshForUpdate();
 
-            $nameTaken = Title::query()
-                ->withoutGlobalScope(PromotionContextScope::class)
-                ->withTrashed()
-                ->whereNameInPromotion($titleData->name, $lockedTitle->promotion_id)
-                ->whereKeyNot($lockedTitle->getKey())
-                ->exists();
-
-            if ($nameTaken) {
-                throw NameTakenException::name($titleData->name);
-            }
+            $this->nameRequirements->ensureAvailable(
+                Title::query()
+                    ->withoutGlobalScope(PromotionContextScope::class)
+                    ->withTrashed()
+                    ->where('promotion_id', $lockedTitle->promotion_id),
+                'name',
+                $titleData->name,
+                fn (): NameTakenException => NameTakenException::name($titleData->name),
+                except: $lockedTitle,
+            );
 
             TitleTypeEligibility::ensureCanChange($lockedTitle, $titleData->type);
 

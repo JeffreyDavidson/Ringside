@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Exceptions\Roster\Stables\CannotBeCreatedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Scopes\PromotionContextScope;
@@ -23,6 +24,7 @@ class CreateAction
         protected EstablishAction $establishAction,
         protected AddStableMembersAction $addStableMembersAction,
         protected StableNameLock $nameLock,
+        protected GuardedNameRequirements $nameRequirements,
     ) {}
 
     /**
@@ -54,14 +56,14 @@ class CreateAction
                 $this->nameLock->lock($name);
             }
 
-            $nameTaken = Stable::query()
-                ->withoutGlobalScope(PromotionContextScope::class)
-                ->whereNameInPromotion($name, $promotionId)
-                ->exists();
-
-            if ($nameTaken) {
-                throw CannotBeCreatedException::nameTaken($name);
-            }
+            $this->nameRequirements->ensureAvailable(
+                Stable::query()
+                    ->withoutGlobalScope(PromotionContextScope::class)
+                    ->where('promotion_id', $promotionId),
+                'name',
+                $name,
+                fn (): CannotBeCreatedException => CannotBeCreatedException::nameTaken($name),
+            );
 
             $stable = Stable::query()
                 ->make(['name' => $name])
