@@ -257,6 +257,40 @@ describe('FormModal employment date', function () {
     });
 });
 
+describe('FormModal Auto fill button', function () {
+    beforeEach(function () {
+        app()->detectEnvironment(fn (): string => 'local');
+    });
+
+    afterEach(function () {
+        app()->detectEnvironment(fn (): string => 'testing');
+    });
+
+    it('shows the Auto fill button when creating in the local environment', function () {
+        // Arrange
+        $label = __('core.form.auto_fill');
+
+        // Act
+        $component = livewire(FormModal::class);
+
+        // Assert
+        $component->assertSee($label);
+    });
+
+    it('hides the Auto fill button when editing in the local environment', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()
+            ->create();
+        $label = __('core.form.auto_fill');
+
+        // Act
+        $component = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Assert
+        $component->assertDontSee($label);
+    });
+});
+
 describe('FormModal Dummy Data', function () {
     it('can fill dummy data', function () {
         $component = livewire(FormModal::class);

@@ -65,7 +65,5 @@ class DeleteAction
             $this->endCurrentRelationships->handle($lockedTagTeam, $effectiveDate);
             $this->deletionState->delete($lockedTagTeam, $effectiveDate);
         });
-
-        $tagTeam->setAttribute($tagTeam->getDeletedAtColumn(), $effectiveDate);
     }
 }

@@ -245,3 +245,19 @@ test('it maintains data integrity during restoration', function () {
     expect(requiredDate($tagTeam->created_at)->toDateTimeString())->toBe(requiredDate($originalCreatedAt)->toDateTimeString());
     expect($tagTeam->deleted_at)->toBeNull();
 });
+
+test('it leaves the in-memory deleted_at equal to the stored value when the restoration is backdated', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()
+        ->trashed()
+        ->create();
+
+    // Act
+    resolve(RestoreAction::class)->handle($tagTeam, now()->subDays(5));
+
+    // Assert
+    $stored = TagTeam::withTrashed()->findOrFail($tagTeam->id);
+
+    expect($tagTeam->deleted_at)->toBe($stored->deleted_at)
+        ->and($tagTeam->deleted_at)->toBeNull();
+});

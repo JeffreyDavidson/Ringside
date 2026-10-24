@@ -174,3 +174,17 @@ test('it handles tag team with ended relationships', function () {
     // Historical partnership should remain
     expect($tagTeam->wrestlers()->count())->toBe(1);
 });
+
+test('it leaves the in-memory deleted_at equal to the stored value when the deletion is backdated', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()
+        ->create();
+
+    // Act
+    resolve(DeleteAction::class)->handle($tagTeam, now()->subDays(5));
+
+    // Assert
+    $stored = TagTeam::withTrashed()->findOrFail($tagTeam->id);
+
+    expect(requiredDate($tagTeam->deleted_at)->toDateTimeString())->toBe(requiredDate($stored->deleted_at)->toDateTimeString());
+});
